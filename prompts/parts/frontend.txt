@@ -1,0 +1,65 @@
+3. Frontend Requirements (React + Vite)
+
+Authentication
+Login Page
+Register Page
+Forgot Password (Optional)
+
+Donor Screens
+Dashboard
+Add Donation Form
+Donation History
+AI Prediction Card
+Notification Panel
+Profile
+Feedback Screen
+
+NGO Screens
+Dashboard
+Nearby Donations (Google Maps)
+Donation Details
+Accepted Donations
+Notification Panel
+Feedback Screen
+
+Volunteer Screens
+Dashboard
+Assigned Pickups
+Pickup Verification Screen
+Delivery Tracking
+Google Maps Navigation
+Delivery History
+
+Admin Screens
+Dashboard
+NGO Approval
+Donor Approval
+User Management
+Donation Management
+Feedback Logs
+Analytics Dashboard
+
+Common Components
+Navbar
+Sidebar
+Protected Routes
+Loading Spinner
+Toast Notifications
+Cards
+Tables
+Charts
+Modal Components
+Image Upload Component
+File Upload Component
+Map Component
+Rating Component
+
+UI Libraries
+React Router
+Axios
+Tailwind CSS
+React Hook Form
+React Query (Optional)
+Google Maps React Library
+Recharts / Chart.js
+React Icons
