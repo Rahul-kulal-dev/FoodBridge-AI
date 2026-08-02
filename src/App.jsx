@@ -38,6 +38,17 @@ import NgoNotificationsPage from './ngo/notifications/page';
 import NgoFeedbackPage from './ngo/feedback/page';
 import NgoProfilePage from './ngo/profile/page';
 
+// Volunteer Module Components
+import VolunteerLayout from './volunteer/layout';
+import VolunteerDashboardPage from './volunteer/page';
+import AssignedPickupsPage from './volunteer/assignments/page';
+import NavigationPage from './volunteer/navigation/page';
+import PickupVerificationPage from './volunteer/verification/page';
+import UpdateDeliveryStatusPage from './volunteer/delivery-status/page';
+import VolunteerNotificationsPage from './volunteer/notifications/page';
+import DeliveryHistoryPage from './volunteer/history/page';
+import VolunteerProfilePage from './volunteer/profile/page';
+
 /**
  * Landing Page Component
  */
@@ -118,6 +129,18 @@ function App() {
           <Route path="notifications" element={<NgoNotificationsPage />} />
           <Route path="feedback" element={<NgoFeedbackPage />} />
           <Route path="profile" element={<NgoProfilePage />} />
+        </Route>
+
+        {/* Volunteer Portal Routes */}
+        <Route path="/volunteer" element={<VolunteerLayout />}>
+          <Route index element={<VolunteerDashboardPage />} />
+          <Route path="assignments" element={<AssignedPickupsPage />} />
+          <Route path="navigation" element={<NavigationPage />} />
+          <Route path="verification" element={<PickupVerificationPage />} />
+          <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
+          <Route path="notifications" element={<VolunteerNotificationsPage />} />
+          <Route path="history" element={<DeliveryHistoryPage />} />
+          <Route path="profile" element={<VolunteerProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

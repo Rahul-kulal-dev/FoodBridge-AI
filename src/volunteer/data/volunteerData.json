@@ -1,0 +1,122 @@
+{
+  "profile": {
+    "name": "Alex Johnson",
+    "email": "alex.j@foodbridge.org",
+    "phone": "+91 98765 43210",
+    "emergencyContact": "+91 98765 00999 (Sarah Johnson - Sister)",
+    "vehicleType": "Refrigerated EV Van",
+    "vehicleNumber": "KA-03-EV-8842",
+    "deliveryRadius": "15 km",
+    "availability": "Mon - Sat (8:00 AM - 6:00 PM)",
+    "verificationStatus": "Verified Courier",
+    "rating": 4.9,
+    "totalDeliveries": 142,
+    "joinedDate": "January 2025",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+  },
+  "assignments": [
+    {
+      "id": "ASN-701",
+      "foodName": "Fresh Prepared Lunch Meals (Paneer Curry & Rice)",
+      "quantity": "120 Portions",
+      "donorName": "Grand Palace Hotel",
+      "pickupAddress": "74 MG Road, Sector 4, Metro City",
+      "ngoName": "Hope Community Kitchen",
+      "ngoAddress": "Sector 5 Community Hub, Metro City",
+      "distance": "2.1 km",
+      "estimatedTime": "12 Mins",
+      "pickupDeadline": "Today at 3:30 PM",
+      "priorityScore": 98,
+      "status": "In Transit",
+      "image": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "ASN-702",
+      "foodName": "Whole Grain Artisan Bread & Buns",
+      "quantity": "40 kg",
+      "donorName": "Daily Harvest Bakery",
+      "pickupAddress": "12 Bakery Lane, Market Complex",
+      "ngoName": "St. Jude Youth Shelter",
+      "ngoAddress": "Block B, Civil Lines",
+      "distance": "3.8 km",
+      "estimatedTime": "18 Mins",
+      "pickupDeadline": "Today at 5:00 PM",
+      "priorityScore": 95,
+      "status": "Assigned",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "ASN-703",
+      "foodName": "Organic Farm Tomatoes & Fruit Crates",
+      "quantity": "85 kg",
+      "donorName": "GreenHarvest Market",
+      "pickupAddress": "Supermarket Complex, Block C",
+      "ngoName": "Care & Share Foundation",
+      "ngoAddress": "Ring Road Hub",
+      "distance": "5.4 km",
+      "estimatedTime": "24 Mins",
+      "pickupDeadline": "Today at 6:30 PM",
+      "priorityScore": 92,
+      "status": "Assigned",
+      "image": "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80"
+    }
+  ],
+  "history": [
+    {
+      "id": "ASN-698",
+      "food": "Pasteurized Whole Milk Pouches (60 Units)",
+      "donor": "Metro Supermarket",
+      "ngo": "City Shelter Home",
+      "pickupTime": "Yesterday at 2:00 PM",
+      "deliveryTime": "Yesterday at 2:32 PM",
+      "status": "Delivered",
+      "rating": 5.0
+    },
+    {
+      "id": "ASN-695",
+      "food": "Canned Soups & Pantry Items (200 Units)",
+      "donor": "City Retail Logistics",
+      "ngo": "Hope Community Kitchen",
+      "pickupTime": "2 Days ago",
+      "deliveryTime": "2 Days ago",
+      "status": "Delivered",
+      "rating": 4.9
+    },
+    {
+      "id": "ASN-690",
+      "food": "Event Sandwich Platters (40 Boxes)",
+      "donor": "Tech Park Cafe",
+      "ngo": "Youth Empowerment Center",
+      "pickupTime": "3 Days ago",
+      "deliveryTime": "3 Days ago",
+      "status": "Delivered",
+      "rating": 4.8
+    }
+  ],
+  "notifications": [
+    {
+      "id": "VNOTIF-1",
+      "title": "New Pickup Assignment",
+      "message": "You have been assigned to pickup 120 Portions of Lunch Meals from Grand Palace Hotel.",
+      "category": "Assignments",
+      "time": "15 mins ago",
+      "read": false
+    },
+    {
+      "id": "VNOTIF-2",
+      "title": "Verification Approved",
+      "message": "Your pickup photo verification for ASN-698 has been approved by compliance.",
+      "category": "Verification",
+      "time": "1 hour ago",
+      "read": false
+    },
+    {
+      "id": "VNOTIF-3",
+      "title": "Route Optimization Update",
+      "message": "Traffic update: Heavy congestion on MG Road. Rerouting via Bypass Flyover.",
+      "category": "Navigation",
+      "time": "2 hours ago",
+      "read": true
+    }
+  ]
+}
