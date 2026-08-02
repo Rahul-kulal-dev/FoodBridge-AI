@@ -97,7 +97,7 @@ const CreateDonationPage = () => {
   };
 
   return (
-    <div className="max-w-4xl space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
       <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card">
         <div className="flex items-center gap-3.5">
