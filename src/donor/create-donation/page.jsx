@@ -108,9 +108,6 @@ const CreateDonationPage = () => {
             <h1 className="text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
               Create Surplus Food Listing
             </h1>
-            <p className="text-xs text-[#64748B] mt-0.5">
-              Fill in the details below to list your surplus food for donation.
-            </p>
           </div>
         </div>
       </div>
@@ -354,16 +351,11 @@ const CreateDonationPage = () => {
 
           {/* SECTION 5: Pickup Location with Google Maps Picker */}
           <div className="space-y-2">
-            <div>
-              <div className="flex items-center gap-2 text-emerald-600">
-                <MapPin className="w-4 h-4" />
-                <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                  Pickup Location
-                </label>
-              </div>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                Select the exact pickup location on the map.
-              </p>
+            <div className="flex items-center gap-2 text-emerald-600">
+              <MapPin className="w-4 h-4" />
+              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
+                Pickup Location
+              </label>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
@@ -472,16 +464,11 @@ const CreateDonationPage = () => {
 
           {/* SECTION 6: Food Quality Checklist */}
           <div className="space-y-3">
-            <div>
-              <div className="flex items-center gap-2 text-emerald-600">
-                <ShieldCheck className="w-4 h-4" />
-                <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                  Food Quality Checklist
-                </label>
-              </div>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                Please confirm the following to help us ensure food safety.
-              </p>
+            <div className="flex items-center gap-2 text-emerald-600">
+              <ShieldCheck className="w-4 h-4" />
+              <label className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
+                Food Quality Checklist
+              </label>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
