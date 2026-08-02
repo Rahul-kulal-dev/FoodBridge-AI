@@ -21,26 +21,12 @@ import MobileSidebar from './MobileSidebar';
  * Master sidebar container for desktop, tablet (collapsible), and mobile (drawer).
  * Pure White background (#ffffff) with Emerald Green accents matching the landing page.
  */
-const DonorSidebar = () => {
-  // Collapsed state for tablet view
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: externalSetIsCollapsed }) => {
+  // Fallback internal collapsed state if props are not provided
+  const [internalIsCollapsed, setInternalIsCollapsed] = useState(false);
 
-  // Auto-collapse sidebar on tablet screen resize (768px - 1024px)
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-        setIsCollapsed(true);
-      } else if (window.innerWidth >= 1024) {
-        setIsCollapsed(false);
-      }
-    };
-
-    // Initial check
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
+  const setIsCollapsed = externalSetIsCollapsed || setInternalIsCollapsed;
 
   // Navigation Items defined strictly according to requirements
   const navItems = [
@@ -97,20 +83,33 @@ const DonorSidebar = () => {
       {/* Desktop & Tablet Sidebar (>= 768px) */}
       <aside
         className={`
-          hidden md:flex fixed top-0 left-0 bottom-0 z-30 flex-col bg-white border-r border-[#E7EAF0] transition-all duration-300 ease-in-out select-none shadow-xs
+          hidden md:flex fixed top-0 left-0 bottom-0 z-30 flex-col bg-white border-r border-[#E7EAF0] transition-all duration-300 ease-in-out select-none shadow-xs overflow-x-hidden
           ${isCollapsed ? 'w-20' : 'w-72'}
         `}
       >
         {/* Sidebar Header Section */}
-        <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between min-h-[73px]">
-          <div className="flex items-center gap-3 overflow-hidden">
-            {/* Landing Page Brand Logo Lockup */}
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0 transition-transform hover:scale-105">
-              <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
-            </div>
+        {isCollapsed ? (
+          <div className="p-3 border-b border-[#E7EAF0] flex flex-col items-center justify-center min-h-[73px] shrink-0">
+            <button
+              onClick={() => setIsCollapsed(false)}
+              title="Expand Sidebar"
+              className="relative group w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer"
+            >
+              <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2] group-hover:fill-white" />
+              <span className="absolute -bottom-1 -right-1 bg-white border border-[#E7EAF0] rounded-full p-0.5 shadow-xs text-emerald-600">
+                <ChevronRight className="w-3 h-3" />
+              </span>
+            </button>
+          </div>
+        ) : (
+          <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between min-h-[73px] shrink-0">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Landing Page Brand Logo Lockup */}
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0 transition-transform hover:scale-105">
+                <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
+              </div>
 
-            {/* Title & Subtitle */}
-            {!isCollapsed && (
+              {/* Title & Subtitle */}
               <div className="flex flex-col min-w-0 transition-opacity duration-200">
                 <span className="text-base font-extrabold text-[#0F172A] tracking-tight leading-tight truncate">
                   FoodBridge <span className="text-emerald-600 font-black">AI</span>
@@ -119,22 +118,18 @@ const DonorSidebar = () => {
                   Donor Portal Dashboard
                 </span>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Collapse Toggle Button (Tablet/Desktop) */}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#f7f8fb] border border-transparent hover:border-[#E7EAF0] transition-all"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-emerald-600" />
-            ) : (
+            {/* Collapse Toggle Button (Tablet/Desktop) */}
+            <button
+              onClick={() => setIsCollapsed(true)}
+              aria-label="Collapse sidebar"
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#f7f8fb] border border-transparent hover:border-[#E7EAF0] transition-all shrink-0 cursor-pointer"
+            >
               <ChevronLeft className="w-4 h-4" />
-            )}
-          </button>
-        </div>
+            </button>
+          </div>
+        )}
 
         {/* Section Label */}
         {!isCollapsed && (
@@ -146,7 +141,7 @@ const DonorSidebar = () => {
         )}
 
         {/* Navigation Items List */}
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1 scrollbar-thin">
+        <nav className={`flex-1 overflow-y-auto overflow-x-hidden py-2 space-y-1 scrollbar-thin ${isCollapsed ? 'px-2' : 'px-3'}`}>
           {navItems.map((item) => (
             <SidebarItem
               key={item.route}

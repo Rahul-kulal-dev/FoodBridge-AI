@@ -29,11 +29,15 @@ const SidebarProfile = ({
   const isVerified = user.verificationStatus === 'Verified';
 
   return (
-    <div className="mt-auto border-t border-[#E7EAF0] pt-3.5 pb-3 px-3 transition-all duration-200">
+    <div className={`mt-auto border-t border-[#E7EAF0] pt-3.5 pb-3 transition-all duration-200 ${isCollapsed ? 'px-2' : 'px-3'}`}>
       {isCollapsed ? (
         /* Collapsed Profile View */
         <div className="flex flex-col items-center gap-3">
-          <div className="relative group cursor-pointer" onClick={() => navigate('/donor/profile')}>
+          <div
+            className="relative group cursor-pointer"
+            onClick={() => navigate('/donor/profile')}
+            title={`${user.name} (${user.email}) - ${user.verificationStatus}`}
+          >
             <img
               src={user.avatar}
               alt={user.name}
@@ -45,16 +49,6 @@ const SidebarProfile = ({
                 isVerified ? 'bg-emerald-500' : 'bg-amber-500'
               }`}
             />
-            {/* White Tooltip */}
-            <div className="absolute left-full ml-3 px-3 py-2 bg-white text-[#0F172A] border border-[#E7EAF0] text-xs rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 whitespace-nowrap">
-              <div className="font-bold text-[#0F172A]">{user.name}</div>
-              <div className="text-[#64748B] text-[11px]">{user.email}</div>
-              <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
-                {isVerified ? <BadgeCheck className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-amber-500" />}
-                {user.verificationStatus}
-              </div>
-              <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-white border-l border-b border-[#E7EAF0] rotate-45" />
-            </div>
           </div>
 
           <button
