@@ -25,6 +25,19 @@ import DonorNotificationsPage from './donor/notifications/page';
 import DonorFeedbackPage from './donor/feedback/page';
 import DonorProfilePage from './donor/profile/page';
 
+// NGO Module Components
+import NgoLayout from './ngo/layout';
+import NgoDashboardPage from './ngo/page';
+import NgoVerificationPage from './ngo/verification/page';
+import BrowseFoodPage from './ngo/browse-food/page';
+import NgoMapsPage from './ngo/maps/page';
+import FoodDetailsPage from './ngo/food-details/page';
+import AcceptedDonationsPage from './ngo/accepted-donations/page';
+import TrackVolunteerPage from './ngo/track-volunteer/page';
+import NgoNotificationsPage from './ngo/notifications/page';
+import NgoFeedbackPage from './ngo/feedback/page';
+import NgoProfilePage from './ngo/profile/page';
+
 /**
  * Landing Page Component
  */
@@ -91,6 +104,20 @@ function App() {
           <Route path="notifications" element={<DonorNotificationsPage />} />
           <Route path="feedback" element={<DonorFeedbackPage />} />
           <Route path="profile" element={<DonorProfilePage />} />
+        </Route>
+
+        {/* NGO Portal Routes */}
+        <Route path="/ngo" element={<NgoLayout />}>
+          <Route index element={<NgoDashboardPage />} />
+          <Route path="verification" element={<NgoVerificationPage />} />
+          <Route path="browse-food" element={<BrowseFoodPage />} />
+          <Route path="accepted-donations" element={<AcceptedDonationsPage />} />
+          <Route path="maps" element={<NgoMapsPage />} />
+          <Route path="food-details" element={<FoodDetailsPage />} />
+          <Route path="track-volunteer" element={<TrackVolunteerPage />} />
+          <Route path="notifications" element={<NgoNotificationsPage />} />
+          <Route path="feedback" element={<NgoFeedbackPage />} />
+          <Route path="profile" element={<NgoProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
