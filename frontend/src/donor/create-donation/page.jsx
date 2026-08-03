@@ -131,11 +131,12 @@ const CreateDonationPage = () => {
 
       const data = await res.json();
       if (res.ok && data.imageUrl) {
+        const fullImgUrl = data.imageUrl.startsWith('http') ? data.imageUrl : `http://localhost:5000${data.imageUrl}`;
         setImages((prev) => [
           ...prev,
           {
             id: `img-${Date.now()}`,
-            url: `http://localhost:5000${data.imageUrl}`,
+            url: fullImgUrl,
             rawUrl: data.imageUrl,
             name: files[0].name,
           },

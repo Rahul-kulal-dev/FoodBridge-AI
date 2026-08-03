@@ -3,14 +3,14 @@ import { Package, Search, ArrowUpRight, Filter, Clock, Loader2, Utensils, Buildi
 
 /**
  * My Food Donations Page (/donor/donations)
- * Directly connects to MongoDB Atlas backend (GET /api/donations/my).
- * Zero dummy data fallback.
+ * Safely formats Cloudinary CDN & local URLs with image error fallback.
  */
 const MyDonationsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [failedImages, setFailedImages] = useState({});
 
   const fetchMyDonations = async () => {
     setLoading(true);
@@ -42,6 +42,18 @@ const MyDonationsPage = () => {
   useEffect(() => {
     fetchMyDonations();
   }, []);
+
+  const formatImageUrl = (imgUrl) => {
+    if (!imgUrl) return null;
+    if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {
+      return imgUrl;
+    }
+    return `http://localhost:5000${imgUrl.startsWith('/') ? '' : '/'}${imgUrl}`;
+  };
+
+  const handleImageError = (id) => {
+    setFailedImages((prev) => ({ ...prev, [id]: true }));
+  };
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -186,6 +198,8 @@ const MyDonationsPage = () => {
               const docId = `DON-${item._id.slice(-4).toUpperCase()}`;
               const statusLabel = getStatusLabel(item.status);
               const recipientName = item.ngoId?.organizationName || item.ngoId?.name || 'Awaiting NGO Request';
+              const imgSrc = formatImageUrl(item.image);
+              const hasImageFailed = failedImages[item._id];
 
               return (
                 <div
@@ -202,10 +216,15 @@ const MyDonationsPage = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {item.image ? (
-                      <img src={item.image} alt={item.title} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-100" />
+                    {imgSrc && !hasImageFailed ? (
+                      <img
+                        src={imgSrc}
+                        alt={item.title}
+                        onError={() => handleImageError(item._id)}
+                        className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-100 bg-slate-50"
+                      />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
                         <Utensils className="w-5 h-5" />
                       </div>
                     )}
@@ -242,15 +261,22 @@ const MyDonationsPage = () => {
                     const docId = `DON-${item._id.slice(-4).toUpperCase()}`;
                     const statusLabel = getStatusLabel(item.status);
                     const recipientName = item.ngoId?.organizationName || item.ngoId?.name || 'Awaiting NGO Request';
+                    const imgSrc = formatImageUrl(item.image);
+                    const hasImageFailed = failedImages[item._id];
 
                     return (
                       <tr key={item._id} className="hover:bg-[#f8fafc]/60 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            {item.image ? (
-                              <img src={item.image} alt={item.title} className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-100" />
+                            {imgSrc && !hasImageFailed ? (
+                              <img
+                                src={imgSrc}
+                                alt={item.title}
+                                onError={() => handleImageError(item._id)}
+                                className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-100 bg-slate-50"
+                              />
                             ) : (
-                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
                                 <Utensils className="w-4 h-4" />
                               </div>
                             )}

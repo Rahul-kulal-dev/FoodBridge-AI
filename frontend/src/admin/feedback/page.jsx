@@ -2,40 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   MessageSquare,
   Star,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 
 /**
  * Admin Feedback Logs Page (/admin/feedback)
- * Refactored to match FoodBridge AI design system 1:1
+ * Directly connected to MongoDB Atlas database (GET /api/feedback/admin-logs).
+ * Zero dummy data fallback.
  */
 const AdminFeedbackPage = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const defaultLogs = [
-    {
-      _id: 'fb-1',
-      user: { name: 'Metro City Shelter & Food Bank', role: 'ngo' },
-      rating: 5,
-      comment: 'Exceptional surplus food redistribution! Delivery was prompt and produce was fresh.',
-      createdAt: '2026-08-03T14:20:00Z',
-    },
-    {
-      _id: 'fb-2',
-      user: { name: 'GreenHarvest Market', role: 'donor' },
-      rating: 5,
-      comment: 'Extremely easy to log surplus bakery items. The volunteer picked it up in less than 30 mins!',
-      createdAt: '2026-08-02T18:10:00Z',
-    },
-    {
-      _id: 'fb-3',
-      user: { name: 'Alex Rivers', role: 'volunteer' },
-      rating: 4,
-      comment: 'Navigation routes were accurate. Great coordination between donor and shelter.',
-      createdAt: '2026-08-01T11:45:00Z',
-    },
-  ];
 
   const fetchFeedbackLogs = async () => {
     setLoading(true);
@@ -46,13 +24,14 @@ const AdminFeedbackPage = () => {
       });
       const data = await res.json();
 
-      if (res.ok && data.logs && data.logs.length > 0) {
+      if (res.ok && data.logs) {
         setLogs(data.logs);
       } else {
-        setLogs(defaultLogs);
+        setLogs([]);
       }
     } catch (err) {
-      setLogs(defaultLogs);
+      console.warn('Error fetching feedback logs:', err);
+      setLogs([]);
     } finally {
       setLoading(false);
     }
@@ -62,9 +41,9 @@ const AdminFeedbackPage = () => {
     fetchFeedbackLogs();
   }, []);
 
-  const avgRating = (
-    logs.reduce((acc, f) => acc + (f.rating || 5), 0) / (logs.length || 1)
-  ).toFixed(1);
+  const avgRating = logs.length > 0
+    ? (logs.reduce((acc, f) => acc + (f.rating || 5), 0) / logs.length).toFixed(1)
+    : '5.0';
 
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
@@ -79,7 +58,7 @@ const AdminFeedbackPage = () => {
               Feedback & Rating Logs
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              System feedback logs submitted by Donors, NGOs, and Volunteers.
+              System feedback logs submitted by Donors, NGOs, and Volunteers in database.
             </p>
           </div>
         </div>
@@ -116,45 +95,58 @@ const AdminFeedbackPage = () => {
 
       {/* Feedback Logs List */}
       <div className="space-y-4">
-        {logs.map((item) => {
-          const userObj = item.userId || item.user || { name: 'Platform User', role: 'donor' };
-          const role = userObj.role || 'donor';
+        {loading ? (
+          <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-bold">Loading feedback logs...</p>
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-2 shadow-soft-card">
+            <MessageSquare className="w-10 h-10 text-slate-300 mx-auto" />
+            <h3 className="text-base font-bold text-[#0F172A]">No feedback logs yet</h3>
+            <p className="text-xs text-slate-400 font-medium">There are currently no feedback logs submitted in the database.</p>
+          </div>
+        ) : (
+          logs.map((item) => {
+            const userObj = item.userId || item.user || { name: 'Platform User', role: 'donor' };
+            const role = userObj.role || 'donor';
 
-          return (
-            <div
-              key={item._id}
-              className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-3"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-xl text-xs font-bold uppercase border ${
-                    role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : role === 'volunteer' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  }`}>
-                    {role}
+            return (
+              <div
+                key={item._id}
+                className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl text-xs font-bold uppercase border ${
+                      role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : role === 'volunteer' ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    }`}>
+                      {role}
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-[#0F172A] text-sm sm:text-base">
+                        {userObj.organizationName || userObj.name}
+                      </h4>
+                      <span className="text-[11px] text-[#64748B] font-medium">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-extrabold text-[#0F172A] text-sm sm:text-base">
-                      {userObj.organizationName || userObj.name}
-                    </h4>
-                    <span className="text-[11px] text-[#64748B] font-medium">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </span>
+
+                  <div className="flex items-center text-amber-400">
+                    {[...Array(item.rating || 5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-current" />
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex items-center text-amber-400">
-                  {[...Array(item.rating || 5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
+                <p className="text-xs sm:text-sm text-[#334155] font-medium bg-[#f8fafc] p-3.5 rounded-xl border border-[#E7EAF0]">
+                  "{item.comment || 'Great experience with FoodBridge AI.'}"
+                </p>
               </div>
-
-              <p className="text-xs sm:text-sm text-[#334155] font-medium bg-[#f8fafc] p-3.5 rounded-xl border border-[#E7EAF0]">
-                "{item.comment || 'Great experience with FoodBridge AI.'}"
-              </p>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

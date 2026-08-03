@@ -6,6 +6,7 @@ const {
   approveUser,
   rejectUser,
   getAllUsers,
+  getAllDonations,
   getAdminAnalytics,
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
@@ -18,6 +19,7 @@ router.get('/pending-donors', getPendingDonors);
 router.patch('/users/:id/approve', approveUser);
 router.patch('/users/:id/reject', rejectUser);
 router.get('/users', getAllUsers);
+router.get('/donations', getAllDonations);
 router.get('/analytics', getAdminAnalytics);
 
 module.exports = router;

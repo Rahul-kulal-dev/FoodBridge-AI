@@ -138,11 +138,37 @@ const getAdminAnalytics = async (req, res, next) => {
   }
 };
 
+// @desc    Get all donations for admin monitoring
+// @route   GET /api/admin/donations
+// @access  Private (Admin)
+const getAllDonations = async (req, res, next) => {
+  try {
+    const { status } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const donations = await Donation.find(filter)
+      .populate('donorId', 'name organizationName email phone')
+      .populate('ngoId', 'name organizationName phone')
+      .populate('volunteerId', 'name phone')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: donations.length,
+      donations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPendingNGOs,
   getPendingDonors,
   approveUser,
   rejectUser,
   getAllUsers,
+  getAllDonations,
   getAdminAnalytics,
 };

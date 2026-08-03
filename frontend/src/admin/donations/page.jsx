@@ -4,12 +4,14 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
 
 /**
  * Admin Monitor Donations Page (/admin/donations)
- * Refactored to match FoodBridge AI design system 1:1
+ * Directly connected to MongoDB Atlas database (GET /api/admin/donations).
+ * Zero dummy data fallback.
  */
 const AdminDonationsPage = () => {
   const [donations, setDonations] = useState([]);
@@ -17,52 +19,16 @@ const AdminDonationsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const defaultDonations = [
-    {
-      _id: 'DON-8942',
-      title: 'Fresh Organic Produce & Dairy',
-      foodType: 'fruits_veg',
-      quantity: 180,
-      unit: 'kg',
-      status: 'picked_up',
-      donorName: 'GreenHarvest Market',
-      ngoName: 'Metro City Shelter & Food Bank',
-      updatedAt: '2026-08-03T16:40:00Z',
-    },
-    {
-      _id: 'DON-8941',
-      title: 'Artisan Bakery Bread & Pastries',
-      foodType: 'bakery',
-      quantity: 45,
-      unit: 'kg',
-      status: 'delivered',
-      donorName: 'Ocean View Bakery',
-      ngoName: 'Hope Harvest Community Kitchen',
-      updatedAt: '2026-08-03T15:00:00Z',
-    },
-    {
-      _id: 'DON-8939',
-      title: 'Canned Soups & Pantry Goods',
-      foodType: 'packaged',
-      quantity: 320,
-      unit: 'units',
-      status: 'available',
-      donorName: 'Central Gourmet Market',
-      ngoName: 'Awaiting NGO Request',
-      updatedAt: '2026-08-03T13:30:00Z',
-    },
-  ];
-
   const fetchDonations = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/ngo/donations/nearby', {
+      const res = await fetch('http://localhost:5000/api/admin/donations', {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
 
-      if (res.ok && data.donations && data.donations.length > 0) {
+      if (res.ok && data.donations) {
         const formatted = data.donations.map((d) => ({
           _id: `DON-${d._id.slice(-4).toUpperCase()}`,
           title: d.title,
@@ -70,16 +36,17 @@ const AdminDonationsPage = () => {
           quantity: d.quantity,
           unit: d.unit || 'kg',
           status: d.status,
-          donorName: d.donorId?.name || d.donorId?.organizationName || 'Verified Donor',
-          ngoName: d.ngoId?.name || 'Awaiting NGO Request',
+          donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Donor',
+          ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Awaiting NGO Request',
           updatedAt: d.updatedAt || d.createdAt,
         }));
         setDonations(formatted);
       } else {
-        setDonations(defaultDonations);
+        setDonations([]);
       }
     } catch (err) {
-      setDonations(defaultDonations);
+      console.warn('Error fetching admin donations:', err);
+      setDonations([]);
     } finally {
       setLoading(false);
     }
@@ -111,7 +78,7 @@ const AdminDonationsPage = () => {
               Monitor Platform Donations
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Real-time monitoring of food surplus listings, NGO requests, and delivery states.
+              Real-time monitoring of food surplus listings from MongoDB Atlas database.
             </p>
           </div>
         </div>
@@ -157,61 +124,74 @@ const AdminDonationsPage = () => {
 
       {/* Donations Table */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
-              <tr>
-                <th className="px-6 py-4">ID & ITEM TITLE</th>
-                <th className="px-6 py-4">QUANTITY</th>
-                <th className="px-6 py-4">DONOR</th>
-                <th className="px-6 py-4">MATCHED RECIPIENT</th>
-                <th className="px-6 py-4">STATUS</th>
-                <th className="px-6 py-4 text-right">LAST UPDATED</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E7EAF0]">
-              {filtered.map((d) => {
-                let statusBadge = 'bg-amber-50 text-amber-700 border-amber-200';
-                if (d.status === 'delivered') statusBadge = 'bg-slate-100 text-slate-800 border-slate-200';
-                if (d.status === 'picked_up' || d.status === 'accepted') statusBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        {loading ? (
+          <div className="p-12 text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-bold">Loading donations database...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center space-y-2">
+            <Package className="w-10 h-10 text-slate-300 mx-auto" />
+            <h3 className="text-base font-bold text-[#0F172A]">No donations found</h3>
+            <p className="text-xs text-slate-400 font-medium">There are currently no donations matching your query in the database.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
+                <tr>
+                  <th className="px-6 py-4">ID & ITEM TITLE</th>
+                  <th className="px-6 py-4">QUANTITY</th>
+                  <th className="px-6 py-4">DONOR</th>
+                  <th className="px-6 py-4">MATCHED RECIPIENT</th>
+                  <th className="px-6 py-4">STATUS</th>
+                  <th className="px-6 py-4 text-right">LAST UPDATED</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E7EAF0]">
+                {filtered.map((d) => {
+                  let statusBadge = 'bg-amber-50 text-amber-700 border-amber-200';
+                  if (d.status === 'delivered') statusBadge = 'bg-slate-100 text-slate-800 border-slate-200';
+                  if (d.status === 'picked_up' || d.status === 'accepted') statusBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
-                return (
-                  <tr key={d._id} className="hover:bg-[#f8fafc]/60 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="font-mono font-bold text-xs text-[#0F172A] bg-slate-100 px-2 py-0.5 rounded border border-slate-200 block w-fit mb-1">
-                        {d._id}
-                      </span>
-                      <div className="font-extrabold text-[#0F172A] text-sm">{d.title}</div>
-                    </td>
+                  return (
+                    <tr key={d._id} className="hover:bg-[#f8fafc]/60 transition-colors">
+                      <td className="px-6 py-4">
+                        <span className="font-mono font-bold text-xs text-[#0F172A] bg-slate-100 px-2 py-0.5 rounded border border-slate-200 block w-fit mb-1">
+                          {d._id}
+                        </span>
+                        <div className="font-extrabold text-[#0F172A] text-sm">{d.title}</div>
+                      </td>
 
-                    <td className="px-6 py-4 font-bold text-[#0F172A]">
-                      {d.quantity} {d.unit}
-                    </td>
+                      <td className="px-6 py-4 font-bold text-[#0F172A]">
+                        {d.quantity} {d.unit}
+                      </td>
 
-                    <td className="px-6 py-4 font-medium text-[#334155]">
-                      {d.donorName}
-                    </td>
+                      <td className="px-6 py-4 font-medium text-[#334155]">
+                        {d.donorName}
+                      </td>
 
-                    <td className="px-6 py-4 font-medium text-[#334155]">
-                      {d.ngoName}
-                    </td>
+                      <td className="px-6 py-4 font-medium text-[#334155]">
+                        {d.ngoName}
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusBadge} uppercase text-[10px]`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                        {d.status.replace('_', ' ')}
-                      </span>
-                    </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusBadge} uppercase text-[10px]`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {d.status.replace('_', ' ')}
+                        </span>
+                      </td>
 
-                    <td className="px-6 py-4 text-right text-[#64748B] font-medium">
-                      {new Date(d.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <td className="px-6 py-4 text-right text-[#64748B] font-medium">
+                        {new Date(d.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
