@@ -68,13 +68,23 @@ const uploadVerificationDoc = async (req, res, next) => {
     
     user.verificationDocs.push({ docUrl });
     user.verificationStatus = 'pending';
+    user.rejectionReason = '';
     await user.save();
 
     res.json({
       success: true,
       message: 'Verification document uploaded successfully',
       docUrl,
-      user,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        user_role: user.user_role || user.role,
+        verificationStatus: user.verificationStatus,
+        verificationDocs: user.verificationDocs,
+        rejectionReason: user.rejectionReason,
+      },
     });
   } catch (error) {
     next(error);

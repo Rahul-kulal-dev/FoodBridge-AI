@@ -46,6 +46,7 @@ const approveUser = async (req, res, next) => {
     }
 
     user.verificationStatus = 'approved';
+    user.rejectionReason = '';
     await user.save();
 
     res.json({
@@ -68,7 +69,9 @@ const rejectUser = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    const { rejectionReason } = req.body;
     user.verificationStatus = 'rejected';
+    user.rejectionReason = rejectionReason || 'Document incomplete or illegible. Please re-upload clear government-issued document.';
     await user.save();
 
     res.json({

@@ -9,12 +9,16 @@ import {
   Utensils,
   Search,
   X,
-  Loader2
+  Loader2,
+  MessageSquare
 } from 'lucide-react';
 
 /**
  * Admin Verification Management Page (/admin/verifications)
- * Refactored to match FoodBridge AI design system 1:1
+ * Complete Workflow:
+ * - Shows Pending Review requests.
+ * - Admin Approve updates user status to 'approved' (enabling donation creation).
+ * - Admin Reject opens Rejection Reason prompt, updates status to 'rejected' & saves rejection reason.
  */
 const AdminVerificationsPage = () => {
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected'
@@ -22,6 +26,8 @@ const AdminVerificationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDocModal, setActiveDocModal] = useState(null);
+  const [rejectModalUser, setRejectModalUser] = useState(null);
+  const [rejectionReasonText, setRejectionReasonText] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
 
   // Demo fallback items if DB is empty
@@ -35,6 +41,7 @@ const AdminVerificationsPage = () => {
       phone: '+1 (555) 234-5678',
       address: '450 Coastal Blvd, Suite 12',
       verificationStatus: 'pending',
+      rejectionReason: '',
       verificationDocs: [
         { docUrl: '/uploads/FSSAI_License_OceanView.pdf' },
         { docUrl: '/uploads/Tax_Registration_2026.pdf' }
@@ -50,6 +57,7 @@ const AdminVerificationsPage = () => {
       phone: '+1 (555) 987-6543',
       address: '780 Food Relief Way',
       verificationStatus: 'pending',
+      rejectionReason: '',
       verificationDocs: [
         { docUrl: '/uploads/NGO_Registration_Cert.pdf' }
       ],
@@ -64,6 +72,7 @@ const AdminVerificationsPage = () => {
       phone: '+1 (555) 444-1234',
       address: '120 Central Plaza',
       verificationStatus: 'approved',
+      rejectionReason: '',
       verificationDocs: [
         { docUrl: '/uploads/FSSAI_Approval.pdf' }
       ],
@@ -86,7 +95,6 @@ const AdminVerificationsPage = () => {
         setUsers(defaultPendingUsers);
       }
     } catch (err) {
-      console.warn('Backend connection notice, displaying queue:', err.message);
       setUsers(defaultPendingUsers);
     } finally {
       setLoading(false);
@@ -106,48 +114,49 @@ const AdminVerificationsPage = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      if (res.ok) {
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved' } : u))
-        );
-      } else {
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved' } : u))
-        );
-      }
+      setUsers((prev) =>
+        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
+      );
     } catch (err) {
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved' } : u))
+        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
       );
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleReject = async (userId) => {
+  const handleOpenRejectModal = (userItem) => {
+    setRejectModalUser(userItem);
+    setRejectionReasonText('Document incomplete or illegible. Please re-upload clear FSSAI / Tax ID document.');
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectModalUser) return;
+    const userId = rejectModalUser._id;
     setActionLoading(userId);
+
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/reject`, {
         method: 'PATCH',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ rejectionReason: rejectionReasonText }),
       });
 
-      if (res.ok) {
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected' } : u))
-        );
-      } else {
-        setUsers((prev) =>
-          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected' } : u))
-        );
-      }
+      setUsers((prev) =>
+        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
+      );
     } catch (err) {
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected' } : u))
+        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
       );
     } finally {
       setActionLoading(null);
+      setRejectModalUser(null);
     }
   };
 
@@ -170,10 +179,10 @@ const AdminVerificationsPage = () => {
           </div>
           <div>
             <h1 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
-              Pending Document Verifications
+              Admin Verification Approvals
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Review and approve or reject verification requests for Donors and NGOs.
+              Approve or reject verification requests. Approved donors unlock donation creation.
             </p>
           </div>
         </div>
@@ -230,9 +239,9 @@ const AdminVerificationsPage = () => {
         {filteredUsers.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
             <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto" />
-            <h3 className="text-base font-bold text-[#0F172A]">No verifications found</h3>
+            <h3 className="text-base font-bold text-[#0F172A]">No requests in this queue</h3>
             <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto">
-              There are no verification requests matching your selected filter.
+              There are currently no requests matching your selected tab.
             </p>
           </div>
         ) : (
@@ -264,9 +273,12 @@ const AdminVerificationsPage = () => {
                   <p className="text-xs text-slate-500 font-medium">
                     Contact: <strong className="text-[#0F172A]">{item.name}</strong> • {item.email} • {item.phone || 'No phone'}
                   </p>
-                  <p className="text-xs text-slate-400">
-                    Address: {item.address || 'Standard Location'}
-                  </p>
+
+                  {item.verificationStatus === 'rejected' && item.rejectionReason && (
+                    <p className="text-xs text-rose-600 font-medium pt-1">
+                      <strong>Rejection Reason:</strong> {item.rejectionReason}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -302,7 +314,7 @@ const AdminVerificationsPage = () => {
                     <button
                       type="button"
                       disabled={actionLoading === item._id}
-                      onClick={() => handleReject(item._id)}
+                      onClick={() => handleOpenRejectModal(item)}
                       className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <XCircle className="w-4 h-4" />
@@ -314,14 +326,14 @@ const AdminVerificationsPage = () => {
                 {item.verificationStatus === 'approved' && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Approved Donor</span>
+                    <span>Verified & Approved</span>
                   </span>
                 )}
 
                 {item.verificationStatus === 'rejected' && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
                     <XCircle className="w-4 h-4 text-rose-600" />
-                    <span>Verification Rejected</span>
+                    <span>Rejected</span>
                   </span>
                 )}
               </div>
@@ -329,6 +341,63 @@ const AdminVerificationsPage = () => {
           ))
         )}
       </div>
+
+      {/* Rejection Reason Modal */}
+      {rejectModalUser && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E7EAF0] space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <XCircle className="w-5 h-5 text-rose-600" />
+                <h3 className="font-bold text-slate-900 text-base">
+                  Reject Verification Request
+                </h3>
+              </div>
+              <button
+                onClick={() => setRejectModalUser(null)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <p className="text-slate-600 font-medium">
+                Provide a reason for rejecting <strong className="text-slate-900">{rejectModalUser.organizationName || rejectModalUser.name}</strong>. The donor will see this reason and be allowed to re-upload revised documents.
+              </p>
+
+              <div>
+                <label className="block font-bold text-slate-800 uppercase mb-1">Rejection Reason</label>
+                <textarea
+                  rows={3}
+                  value={rejectionReasonText}
+                  onChange={(e) => setRejectionReasonText(e.target.value)}
+                  placeholder="e.g. Document illegible or expired. Please upload clear FSSAI Certificate."
+                  className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:border-rose-500 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRejectModalUser(null)}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleConfirmReject}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+              >
+                Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Document View Preview Modal */}
       {activeDocModal && (

@@ -91,8 +91,20 @@ const CreateDonationPage = () => {
     }, 800);
   };
 
+  const [user] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : { verificationStatus: 'pending' };
+    } catch (e) {
+      return { verificationStatus: 'pending' };
+    }
+  });
+
+  const isVerified = user.verificationStatus === 'approved';
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isVerified) return;
     setSubmitted(true);
   };
 
@@ -100,17 +112,51 @@ const CreateDonationPage = () => {
     <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
-            <PlusCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
+              <PlusCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
+                Create Surplus Food Listing
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
-              Create Surplus Food Listing
-            </h1>
-          </div>
+
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border capitalize ${
+            isVerified ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+          }`}>
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>{isVerified ? 'Verified Donor' : 'Verification Required'}</span>
+          </span>
         </div>
       </div>
+
+      {/* Verification Restricted Banner */}
+      {!isVerified && (
+        <div className="bg-amber-50 border-2 border-amber-200 p-6 rounded-3xl space-y-3">
+          <div className="flex items-center gap-2 text-amber-800 font-extrabold text-base">
+            <ShieldCheck className="w-5 h-5 text-amber-600" />
+            <span>Verification Required to Create Donations</span>
+          </div>
+          <p className="text-xs sm:text-sm text-amber-900 font-medium leading-relaxed">
+            Only verified donors can list food donations for safety compliance. Your current verification status is{' '}
+            <strong className="uppercase underline">{user.verificationStatus || 'pending'}</strong>.
+            {user.rejectionReason && (
+              <span className="block mt-1 text-rose-700 font-bold">
+                Rejection Reason: {user.rejectionReason}
+              </span>
+            )}
+          </p>
+          <a
+            href="/donor/verification"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all"
+          >
+            Go to Verification Page
+          </a>
+        </div>
+      )}
 
       {submitted ? (
         <div className="bg-white p-8 rounded-2xl border border-emerald-200 text-center space-y-5 shadow-soft-card">
