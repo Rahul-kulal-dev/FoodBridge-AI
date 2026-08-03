@@ -111,57 +111,57 @@ const NgoDashboardPage = () => {
   };
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-5 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Hero Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-wrap">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Welcome back, <span className="text-emerald-600">Hope Community</span> Kitchen
           </h1>
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 w-fit">
             <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
             Verified NGO Badge
           </span>
         </div>
 
         {/* Quick Action Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Link
             to="/ngo/browse-food"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] text-center"
           >
-            <ShoppingBag className="w-4 h-4" />
-            <span>Browse Food</span>
+            <ShoppingBag className="w-4 h-4 shrink-0" />
+            <span className="truncate">Browse Food</span>
           </Link>
           <Link
             to="/ngo/maps"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold shadow-xs transition-all duration-200 hover:scale-[1.01]"
+            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold shadow-xs transition-all duration-200 hover:scale-[1.01] text-center"
           >
-            <Map className="w-4 h-4 text-emerald-600" />
-            <span>Nearby Map</span>
+            <Map className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="truncate">Nearby Map</span>
           </Link>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Statistics Cards - 2 cols on mobile, 4 cols on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {stats.map((stat, idx) => {
           const IconComponent = stat.icon;
           return (
             <div
               key={idx}
-              className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col justify-between"
+              className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] sm:text-[11px] font-bold text-[#64748B] uppercase tracking-wider line-clamp-1">
                   {stat.label}
                 </span>
-                <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/60">
-                  <IconComponent className="w-5 h-5" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/60 shrink-0">
+                  <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
-              <div className="mt-4">
-                <div className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+              <div className="mt-3 sm:mt-4">
+                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em] truncate">
                   {stat.value}
                 </div>
               </div>
@@ -171,9 +171,9 @@ const NgoDashboardPage = () => {
       </div>
 
       {/* AI Recommendation Banner */}
-      <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-200/70 shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-200/70 shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3.5 sm:gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
+          <div className="p-2 sm:p-2.5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
             <Sparkles className="w-4 h-4 fill-emerald-600" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-[#0F172A]">
@@ -181,16 +181,16 @@ const NgoDashboardPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
           <Link
             to="/ngo/browse-food"
-            className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all duration-200"
+            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all duration-200 text-center truncate"
           >
             Browse Food
           </Link>
           <Link
             to="/ngo/maps"
-            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold transition-all duration-200"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold transition-all duration-200 text-center truncate"
           >
             Open Map
           </Link>
@@ -199,10 +199,10 @@ const NgoDashboardPage = () => {
 
       {/* Nearby Food Table Section */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden">
-        <div className="p-6 border-b border-[#E7EAF0] flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[#E7EAF0] flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-extrabold text-[#0F172A]">
-              Nearby Surplus Food Donations
+            <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">
+              Nearby Surplus Food
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
               Real-time available surplus food matching your serving area
@@ -210,14 +210,68 @@ const NgoDashboardPage = () => {
           </div>
           <Link
             to="/ngo/browse-food"
-            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0"
           >
-            <span>View All Food</span>
+            <span>View All</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile View Card List (< md) */}
+        <div className="grid grid-cols-1 gap-3 p-4 md:hidden">
+          {nearbyDonations.map((item) => (
+            <div
+              key={item.id}
+              className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 space-y-2.5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-xs text-[#0F172A] bg-white px-2 py-0.5 rounded border border-[#E7EAF0]">
+                  {item.id}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                    acceptedIds.includes(item.id)
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : item.statusColor
+                  }`}
+                >
+                  {acceptedIds.includes(item.id) ? 'Reserved' : item.status}
+                </span>
+              </div>
+
+              <div>
+                <div className="font-bold text-xs text-[#0F172A]">{item.foodType}</div>
+                <div className="text-[11px] text-[#64748B] font-medium mt-0.5">
+                  {item.quantity} • Offered by {item.donor}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-[#E7EAF0]/60 flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                    <MapPin className="w-3 h-3 text-emerald-600" />
+                    {item.distance}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
+                    <Clock className="w-3 h-3 text-amber-500" />
+                    {item.expiry}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => setSelectedDonation(item)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500 text-white font-bold text-xs"
+                >
+                  <Eye className="w-3 h-3" />
+                  <span>View</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop & Tablet Table View (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#f7f8fb] text-[11px] font-bold text-[#64748B] uppercase tracking-wider border-b border-[#E7EAF0]">

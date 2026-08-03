@@ -131,9 +131,9 @@ const BrowseFoodPage = () => {
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Browse Nearby Surplus Food
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-medium">
@@ -141,16 +141,16 @@ const BrowseFoodPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-extrabold text-xs border border-emerald-200">
-            <Sparkles className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+            <Sparkles className="w-4 h-4 text-emerald-600 fill-emerald-600 shrink-0" />
             AI Verified Freshness Engine
           </span>
         </div>
       </div>
 
       {/* Filter & Search Controls Bar */}
-      <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
         {/* Search & Sort Row */}
         <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
           <div className="relative w-full sm:w-80">
@@ -164,7 +164,7 @@ const BrowseFoodPage = () => {
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
             <span className="text-xs font-bold text-[#64748B] flex items-center gap-1.5">
               <SlidersHorizontal className="w-3.5 h-3.5" /> Sort By:
             </span>
@@ -197,7 +197,7 @@ const BrowseFoodPage = () => {
             </button>
           ))}
 
-          <span className="font-bold text-[#64748B] text-[11px] uppercase tracking-wider ml-3 mr-1">Type:</span>
+          <span className="font-bold text-[#64748B] text-[11px] uppercase tracking-wider ml-1 sm:ml-3 mr-1">Type:</span>
           {['All', 'Cooked Food', 'Raw Produce', 'Bakery', 'Packaged'].map((type) => (
             <button
               key={type}
@@ -215,7 +215,7 @@ const BrowseFoodPage = () => {
       </div>
 
       {/* Food Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredItems.map((item) => {
           const isAccepted = acceptedIds.includes(item.id);
           return (
