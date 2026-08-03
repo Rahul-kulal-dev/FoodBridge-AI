@@ -22,33 +22,33 @@ const AssignedPickupsPage = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Assigned Pickup Orders
           </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">
+          <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
             3 active food pickup orders assigned to your vehicle dispatch queue
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-700">
-          <Truck className="w-4 h-4 text-emerald-600" />
+        <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-700 w-fit">
+          <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Vehicle: {volunteerData.profile.vehicleType}</span>
         </div>
       </div>
 
       {/* Assignment Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {volunteerData.assignments.map((item) => (
           <div
             key={item.id}
             className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden flex flex-col justify-between hover:shadow-xl transition-all duration-300 group"
           >
             {/* Image Header */}
-            <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+            <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-slate-100">
               <img
                 src={item.image}
                 alt={item.foodName}
@@ -64,7 +64,7 @@ const AssignedPickupsPage = () => {
             </div>
 
             {/* Card Body */}
-            <div className="p-5 space-y-3.5 flex-1 flex flex-col justify-between">
+            <div className="p-4 sm:p-5 space-y-3 flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-[#0F172A] line-clamp-1 group-hover:text-emerald-600 transition-colors">
                   {item.foodName}
@@ -108,16 +108,16 @@ const AssignedPickupsPage = () => {
               <div className="pt-2 flex items-center gap-2">
                 <button
                   onClick={() => setSelectedAssignment(item)}
-                  className="flex-1 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all text-center cursor-pointer"
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all text-center cursor-pointer"
                 >
                   View Details
                 </button>
                 <button
                   onClick={() => navigate('/volunteer/navigation')}
-                  className="flex-1 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <Navigation className="w-3.5 h-3.5" />
-                  <span>Start Nav</span>
+                  <Navigation className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">Start Nav</span>
                 </button>
               </div>
             </div>
@@ -127,15 +127,15 @@ const AssignedPickupsPage = () => {
 
       {/* Assignment Details Modal */}
       {selectedAssignment && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl max-w-md w-full p-6 animate-scale-up space-y-4">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
+          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 animate-scale-up space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 {selectedAssignment.id}
               </span>
               <button
                 onClick={() => setSelectedAssignment(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer p-1"
               >
                 ✕
               </button>
@@ -146,7 +146,7 @@ const AssignedPickupsPage = () => {
               <p className="text-xs text-[#64748B] mt-0.5">Assigned to vehicle: {volunteerData.profile.vehicleNumber}</p>
             </div>
 
-            <div className="space-y-2 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
+            <div className="space-y-2.5 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
               <div>
                 <span className="text-[10px] text-[#64748B] uppercase font-bold block">Donor Pickup Address</span>
                 <p className="font-bold text-[#0F172A]">{selectedAssignment.donorName}</p>
@@ -159,16 +159,16 @@ const AssignedPickupsPage = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E7EAF0] flex items-center justify-end gap-3">
+            <div className="pt-3 border-t border-[#E7EAF0] flex flex-wrap sm:flex-nowrap items-center justify-end gap-2.5">
               <button
                 onClick={() => setSelectedAssignment(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
               >
                 Close
               </button>
               <button
                 onClick={() => navigate('/volunteer/navigation')}
-                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Navigation className="w-3.5 h-3.5" />
                 <span>Launch GPS Navigation</span>
