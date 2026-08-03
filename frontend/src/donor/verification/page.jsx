@@ -15,10 +15,7 @@ import {
 
 /**
  * Clean & Modern Donor Verification Page (/donor/verification)
- * Matches attached mockup 1:1:
- * - Shows only uploaded documents with status & View button.
- * - Hides document section before any upload.
- * - Minimal, professional, and free of dummy data.
+ * Matches attached mockup 1:1
  */
 const DonorVerificationPage = () => {
   const fileInputRef = useRef(null);
@@ -27,24 +24,26 @@ const DonorVerificationPage = () => {
   const [activeDocModal, setActiveDocModal] = useState(null);
 
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : { verificationStatus: 'pending' };
+    try {
+      const saved = localStorage.getItem('user');
+      return saved ? JSON.parse(saved) : { verificationStatus: 'pending' };
+    } catch (e) {
+      return { verificationStatus: 'pending' };
+    }
   });
 
-  // State for uploaded documents (persisted from user backend or session uploads)
+  // State for uploaded documents (safe JSON storage without component references)
   const [uploadedDocs, setUploadedDocs] = useState(() => {
-    const savedDocs = localStorage.getItem('donor_uploaded_docs');
-    if (savedDocs) return JSON.parse(savedDocs);
-    return user.verificationDocs && user.verificationDocs.length > 0
-      ? user.verificationDocs.map((d, i) => ({
-          id: `doc-${i}`,
-          title: d.docUrl ? d.docUrl.split('/').pop() : `Verification Document ${i + 1}`,
-          status: 'Pending Review',
-          statusType: 'pending',
-          fileUrl: d.docUrl || '#',
-          icon: i % 2 === 0 ? FileText : Building2,
-        }))
-      : [];
+    try {
+      const savedDocs = localStorage.getItem('donor_uploaded_docs');
+      if (savedDocs) {
+        const parsed = JSON.parse(savedDocs);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Error reading saved docs:', e);
+    }
+    return [];
   });
 
   const fetchProfile = async () => {
@@ -67,15 +66,14 @@ const DonorVerificationPage = () => {
             title: d.docUrl ? d.docUrl.split('/').pop() : `Verification_Document_${i + 1}.pdf`,
             status: data.user.verificationStatus === 'approved' ? 'Approved' : data.user.verificationStatus === 'rejected' ? 'Rejected' : 'Pending Review',
             statusType: data.user.verificationStatus || 'pending',
-            fileUrl: d.docUrl || '#',
-            icon: i % 2 === 0 ? FileText : Building2,
+            iconType: i % 2 === 0 ? 'file' : 'building',
           }));
           setUploadedDocs(apiDocs);
           localStorage.setItem('donor_uploaded_docs', JSON.stringify(apiDocs));
         }
       }
     } catch (err) {
-      console.warn('Profile sync warning:', err.message);
+      console.warn('Profile sync notice:', err.message);
     }
   };
 
@@ -96,8 +94,7 @@ const DonorVerificationPage = () => {
       title: filesArray[0].name,
       status: 'Pending Review',
       statusType: 'pending',
-      fileUrl: URL.createObjectURL(filesArray[0]),
-      icon: filesArray[0].name.toLowerCase().includes('tax') ? Building2 : FileText,
+      iconType: filesArray[0].name.toLowerCase().includes('tax') ? 'building' : 'file',
     };
 
     try {
@@ -227,7 +224,7 @@ const DonorVerificationPage = () => {
 
           <div className="space-y-3">
             {uploadedDocs.map((doc) => {
-              const IconComp = doc.icon || FileText;
+              const IconComp = doc.iconType === 'building' ? Building2 : FileText;
               let statusPillStyle = 'bg-amber-50 text-amber-700 border-amber-200';
               if (doc.status === 'Approved') statusPillStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
               if (doc.status === 'Rejected') statusPillStyle = 'bg-rose-50 text-rose-700 border-rose-200';
