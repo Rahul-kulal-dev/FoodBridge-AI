@@ -23,19 +23,37 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
     setLoading(true);
     setErrorMsg('');
 
-    const targetPath = role === 'ngo' ? '/ngo' : role === 'volunteer' ? '/volunteer' : '/donor';
-    const payload = {
-      name: formData.name || 'User',
-      email: formData.email,
-      password: formData.password || 'password123',
-      user_role: role,
-      role: role,
-      organizationName: formData.org || '',
-    };
+    // Validate required fields
+    if (!formData.email) {
+      setErrorMsg('Please enter your email address.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.password || formData.password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.');
+      setLoading(false);
+      return;
+    }
+    if (initialType !== 'login' && !formData.name) {
+      setErrorMsg('Please enter your full name.');
+      setLoading(false);
+      return;
+    }
+
+    const payload = initialType === 'login'
+      ? { email: formData.email, password: formData.password }
+      : {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          user_role: role,
+          role: role,
+          organizationName: formData.org || '',
+        };
 
     try {
-      const endpoint = initialType === 'login' 
-        ? 'http://localhost:5000/api/auth/login' 
+      const endpoint = initialType === 'login'
+        ? 'http://localhost:5000/api/auth/login'
         : 'http://localhost:5000/api/auth/register';
 
       const res = await fetch(endpoint, {
@@ -46,47 +64,29 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
 
       const data = await res.json();
 
-      if (res.ok && data.token) {
+      if (res.ok && data.token && data.user) {
+        // Successful authentication — save to localStorage and redirect
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        
-        const finalRole = data.user?.user_role || data.user?.role || role;
-        const redirectRoute = finalRole === 'ngo' ? '/ngo' : finalRole === 'volunteer' ? '/volunteer' : '/donor';
-        
+
+        const finalRole = data.user.user_role || data.user.role || role;
+        const redirectRoute = finalRole === 'admin' ? '/admin'
+          : finalRole === 'ngo' ? '/ngo'
+          : finalRole === 'volunteer' ? '/volunteer'
+          : '/donor';
+
         setSubmitted(true);
         setTimeout(() => {
           onClose();
           navigate(redirectRoute);
         }, 1200);
       } else {
-        // Fallback redirect if user already exists or server error
-        if (data.message && data.message.includes('already exists')) {
-          // Attempt auto login
-          const loginRes = await fetch('http://localhost:5000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: formData.email, password: formData.password || 'password123' }),
-          });
-          const loginData = await loginRes.json();
-          if (loginRes.ok && loginData.token) {
-            localStorage.setItem('token', loginData.token);
-            localStorage.setItem('user', JSON.stringify(loginData.user));
-          }
-        }
-        
-        setSubmitted(true);
-        setTimeout(() => {
-          onClose();
-          navigate(targetPath);
-        }, 1200);
+        // Server returned an error — show it, do NOT navigate
+        setErrorMsg(data.message || 'Authentication failed. Please check your credentials.');
       }
     } catch (err) {
-      console.warn('Backend API connection warning, navigating to portal:', err.message);
-      setSubmitted(true);
-      setTimeout(() => {
-        onClose();
-        navigate(targetPath);
-      }, 1200);
+      // Network error — server is likely down
+      setErrorMsg('Cannot connect to server. Please make sure the backend is running on port 5000.');
     } finally {
       setLoading(false);
     }
@@ -217,6 +217,8 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                   <label className="block text-xs font-bold text-[#0F172A] uppercase mb-1">Password</label>
                   <input
                     type="password"
+                    required
+                    minLength={6}
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}

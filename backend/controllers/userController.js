@@ -48,6 +48,8 @@ const updateUserProfile = async (req, res, next) => {
         role: updatedUser.role,
         user_role: updatedUser.user_role || updatedUser.role,
         verificationStatus: updatedUser.verificationStatus,
+        verificationDocs: updatedUser.verificationDocs || [],
+        rejectionReason: updatedUser.rejectionReason || '',
         phone: updatedUser.phone,
         address: updatedUser.address,
         organizationName: updatedUser.organizationName,
@@ -68,11 +70,22 @@ const uploadVerificationDoc = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
+    const path = require('path');
+    const isPdf = req.file.originalname.toLowerCase().endsWith('.pdf') || req.file.mimetype === 'application/pdf';
+
     // Upload file to Cloudinary
-    const docUrl = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
+    const cloudUrl = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
+
+    // For PDFs, use local static endpoint to serve true application/pdf headers for native Chrome PDF viewing
+    const finalDocUrl = isPdf ? `/uploads/${path.basename(req.file.path)}` : cloudUrl;
+
+    // Find the authenticated user and save the doc URL
     const user = await User.findById(req.user._id);
-    
-    user.verificationDocs.push({ docUrl });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    user.verificationDocs.push({ docUrl: finalDocUrl });
     user.verificationStatus = 'pending';
     user.rejectionReason = '';
     await user.save();
@@ -80,7 +93,7 @@ const uploadVerificationDoc = async (req, res, next) => {
     res.json({
       success: true,
       message: 'Verification document uploaded successfully',
-      docUrl,
+      docUrl: finalDocUrl,
       user: {
         _id: user._id,
         name: user.name,

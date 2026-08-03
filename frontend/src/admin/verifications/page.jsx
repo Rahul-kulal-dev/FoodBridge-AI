@@ -167,31 +167,28 @@ const AdminVerificationsPage = () => {
         <div className="flex items-center gap-1.5 p-1.5 bg-[#F7F8FB] rounded-2xl border border-[#E7EAF0] text-xs font-bold shrink-0">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'pending'
-                ? 'bg-white text-emerald-700 shadow-xs border border-[#E7EAF0]'
-                : 'text-[#64748B] hover:text-[#0F172A]'
-            }`}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeTab === 'pending'
+              ? 'bg-white text-emerald-700 shadow-xs border border-[#E7EAF0]'
+              : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
           >
             Pending Review ({users.filter((u) => (u.verificationStatus || 'pending') === 'pending').length})
           </button>
           <button
             onClick={() => setActiveTab('approved')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'approved'
-                ? 'bg-white text-emerald-700 shadow-xs border border-[#E7EAF0]'
-                : 'text-[#64748B] hover:text-[#0F172A]'
-            }`}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeTab === 'approved'
+              ? 'bg-white text-emerald-700 shadow-xs border border-[#E7EAF0]'
+              : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
           >
             Approved ({users.filter((u) => u.verificationStatus === 'approved').length})
           </button>
           <button
             onClick={() => setActiveTab('rejected')}
-            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'rejected'
-                ? 'bg-white text-rose-700 shadow-xs border border-[#E7EAF0]'
-                : 'text-[#64748B] hover:text-[#0F172A]'
-            }`}
+            className={`px-4 py-2 rounded-xl transition-all cursor-pointer ${activeTab === 'rejected'
+              ? 'bg-white text-rose-700 shadow-xs border border-[#E7EAF0]'
+              : 'text-[#64748B] hover:text-[#0F172A]'
+              }`}
           >
             Rejected ({users.filter((u) => u.verificationStatus === 'rejected').length})
           </button>
@@ -235,9 +232,8 @@ const AdminVerificationsPage = () => {
               >
                 {/* User Info */}
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-2xl shrink-0 ${
-                    role === 'ngo' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                  }`}>
+                  <div className={`p-3 rounded-2xl shrink-0 ${role === 'ngo' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                    }`}>
                     {role === 'ngo' ? <Building2 className="w-6 h-6" /> : <Utensils className="w-6 h-6" />}
                   </div>
 
@@ -246,9 +242,8 @@ const AdminVerificationsPage = () => {
                       <h3 className="font-extrabold text-[#0F172A] text-base sm:text-lg">
                         {item.organizationName || item.name}
                       </h3>
-                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
-                        role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      }`}>
+                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        }`}>
                         {role === 'ngo' ? 'NGO Hub' : 'Food Donor'}
                       </span>
                     </div>
@@ -407,21 +402,30 @@ const AdminVerificationsPage = () => {
                 <p className="text-slate-500 font-medium">Submitted Compliance Files:</p>
                 {activeDocModal.verificationDocs && activeDocModal.verificationDocs.length > 0 ? (
                   activeDocModal.verificationDocs.map((doc, idx) => {
-                    const fileBasename = doc.docUrl ? doc.docUrl.split('/').pop() : `Compliance_Document_${idx + 1}.pdf`;
-                    const fullUrl = doc.docUrl ? `http://localhost:5000${doc.docUrl}` : '#';
+                    const rawUrl = typeof doc === 'string' ? doc : doc.docUrl || '';
+                    const fileBasename = rawUrl ? rawUrl.split('/').pop() : `Compliance_Document_${idx + 1}.pdf`;
+                    const isPdf = fileBasename.toLowerCase().endsWith('.pdf');
+                    const fullUrl = rawUrl
+                      ? rawUrl.startsWith('http')
+                        ? rawUrl
+                        : `http://localhost:5000${rawUrl}`
+                      : '#';
+
                     return (
-                      <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
-                        <span className="font-mono font-bold text-slate-800 truncate max-w-[240px]">
+                      <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                        <span className="font-mono font-bold text-slate-800 truncate max-w-[220px]">
                           {fileBasename}
                         </span>
-                        <a
-                          href={fullUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-emerald-600 font-bold hover:underline"
-                        >
-                          Download / View
-                        </a>
+                        {fullUrl && fullUrl !== '#' && (
+                          <a
+                            href={fullUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg text-xs transition-all flex items-center gap-1 border border-emerald-200"
+                          >
+                            Open File  →
+                          </a>
+                        )}
                       </div>
                     );
                   })

@@ -28,51 +28,17 @@ import { Link } from 'react-router-dom';
 const DonorDashboardPage = () => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : { name: 'GreenHarvest Market', verificationStatus: 'approved' };
+    return saved ? JSON.parse(saved) : { name: 'Donor', verificationStatus: 'pending' };
   });
 
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Default demo items if DB is empty
-  const defaultRecentDonations = [
-    {
-      id: 'DON-8942',
-      title: 'Fresh Organic Produce & Dairy',
-      quantity: '180 kg',
-      recipient: 'Metro City Shelter & Food Bank',
-      status: 'In Transit',
-      statusColor: 'bg-emerald-50 text-emerald-700 border border-emerald-200/80',
-      time: '20 mins ago',
-      isCompleted: false,
-    },
-    {
-      id: 'DON-8941',
-      title: 'Artisan Bakery Bread & Pastries',
-      quantity: '45 kg',
-      recipient: 'Hope Harvest Community Kitchen',
-      status: 'Delivered',
-      statusColor: 'bg-slate-100 text-[#0F172A] border border-[#E7EAF0]',
-      time: '2 hours ago',
-      isCompleted: true,
-    },
-    {
-      id: 'DON-8939',
-      title: 'Canned Soups & Pantry Goods',
-      quantity: '320 units',
-      recipient: 'St. Jude Youth Center',
-      status: 'Pending Pickup',
-      statusColor: 'bg-amber-50 text-amber-700 border border-amber-200/80',
-      time: '4 hours ago',
-      isCompleted: false,
-    },
-  ];
-
   const fetchMyDonations = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setDonations(defaultRecentDonations);
+        setDonations([]);
         setLoading(false);
         return;
       }
@@ -82,7 +48,7 @@ const DonorDashboardPage = () => {
       });
       const data = await res.json();
 
-      if (res.ok && data.donations && data.donations.length > 0) {
+      if (res.ok && data.donations) {
         const formatted = data.donations.map((d) => {
           let color = 'bg-amber-50 text-amber-700 border border-amber-200/80';
           if (d.status === 'delivered') color = 'bg-slate-100 text-[#0F172A] border border-[#E7EAF0]';
@@ -92,7 +58,7 @@ const DonorDashboardPage = () => {
             id: `DON-${d._id.slice(-4).toUpperCase()}`,
             title: d.title,
             quantity: `${d.quantity} ${d.unit || 'kg'}`,
-            recipient: d.ngoId?.name || d.ngoId?.organizationName || 'Pending NGO Assignment',
+            recipient: d.ngoId?.organizationName || d.ngoId?.name || 'Awaiting NGO Request',
             status: d.status.replace('_', ' ').toUpperCase(),
             statusColor: color,
             time: new Date(d.updatedAt || d.createdAt).toLocaleDateString(),
@@ -102,11 +68,11 @@ const DonorDashboardPage = () => {
         });
         setDonations(formatted);
       } else {
-        setDonations(defaultRecentDonations);
+        setDonations([]);
       }
     } catch (err) {
       console.warn('API error fetching donor data:', err);
-      setDonations(defaultRecentDonations);
+      setDonations([]);
     } finally {
       setLoading(false);
     }
@@ -122,7 +88,7 @@ const DonorDashboardPage = () => {
   // System auto-calculated statistics
   const activeCount = donations.filter(d => ['available', 'accepted', 'picked_up', 'Pending Pickup', 'In Transit'].includes(d.rawStatus || d.status)).length;
   const completedDonations = donations.filter(d => ['delivered', 'Delivered'].includes(d.rawStatus || d.status));
-  const totalMealsCalculated = completedDonations.reduce((acc, d) => acc + (d.rawQuantity ? d.rawQuantity * 3 : 150), 14820);
+  const totalMealsCalculated = completedDonations.reduce((acc, d) => acc + (d.rawQuantity ? d.rawQuantity * 3 : 0), 0);
 
   const stats = [
     {
@@ -188,7 +154,7 @@ const DonorDashboardPage = () => {
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-wrap">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-            Welcome back, <span className="text-emerald-600">{user.organizationName || user.name || 'GreenHarvest Market'}</span>
+            Welcome back, <span className="text-emerald-600">{user.organizationName || user.name || 'Donor'}</span>
           </h1>
           <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border w-fit ${
             isVerified 
@@ -334,82 +300,94 @@ const DonorDashboardPage = () => {
           </Link>
         </div>
 
-        {/* Mobile View Card List (< md) */}
-        <div className="grid grid-cols-1 gap-3 p-4 md:hidden">
-          {donations.map((row) => (
-            <div
-              key={row.id}
-              className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 space-y-2.5"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-xs text-[#0F172A] bg-white px-2 py-0.5 rounded border border-[#E7EAF0]">
-                  {row.id}
-                </span>
-                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${row.statusColor}`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  {row.status}
-                </span>
-              </div>
-
-              <div>
-                <div className="font-bold text-xs text-[#0F172A]">{row.title}</div>
-                <div className="text-[11px] text-[#64748B] font-medium mt-0.5">
-                  {row.quantity} • {row.time}
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-[#E7EAF0]/60 text-[11px] text-[#334155]">
-                <span className="text-[#64748B]">Matched Recipient: </span>
-                <span className="font-semibold">{row.recipient}</span>
-              </div>
+        {donations.length === 0 ? (
+          <div className="p-8 text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+              <Package className="w-6 h-6" />
             </div>
-          ))}
-        </div>
-
-        {/* Desktop & Tablet Table View (>= md) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
-              <tr>
-                <th className="px-6 py-4">DONATION ID</th>
-                <th className="px-6 py-4">ITEMS & QUANTITY</th>
-                <th className="px-6 py-4">MATCHED RECIPIENT</th>
-                <th className="px-6 py-4">STATUS</th>
-                <th className="px-6 py-4 text-right">TIME</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E7EAF0]">
+            <h4 className="font-bold text-[#0F172A] text-sm">No Food Donations Found</h4>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              You haven't listed any surplus food items yet. Click "Create Donation" to publish your first surplus batch!
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile View Card List (< md) */}
+            <div className="grid grid-cols-1 gap-3 p-4 md:hidden">
               {donations.map((row) => (
-                <tr key={row.id} className="hover:bg-[#f8fafc]/60 transition-colors">
-                  <td className="px-6 py-4 font-mono font-bold text-[#0F172A]">
-                    {row.id}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-bold text-[#0F172A]">{row.title}</div>
-                    <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{row.quantity}</div>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-[#334155]">
-                    {row.recipient}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${row.statusColor}`}>
+                <div
+                  key={row.id}
+                  className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-[#0F172A] bg-white px-2 py-0.5 rounded border border-[#E7EAF0]">
+                      {row.id}
+                    </span>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${row.statusColor}`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-current" />
                       {row.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-right text-[#64748B] font-medium">
-                    {row.time}
-                  </td>
-                </tr>
+                  </div>
+
+                  <div>
+                    <div className="font-bold text-xs text-[#0F172A]">{row.title}</div>
+                    <div className="text-[11px] text-[#64748B] font-medium mt-0.5">
+                      {row.quantity} • {row.time}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#E7EAF0]/60 text-[11px] text-[#334155]">
+                    <span className="text-[#64748B]">Matched Recipient: </span>
+                    <span className="font-semibold">{row.recipient}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {/* Desktop & Tablet Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
+                  <tr>
+                    <th className="px-6 py-4">DONATION ID</th>
+                    <th className="px-6 py-4">ITEMS & QUANTITY</th>
+                    <th className="px-6 py-4">MATCHED RECIPIENT</th>
+                    <th className="px-6 py-4">STATUS</th>
+                    <th className="px-6 py-4 text-right">TIME</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7EAF0]">
+                  {donations.map((row) => (
+                    <tr key={row.id} className="hover:bg-[#f8fafc]/60 transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-[#0F172A]">
+                        {row.id}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-[#0F172A]">{row.title}</div>
+                        <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{row.quantity}</div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-[#334155]">
+                        {row.recipient}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold ${row.statusColor}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                          {row.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-[#64748B] font-medium">
+                        {row.time}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
 export default DonorDashboardPage;
-
-

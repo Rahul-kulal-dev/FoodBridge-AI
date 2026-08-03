@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Landing Page Components
 import Navbar from './components/Navbar';
@@ -114,50 +115,58 @@ function App() {
         <Route path="/" element={<LandingPage />} />
 
         {/* Admin Portal Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="verifications" element={<AdminVerificationsPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="donations" element={<AdminDonationsPage />} />
-          <Route path="feedback" element={<AdminFeedbackPage />} />
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="verifications" element={<AdminVerificationsPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="donations" element={<AdminDonationsPage />} />
+            <Route path="feedback" element={<AdminFeedbackPage />} />
+          </Route>
         </Route>
 
         {/* Donor Portal Routes */}
-        <Route path="/donor" element={<DonorLayout />}>
-          <Route index element={<DonorDashboardPage />} />
-          <Route path="verification" element={<DonorVerificationPage />} />
-          <Route path="create-donation" element={<CreateDonationPage />} />
-          <Route path="donations" element={<MyDonationsPage />} />
-          <Route path="ai-predictions" element={<AIPredictionsPage />} />
-          <Route path="notifications" element={<DonorNotificationsPage />} />
-          <Route path="feedback" element={<DonorFeedbackPage />} />
-          <Route path="profile" element={<DonorProfilePage />} />
+        <Route element={<ProtectedRoute allowedRoles={['donor']} />}>
+          <Route path="/donor" element={<DonorLayout />}>
+            <Route index element={<DonorDashboardPage />} />
+            <Route path="verification" element={<DonorVerificationPage />} />
+            <Route path="create-donation" element={<CreateDonationPage />} />
+            <Route path="donations" element={<MyDonationsPage />} />
+            <Route path="ai-predictions" element={<AIPredictionsPage />} />
+            <Route path="notifications" element={<DonorNotificationsPage />} />
+            <Route path="feedback" element={<DonorFeedbackPage />} />
+            <Route path="profile" element={<DonorProfilePage />} />
+          </Route>
         </Route>
 
         {/* NGO Portal Routes */}
-        <Route path="/ngo" element={<NgoLayout />}>
-          <Route index element={<NgoDashboardPage />} />
-          <Route path="verification" element={<NgoVerificationPage />} />
-          <Route path="browse-food" element={<BrowseFoodPage />} />
-          <Route path="accepted-donations" element={<AcceptedDonationsPage />} />
-          <Route path="maps" element={<NgoMapsPage />} />
-          <Route path="food-details" element={<FoodDetailsPage />} />
-          <Route path="track-volunteer" element={<TrackVolunteerPage />} />
-          <Route path="notifications" element={<NgoNotificationsPage />} />
-          <Route path="feedback" element={<NgoFeedbackPage />} />
-          <Route path="profile" element={<NgoProfilePage />} />
+        <Route element={<ProtectedRoute allowedRoles={['ngo']} />}>
+          <Route path="/ngo" element={<NgoLayout />}>
+            <Route index element={<NgoDashboardPage />} />
+            <Route path="verification" element={<NgoVerificationPage />} />
+            <Route path="browse-food" element={<BrowseFoodPage />} />
+            <Route path="accepted-donations" element={<AcceptedDonationsPage />} />
+            <Route path="maps" element={<NgoMapsPage />} />
+            <Route path="food-details" element={<FoodDetailsPage />} />
+            <Route path="track-volunteer" element={<TrackVolunteerPage />} />
+            <Route path="notifications" element={<NgoNotificationsPage />} />
+            <Route path="feedback" element={<NgoFeedbackPage />} />
+            <Route path="profile" element={<NgoProfilePage />} />
+          </Route>
         </Route>
 
         {/* Volunteer Portal Routes */}
-        <Route path="/volunteer" element={<VolunteerLayout />}>
-          <Route index element={<VolunteerDashboardPage />} />
-          <Route path="assignments" element={<AssignedPickupsPage />} />
-          <Route path="navigation" element={<NavigationPage />} />
-          <Route path="verification" element={<PickupVerificationPage />} />
-          <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
-          <Route path="notifications" element={<VolunteerNotificationsPage />} />
-          <Route path="history" element={<DeliveryHistoryPage />} />
-          <Route path="profile" element={<VolunteerProfilePage />} />
+        <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}>
+          <Route path="/volunteer" element={<VolunteerLayout />}>
+            <Route index element={<VolunteerDashboardPage />} />
+            <Route path="assignments" element={<AssignedPickupsPage />} />
+            <Route path="navigation" element={<NavigationPage />} />
+            <Route path="verification" element={<PickupVerificationPage />} />
+            <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
+            <Route path="notifications" element={<VolunteerNotificationsPage />} />
+            <Route path="history" element={<DeliveryHistoryPage />} />
+            <Route path="profile" element={<VolunteerProfilePage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

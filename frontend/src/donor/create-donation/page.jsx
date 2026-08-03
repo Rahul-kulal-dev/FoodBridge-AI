@@ -44,12 +44,12 @@ const CreateDonationPage = () => {
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('kg');
   const [category, setCategory] = useState('cooked');
-  
+
   // Set default prep and expiry dates
   const todayStr = new Date().toISOString().split('T')[0];
   const [prepDate, setPrepDate] = useState(todayStr);
   const [prepTime, setPrepTime] = useState('10:30');
-  
+
   // Default expiry date time set 6 hours from now
   const futureDate = new Date(Date.now() + 6 * 3600 * 1000);
   const [expiryDate, setExpiryDate] = useState(futureDate.toISOString().split('T')[0]);
@@ -294,9 +294,8 @@ const CreateDonationPage = () => {
             </div>
           </div>
 
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border capitalize ${
-            isVerified ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-          }`}>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border capitalize ${isVerified ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+            }`}>
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>{isVerified ? 'Verified Donor' : 'Verification Required'}</span>
           </span>
@@ -350,9 +349,7 @@ const CreateDonationPage = () => {
             <h2 className="text-2xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
               Donation Created & Available!
             </h2>
-            <p className="text-sm text-[#64748B] max-w-md mx-auto">
-              Your donation <strong>{foodName}</strong> is saved in MongoDB database with status <strong>Available</strong>.
-            </p>
+
           </div>
 
           <div className="p-4 bg-[#f8fafc] rounded-xl border border-[#E7EAF0] max-w-lg mx-auto text-left text-xs space-y-2">
@@ -396,7 +393,7 @@ const CreateDonationPage = () => {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-6">
-          
+
           {/* SECTION 1: Food Images Upload (Required) */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -656,17 +653,15 @@ const CreateDonationPage = () => {
                   <div
                     key={item.key}
                     onClick={() => toggleChecklist(item.key)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
-                      isChecked
-                        ? 'border-emerald-500 bg-emerald-50/40 shadow-xs'
-                        : 'border-rose-200 bg-rose-50/30 hover:border-rose-300'
-                    }`}
+                    className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${isChecked
+                      ? 'border-emerald-500 bg-emerald-50/40 shadow-xs'
+                      : 'border-rose-200 bg-rose-50/30 hover:border-rose-300'
+                      }`}
                   >
                     <div className="flex items-start gap-2 mb-1.5">
                       <div
-                        className={`w-4 h-4 rounded-md flex items-center justify-center mt-0.5 shrink-0 transition-colors ${
-                          isChecked ? 'bg-emerald-500 text-white' : 'border border-rose-300 bg-white'
-                        }`}
+                        className={`w-4 h-4 rounded-md flex items-center justify-center mt-0.5 shrink-0 transition-colors ${isChecked ? 'bg-emerald-500 text-white' : 'border border-rose-300 bg-white'
+                          }`}
                       >
                         {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                       </div>
@@ -687,11 +682,10 @@ const CreateDonationPage = () => {
           <button
             type="submit"
             disabled={loading || !isVerified}
-            className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm shadow-emerald-btn transition-all flex items-center justify-center gap-2 ${
-              !isVerified
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer active:scale-98'
-            }`}
+            className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm shadow-emerald-btn transition-all flex items-center justify-center gap-2 ${!isVerified
+              ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+              : 'bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer active:scale-98'
+              }`}
           >
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

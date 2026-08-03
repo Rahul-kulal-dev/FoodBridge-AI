@@ -1,24 +1,27 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
+  // Disable query buffering so server responds immediately when DB is offline
+  mongoose.set('bufferCommands', false);
+
+  const connStr = process.env.MONGODB_URI;
+  if (!connStr) {
+    console.error('[MongoDB Error] MONGODB_URI is not set in backend/.env');
+    process.exit(1);
+  }
+
   try {
-    const connStr = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/foodbridge_ai';
     const conn = await mongoose.connect(connStr, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
     });
     console.log(`[MongoDB Atlas] Connected successfully: ${conn.connection.host}`);
   } catch (error) {
-    console.warn(`[MongoDB Atlas] Initial connection error: ${error.message}`);
-    console.warn('[MongoDB Atlas] Attempting fallback to local MongoDB instance...');
-    try {
-      const localConn = await mongoose.connect('mongodb://127.0.0.1:27017/foodbridge_ai', {
-        serverSelectionTimeoutMS: 3000,
-      });
-      console.log(`[MongoDB Local] Fallback connection established: ${localConn.connection.host}`);
-    } catch (localErr) {
-      console.error('[MongoDB Error] Database connection failed:', localErr.message);
-      console.error('Please ensure your MONGODB_URI in backend/.env is valid and reachable.');
-    }
+    console.error(`[MongoDB Atlas] Connection failed: ${error.message}`);
+    console.error('Please ensure:');
+    console.error('  1. Your MONGODB_URI in backend/.env is correct');
+    console.error('  2. Your current IP is whitelisted in MongoDB Atlas → Network Access');
+    console.error('  3. Your Atlas cluster is running');
+    process.exit(1);
   }
 };
 

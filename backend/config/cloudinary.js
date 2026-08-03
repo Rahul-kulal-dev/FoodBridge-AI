@@ -14,34 +14,47 @@ cloudinary.config({
  * @returns {Promise<string>} - Returns Cloudinary secure_url or fallback URL
  */
 const uploadToCloudinary = async (filePath, folder = 'foodbridge_uploads') => {
-  try {
-    // Check if Cloudinary credentials are configured
-    if (
-      process.env.CLOUDINARY_CLOUD_NAME &&
-      process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET
-    ) {
-      const result = await cloudinary.uploader.upload(filePath, {
-        folder,
-        resource_type: 'auto',
-      });
-
-      // Cleanup local temp file
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-
-      return result.secure_url;
-    } else {
-      // Fallback if Cloudinary env vars are missing
-      const fileName = filePath.split('/').pop();
-      return `/uploads/${fileName}`;
-    }
-  } catch (error) {
-    console.warn('Cloudinary upload notice (using fallback):', error.message);
+  // Check if Cloudinary credentials are configured
+  if (
+    !process.env.CLOUDINARY_CLOUD_NAME ||
+    !process.env.CLOUDINARY_API_KEY ||
+    !process.env.CLOUDINARY_API_SECRET
+  ) {
+    console.warn('Cloudinary credentials missing, keeping file locally.');
     const fileName = filePath.split('/').pop();
     return `/uploads/${fileName}`;
   }
+
+  let result;
+  try {
+    // Use 'auto' for all files – Cloudinary classifies PDFs as 'image' type
+    // which serves them with proper Content-Type headers for browser viewing
+    result = await cloudinary.uploader.upload(filePath, {
+      folder,
+      resource_type: 'auto',
+    });
+  } catch (firstError) {
+    // Retry with 'raw' as fallback
+    try {
+      result = await cloudinary.uploader.upload(filePath, {
+        folder,
+        resource_type: 'raw',
+      });
+    } catch (secondError) {
+      console.error('Cloudinary upload failed:', secondError.message);
+      const fileName = filePath.split('/').pop();
+      return `/uploads/${fileName}`;
+    }
+  }
+
+  // Cleanup local temp file only if it is NOT a PDF (keep PDFs locally to serve as native PDFs with 200 OK application/pdf headers)
+  const isPdf = filePath.toLowerCase().endsWith('.pdf');
+  if (!isPdf && fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  console.log('Cloudinary upload success:', result.secure_url, '| resource_type:', result.resource_type);
+  return result.secure_url;
 };
 
 module.exports = {

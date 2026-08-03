@@ -23,6 +23,39 @@ import {
  * 4. On Reject: displays rejection reason, status -> Rejected, enables re-upload.
  * 5. Re-upload resets status back to Pending Review.
  */
+const formatVerificationDocs = (docs = [], verificationStatus = 'pending') => {
+  return docs.map((d, i) => {
+    const rawUrl = typeof d === 'string' ? d : d.docUrl || '';
+    const fileName = rawUrl ? rawUrl.split('/').pop() : `Verification_Document_${i + 1}.pdf`;
+    const docStatus =
+      verificationStatus === 'approved'
+        ? 'Approved'
+        : verificationStatus === 'rejected'
+          ? 'Rejected'
+          : 'Pending Review';
+
+    const isPdf = fileName.toLowerCase().endsWith('.pdf');
+    const fileUrl = rawUrl
+      ? rawUrl.startsWith('http')
+        ? rawUrl
+        : `http://localhost:5000${rawUrl}`
+      : '#';
+
+    const isBroken = !rawUrl;
+
+    return {
+      id: d._id || `doc-${i}`,
+      title: fileName,
+      status: docStatus,
+      fileUrl,
+      rawUrl,
+      isPdf,
+      isBroken,
+      iconType: i % 2 === 0 ? 'file' : 'building',
+    };
+  });
+};
+
 const DonorVerificationPage = () => {
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -33,18 +66,39 @@ const DonorVerificationPage = () => {
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('user');
-      return saved ? JSON.parse(saved) : { verificationStatus: 'pending' };
+      return saved ? JSON.parse(saved) : { verificationStatus: 'pending', verificationDocs: [] };
     } catch (e) {
-      return { verificationStatus: 'pending' };
+      return { verificationStatus: 'pending', verificationDocs: [] };
     }
   });
 
-  const [uploadedDocs, setUploadedDocs] = useState([]);
+  const [uploadedDocs, setUploadedDocs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.verificationDocs && parsed.verificationDocs.length > 0) {
+          return formatVerificationDocs(parsed.verificationDocs, parsed.verificationStatus);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  });
 
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      const savedUserStr = localStorage.getItem('user');
+      let localUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+
+      if (!token) {
+        if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
+          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
+        }
+        return;
+      }
 
       const res = await fetch('http://localhost:5000/api/users/profile', {
         headers: { Authorization: `Bearer ${token}` },
@@ -56,28 +110,24 @@ const DonorVerificationPage = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
 
         if (data.user.verificationDocs && data.user.verificationDocs.length > 0) {
-          const apiDocs = data.user.verificationDocs.map((d, i) => {
-            const fileName = d.docUrl ? d.docUrl.split('/').pop() : `Verification_Document_${i + 1}.pdf`;
-            const docStatus =
-              data.user.verificationStatus === 'approved'
-                ? 'Approved'
-                : data.user.verificationStatus === 'rejected'
-                ? 'Rejected'
-                : 'Pending Review';
-
-            return {
-              id: `doc-${i}`,
-              title: fileName,
-              status: docStatus,
-              fileUrl: d.docUrl || '#',
-              iconType: i % 2 === 0 ? 'file' : 'building',
-            };
-          });
-          setUploadedDocs(apiDocs);
+          setUploadedDocs(formatVerificationDocs(data.user.verificationDocs, data.user.verificationStatus));
+        } else if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
+          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, data.user.verificationStatus));
+        }
+      } else {
+        if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
+          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
         }
       }
     } catch (err) {
       console.warn('Profile sync notice:', err.message);
+      const savedUserStr = localStorage.getItem('user');
+      if (savedUserStr) {
+        const localUser = JSON.parse(savedUserStr);
+        if (localUser.verificationDocs && localUser.verificationDocs.length > 0) {
+          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
+        }
+      }
     }
   };
 
@@ -111,43 +161,55 @@ const DonorVerificationPage = () => {
 
       const data = await res.json();
 
-      if (res.ok && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Re-fetch formatted docs
-        fetchProfile();
+      if (res.ok && (data.user || data.docUrl)) {
+        const cloudDocUrl = data.docUrl || (data.user && data.user.verificationDocs?.slice(-1)[0]?.docUrl);
+        const existingDocs = user.verificationDocs || [];
+        const newDocsList = data.user?.verificationDocs || (cloudDocUrl ? [...existingDocs, { docUrl: cloudDocUrl }] : existingDocs);
+
+        const updatedUser = data.user || {
+          ...user,
+          verificationStatus: 'pending',
+          rejectionReason: '',
+          verificationDocs: newDocsList,
+        };
+
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUploadedDocs(formatVerificationDocs(newDocsList, updatedUser.verificationStatus));
       } else {
-        // Fallback local update
-        const fallbackUser = { ...user, verificationStatus: 'pending', rejectionReason: '' };
+        // Fallback local update preserving verificationDocs in localStorage
+        const cloudDocUrl = data.docUrl;
+        const existingDocs = user.verificationDocs || [];
+        const newDoc = { docUrl: cloudDocUrl || `/uploads/${fileName}`, uploadedAt: new Date().toISOString() };
+        const updatedDocs = [...existingDocs, newDoc];
+
+        const fallbackUser = {
+          ...user,
+          verificationStatus: 'pending',
+          rejectionReason: '',
+          verificationDocs: updatedDocs,
+        };
+
         setUser(fallbackUser);
         localStorage.setItem('user', JSON.stringify(fallbackUser));
-
-        setUploadedDocs((prev) => [
-          ...prev,
-          {
-            id: `doc-${Date.now()}`,
-            title: fileName,
-            status: 'Pending Review',
-            iconType: fileName.toLowerCase().includes('tax') ? 'building' : 'file',
-          },
-        ]);
+        setUploadedDocs(formatVerificationDocs(updatedDocs, 'pending'));
       }
       setUploadSuccessMsg('Document uploaded! Sent for Admin review (Status: Pending Review).');
     } catch (err) {
-      const fallbackUser = { ...user, verificationStatus: 'pending', rejectionReason: '' };
+      const existingDocs = user.verificationDocs || [];
+      const newDoc = { docUrl: `/uploads/${fileName}`, uploadedAt: new Date().toISOString() };
+      const updatedDocs = [...existingDocs, newDoc];
+
+      const fallbackUser = {
+        ...user,
+        verificationStatus: 'pending',
+        rejectionReason: '',
+        verificationDocs: updatedDocs,
+      };
+
       setUser(fallbackUser);
       localStorage.setItem('user', JSON.stringify(fallbackUser));
-
-      setUploadedDocs((prev) => [
-        ...prev,
-        {
-          id: `doc-${Date.now()}`,
-          title: fileName,
-          status: 'Pending Review',
-          iconType: fileName.toLowerCase().includes('tax') ? 'building' : 'file',
-        },
-      ]);
+      setUploadedDocs(formatVerificationDocs(updatedDocs, 'pending'));
       setUploadSuccessMsg('Document uploaded! Sent for Admin review (Status: Pending Review).');
     } finally {
       setUploading(false);
@@ -194,13 +256,12 @@ const DonorVerificationPage = () => {
           </div>
         </div>
 
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border capitalize ${
-          isApproved 
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-            : isRejected 
-            ? 'bg-rose-50 text-rose-700 border-rose-200' 
-            : 'bg-amber-50 text-amber-700 border-amber-200'
-        }`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border capitalize ${isApproved
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : isRejected
+              ? 'bg-rose-50 text-rose-700 border-rose-200'
+              : 'bg-amber-50 text-amber-700 border-amber-200'
+          }`}>
           {isApproved && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
           {isRejected && <XCircle className="w-4 h-4 text-rose-600" />}
           {!isApproved && !isRejected && <Clock className="w-4 h-4 text-amber-600" />}
@@ -289,49 +350,87 @@ const DonorVerificationPage = () => {
       {/* 2. Uploaded Documents Section (ONLY rendered if documents exist) */}
       {uploadedDocs.length > 0 && (
         <div className="bg-white p-5 sm:p-7 rounded-3xl border border-[#E7EAF0] shadow-soft-card space-y-4">
-          <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
-            Uploaded Documents
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
+              Uploaded Documents
+            </h3>
+            {uploadedDocs.some((d) => d.isBroken) && (
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = { ...user, verificationDocs: [], verificationStatus: 'pending' };
+                  setUser(updated);
+                  localStorage.setItem('user', JSON.stringify(updated));
+                  setUploadedDocs([]);
+                }}
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Clear Broken Docs & Re-upload</span>
+              </button>
+            )}
+          </div>
 
           <div className="space-y-3">
             {uploadedDocs.map((doc) => {
               const IconComp = doc.iconType === 'building' ? Building2 : FileText;
               let statusPillStyle = 'bg-amber-50 text-amber-700 border-amber-200';
-              if (doc.status === 'Approved' || isApproved) statusPillStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-              if ((doc.status === 'Rejected' || isRejected) && !isApproved) statusPillStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+              if (doc.isBroken) {
+                statusPillStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+              } else if (doc.status === 'Approved' || isApproved) {
+                statusPillStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+              } else if ((doc.status === 'Rejected' || isRejected) && !isApproved) {
+                statusPillStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+              }
 
-              const displayStatus = isApproved ? 'Approved' : isRejected ? 'Rejected' : 'Pending Review';
+              const displayStatus = doc.isBroken
+                ? 'Upload Failed'
+                : isApproved ? 'Approved' : isRejected ? 'Rejected' : 'Pending Review';
 
               return (
                 <div
                   key={doc.id}
-                  className="p-4 rounded-2xl border border-[#E7EAF0] bg-white hover:border-emerald-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${doc.isBroken
+                      ? 'border-rose-200 bg-rose-50/30'
+                      : 'border-[#E7EAF0] bg-white hover:border-emerald-200'
+                    }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                      <IconComp className="w-5 h-5" />
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${doc.isBroken ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                      }`}>
+                      {doc.isBroken ? <AlertTriangle className="w-5 h-5" /> : <IconComp className="w-5 h-5" />}
                     </div>
-                    <span className="font-bold text-[#0F172A] text-sm truncate">
-                      {doc.title}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="font-bold text-[#0F172A] text-sm truncate block">
+                        {doc.title}
+                      </span>
+                      {doc.isBroken && (
+                        <span className="text-[10px] text-rose-600 font-medium">
+                          File not found on server. Please clear and re-upload.
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto shrink-0">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${statusPillStyle}`}>
-                      {displayStatus === 'Approved' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
-                      {displayStatus === 'Rejected' && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
-                      {displayStatus === 'Pending Review' && <Clock className="w-3.5 h-3.5 text-amber-600" />}
+                      {doc.isBroken && <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />}
+                      {!doc.isBroken && displayStatus === 'Approved' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                      {!doc.isBroken && displayStatus === 'Rejected' && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
+                      {!doc.isBroken && displayStatus === 'Pending Review' && <Clock className="w-3.5 h-3.5 text-amber-600" />}
                       <span>{displayStatus}</span>
                     </span>
 
-                    <button
-                      type="button"
-                      onClick={() => setActiveDocModal(doc)}
-                      className="px-3.5 py-1.5 rounded-xl border border-[#E7EAF0] hover:border-emerald-500 bg-white hover:bg-emerald-50/50 text-[#0F172A] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-slate-500" />
-                      <span>View</span>
-                    </button>
+                    {!doc.isBroken && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveDocModal(doc)}
+                        className="px-3.5 py-1.5 rounded-xl border border-[#E7EAF0] hover:border-emerald-500 bg-white hover:bg-emerald-50/50 text-[#0F172A] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-slate-500" />
+                        <span>View</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -360,17 +459,15 @@ const DonorVerificationPage = () => {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center space-y-4 transition-all cursor-pointer ${
-            isDragging
+          className={`border-2 border-dashed rounded-3xl p-8 sm:p-12 text-center space-y-4 transition-all cursor-pointer ${isDragging
               ? 'border-emerald-500 bg-emerald-50/60 scale-[1.002]'
               : isRejected
-              ? 'border-rose-300 bg-rose-50/20 hover:bg-rose-50/40 hover:border-rose-400'
-              : 'border-emerald-300/80 bg-emerald-50/20 hover:bg-emerald-50/40 hover:border-emerald-400'
-          }`}
+                ? 'border-rose-300 bg-rose-50/20 hover:bg-rose-50/40 hover:border-rose-400'
+                : 'border-emerald-300/80 bg-emerald-50/20 hover:bg-emerald-50/40 hover:border-emerald-400'
+            }`}
         >
-          <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center ${
-            isRejected ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
-          }`}>
+          <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center ${isRejected ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-600'
+            }`}>
             {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}
           </div>
 
@@ -429,6 +526,20 @@ const DonorVerificationPage = () => {
                 <span className="text-slate-600 font-medium">Status:</span>
                 <span className="font-bold text-emerald-700">{isApproved ? 'Approved' : isRejected ? 'Rejected' : 'Pending Review'}</span>
               </div>
+
+              {activeDocModal.fileUrl && activeDocModal.fileUrl !== '#' && (
+                <div className="pt-2">
+                  <a
+                    href={activeDocModal.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-emerald-btn transition-all text-xs"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>Open File </span>
+                  </a>
+                </div>
+              )}
             </div>
 
             <div className="pt-2 flex justify-end">
