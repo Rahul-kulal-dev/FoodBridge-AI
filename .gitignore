@@ -1,0 +1,24 @@
+# Environment variables
+.env
+*.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build and temp directories
+dist/
+build/
+.cache/
+
+# Uploads & Logs
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.log
+
+# OS & Editor Files
+.DS_Store
+.vscode/
+.idea/
