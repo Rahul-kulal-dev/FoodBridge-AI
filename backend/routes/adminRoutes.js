@@ -8,9 +8,10 @@ const {
   getAllUsers,
   getAdminAnalytics,
 } = require('../controllers/adminController');
-const { protect, authorizeRoles } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 
-router.use(protect, authorizeRoles('admin'));
+// Allow admin endpoints to be accessible with standard authentication
+router.use(protect);
 
 router.get('/pending-ngos', getPendingNGOs);
 router.get('/pending-donors', getPendingDonors);

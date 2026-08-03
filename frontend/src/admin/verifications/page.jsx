@@ -9,16 +9,13 @@ import {
   Utensils,
   Search,
   X,
-  Loader2,
-  MessageSquare
+  Loader2
 } from 'lucide-react';
 
 /**
  * Admin Verification Management Page (/admin/verifications)
- * Complete Workflow:
- * - Shows Pending Review requests.
- * - Admin Approve updates user status to 'approved' (enabling donation creation).
- * - Admin Reject opens Rejection Reason prompt, updates status to 'rejected' & saves rejection reason.
+ * Displays real user verification data directly from MongoDB Atlas backend.
+ * Zero dummy data fallback.
  */
 const AdminVerificationsPage = () => {
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected'
@@ -30,56 +27,6 @@ const AdminVerificationsPage = () => {
   const [rejectionReasonText, setRejectionReasonText] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
 
-  // Demo fallback items if DB is empty
-  const defaultPendingUsers = [
-    {
-      _id: 'usr-101',
-      name: 'Ocean View Bakery & Bistro',
-      email: 'contact@oceanviewbakery.com',
-      role: 'donor',
-      organizationName: 'Ocean View Bakery & Bistro',
-      phone: '+1 (555) 234-5678',
-      address: '450 Coastal Blvd, Suite 12',
-      verificationStatus: 'pending',
-      rejectionReason: '',
-      verificationDocs: [
-        { docUrl: '/uploads/FSSAI_License_OceanView.pdf' },
-        { docUrl: '/uploads/Tax_Registration_2026.pdf' }
-      ],
-      createdAt: '2026-08-02T10:30:00Z',
-    },
-    {
-      _id: 'usr-102',
-      name: 'Community Hope Harvest Hub',
-      email: 'director@hopeharvest.org',
-      role: 'ngo',
-      organizationName: 'Community Hope Harvest Hub',
-      phone: '+1 (555) 987-6543',
-      address: '780 Food Relief Way',
-      verificationStatus: 'pending',
-      rejectionReason: '',
-      verificationDocs: [
-        { docUrl: '/uploads/NGO_Registration_Cert.pdf' }
-      ],
-      createdAt: '2026-08-01T14:15:00Z',
-    },
-    {
-      _id: 'usr-103',
-      name: 'Metro City Food Bank Network',
-      email: 'admin@metrocityfoodbank.org',
-      role: 'ngo',
-      organizationName: 'Metro City Food Bank Network',
-      phone: '+1 (555) 444-1234',
-      address: '120 Central Plaza',
-      verificationStatus: 'approved',
-      rejectionReason: '',
-      verificationDocs: [
-        { docUrl: '/uploads/FSSAI_Approval.pdf' }
-      ],
-      createdAt: '2026-07-28T09:00:00Z',
-    },
-  ];
-
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -89,13 +36,22 @@ const AdminVerificationsPage = () => {
       });
       const data = await res.json();
 
-      if (res.ok && data.users && data.users.length > 0) {
-        setUsers(data.users);
+      if (res.ok && data.users) {
+        // Show users who have verification documents uploaded or explicitly have a verification status
+        const verifiableUsers = data.users.filter(
+          (u) =>
+            (u.verificationDocs && u.verificationDocs.length > 0) ||
+            u.verificationStatus === 'pending' ||
+            u.verificationStatus === 'approved' ||
+            u.verificationStatus === 'rejected'
+        );
+        setUsers(verifiableUsers);
       } else {
-        setUsers(defaultPendingUsers);
+        setUsers([]);
       }
     } catch (err) {
-      setUsers(defaultPendingUsers);
+      console.warn('Error fetching verification users:', err.message);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -114,13 +70,23 @@ const AdminVerificationsPage = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
-      );
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
+        );
+        // Also update local storage if approving current logged in user
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+          const currentUser = JSON.parse(currentUserStr);
+          if (currentUser._id === userId) {
+            currentUser.verificationStatus = 'approved';
+            currentUser.rejectionReason = '';
+            localStorage.setItem('user', JSON.stringify(currentUser));
+          }
+        }
+      }
     } catch (err) {
-      setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
-      );
+      console.error('Approve error:', err);
     } finally {
       setActionLoading(null);
     }
@@ -128,7 +94,7 @@ const AdminVerificationsPage = () => {
 
   const handleOpenRejectModal = (userItem) => {
     setRejectModalUser(userItem);
-    setRejectionReasonText('Document incomplete or illegible. Please re-upload clear FSSAI / Tax ID document.');
+    setRejectionReasonText('Document incomplete or illegible. Please re-upload clear government-issued document.');
   };
 
   const handleConfirmReject = async () => {
@@ -147,13 +113,23 @@ const AdminVerificationsPage = () => {
         body: JSON.stringify({ rejectionReason: rejectionReasonText }),
       });
 
-      setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
-      );
+      if (res.ok) {
+        setUsers((prev) =>
+          prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
+        );
+        // Update local storage if rejecting current logged in user
+        const currentUserStr = localStorage.getItem('user');
+        if (currentUserStr) {
+          const currentUser = JSON.parse(currentUserStr);
+          if (currentUser._id === userId) {
+            currentUser.verificationStatus = 'rejected';
+            currentUser.rejectionReason = rejectionReasonText;
+            localStorage.setItem('user', JSON.stringify(currentUser));
+          }
+        }
+      }
     } catch (err) {
-      setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
-      );
+      console.error('Reject error:', err);
     } finally {
       setActionLoading(null);
       setRejectModalUser(null);
@@ -163,8 +139,8 @@ const AdminVerificationsPage = () => {
   const filteredUsers = users.filter((u) => {
     const matchesTab = (u.verificationStatus || 'pending') === activeTab;
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (u.organizationName && u.organizationName.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesTab && matchesSearch;
   });
@@ -182,7 +158,7 @@ const AdminVerificationsPage = () => {
               Admin Verification Approvals
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Approve or reject verification requests. Approved donors unlock donation creation.
+              Real-time verification queue connected to MongoDB Atlas database.
             </p>
           </div>
         </div>
@@ -236,109 +212,117 @@ const AdminVerificationsPage = () => {
 
       {/* Verification Queue List */}
       <div className="space-y-4">
-        {filteredUsers.length === 0 ? (
+        {loading ? (
+          <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-bold">Loading real verification data...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
           <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
             <ShieldCheck className="w-12 h-12 text-slate-300 mx-auto" />
             <h3 className="text-base font-bold text-[#0F172A]">No requests in this queue</h3>
             <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto">
-              There are currently no requests matching your selected tab.
+              There are currently no verification submissions matching your selected filter.
             </p>
           </div>
         ) : (
-          filteredUsers.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card hover:border-emerald-200 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5"
-            >
-              {/* User Info */}
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-2xl shrink-0 ${
-                  item.role === 'ngo' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                }`}>
-                  {item.role === 'ngo' ? <Building2 className="w-6 h-6" /> : <Utensils className="w-6 h-6" />}
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-extrabold text-[#0F172A] text-base sm:text-lg">
-                      {item.organizationName || item.name}
-                    </h3>
-                    <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
-                      item.role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    }`}>
-                      {item.role === 'ngo' ? 'NGO Hub' : 'Food Donor'}
-                    </span>
+          filteredUsers.map((item) => {
+            const role = item.user_role || item.role || 'donor';
+            return (
+              <div
+                key={item._id}
+                className="bg-white p-5 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card hover:border-emerald-200 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-5"
+              >
+                {/* User Info */}
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-2xl shrink-0 ${
+                    role === 'ngo' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  }`}>
+                    {role === 'ngo' ? <Building2 className="w-6 h-6" /> : <Utensils className="w-6 h-6" />}
                   </div>
 
-                  <p className="text-xs text-slate-500 font-medium">
-                    Contact: <strong className="text-[#0F172A]">{item.name}</strong> • {item.email} • {item.phone || 'No phone'}
-                  </p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-extrabold text-[#0F172A] text-base sm:text-lg">
+                        {item.organizationName || item.name}
+                      </h3>
+                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
+                        role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      }`}>
+                        {role === 'ngo' ? 'NGO Hub' : 'Food Donor'}
+                      </span>
+                    </div>
 
-                  {item.verificationStatus === 'rejected' && item.rejectionReason && (
-                    <p className="text-xs text-rose-600 font-medium pt-1">
-                      <strong>Rejection Reason:</strong> {item.rejectionReason}
+                    <p className="text-xs text-slate-500 font-medium">
+                      Contact: <strong className="text-[#0F172A]">{item.name}</strong> • {item.email} • {item.phone || 'No phone'}
                     </p>
+
+                    {item.verificationStatus === 'rejected' && item.rejectionReason && (
+                      <p className="text-xs text-rose-600 font-medium pt-1">
+                        <strong>Rejection Reason:</strong> {item.rejectionReason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Document Actions & Decision Buttons */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setActiveDocModal(item)}
+                    className="px-4 py-2.5 rounded-xl border border-[#E7EAF0] hover:bg-slate-50 text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    <Eye className="w-4 h-4 text-emerald-600" />
+                    <span>View Uploaded Docs ({item.verificationDocs ? item.verificationDocs.length : 0})</span>
+                  </button>
+
+                  {item.verificationStatus === 'pending' && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={actionLoading === item._id}
+                        onClick={() => handleApprove(item._id)}
+                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        {actionLoading === item._id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Approve</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={actionLoading === item._id}
+                        onClick={() => handleOpenRejectModal(item)}
+                        className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        <span>Reject</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {item.verificationStatus === 'approved' && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Verified & Approved</span>
+                    </span>
+                  )}
+
+                  {item.verificationStatus === 'rejected' && (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
+                      <XCircle className="w-4 h-4 text-rose-600" />
+                      <span>Rejected</span>
+                    </span>
                   )}
                 </div>
               </div>
-
-              {/* Document Actions & Decision Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setActiveDocModal(item)}
-                  className="px-4 py-2.5 rounded-xl border border-[#E7EAF0] hover:bg-slate-50 text-[#0F172A] text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
-                >
-                  <Eye className="w-4 h-4 text-emerald-600" />
-                  <span>View Uploaded Docs</span>
-                </button>
-
-                {item.verificationStatus === 'pending' && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={actionLoading === item._id}
-                      onClick={() => handleApprove(item._id)}
-                      className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      {actionLoading === item._id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>Approve</span>
-                        </>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={actionLoading === item._id}
-                      onClick={() => handleOpenRejectModal(item)}
-                      className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                )}
-
-                {item.verificationStatus === 'approved' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <span>Verified & Approved</span>
-                  </span>
-                )}
-
-                {item.verificationStatus === 'rejected' && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold">
-                    <XCircle className="w-4 h-4 text-rose-600" />
-                    <span>Rejected</span>
-                  </span>
-                )}
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -422,23 +406,27 @@ const AdminVerificationsPage = () => {
               <div className="p-3 bg-slate-50 rounded-xl space-y-1">
                 <p className="text-slate-500 font-medium">Submitted Compliance Files:</p>
                 {activeDocModal.verificationDocs && activeDocModal.verificationDocs.length > 0 ? (
-                  activeDocModal.verificationDocs.map((doc, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
-                      <span className="font-mono font-bold text-slate-800 truncate">
-                        {doc.docUrl ? doc.docUrl.split('/').pop() : `Compliance_File_${idx + 1}.pdf`}
-                      </span>
-                      <a
-                        href={`http://localhost:5000${doc.docUrl}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-emerald-600 font-bold hover:underline"
-                      >
-                        Download / View
-                      </a>
-                    </div>
-                  ))
+                  activeDocModal.verificationDocs.map((doc, idx) => {
+                    const fileBasename = doc.docUrl ? doc.docUrl.split('/').pop() : `Compliance_Document_${idx + 1}.pdf`;
+                    const fullUrl = doc.docUrl ? `http://localhost:5000${doc.docUrl}` : '#';
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200">
+                        <span className="font-mono font-bold text-slate-800 truncate max-w-[240px]">
+                          {fileBasename}
+                        </span>
+                        <a
+                          href={fullUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-emerald-600 font-bold hover:underline"
+                        >
+                          Download / View
+                        </a>
+                      </div>
+                    );
+                  })
                 ) : (
-                  <p className="text-slate-600 font-medium italic">FSSAI_License_Certificate_2026.pdf (Government Verified)</p>
+                  <p className="text-slate-500 font-medium italic">No document file attached</p>
                 )}
               </div>
             </div>

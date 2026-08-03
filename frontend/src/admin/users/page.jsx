@@ -8,65 +8,19 @@ import {
   Building2,
   Utensils,
   Truck,
-  ShieldAlert
+  ShieldAlert,
+  Loader2
 } from 'lucide-react';
 
 /**
  * Admin Manage Users Page (/admin/users)
- * Refactored to match FoodBridge AI design system 1:1
+ * Displays real user data from MongoDB Atlas backend with zero dummy data fallback.
  */
 const AdminUsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-
-  const defaultUsers = [
-    {
-      _id: 'usr-1',
-      name: 'GreenHarvest Market',
-      email: 'donor@greenharvest.org',
-      role: 'donor',
-      user_role: 'donor',
-      verificationStatus: 'approved',
-      phone: '+1 (555) 321-7654',
-      address: '220 Market Street',
-      createdAt: '2026-07-10T12:00:00Z',
-    },
-    {
-      _id: 'usr-2',
-      name: 'Ocean View Bakery & Bistro',
-      email: 'contact@oceanviewbakery.com',
-      role: 'donor',
-      user_role: 'donor',
-      verificationStatus: 'pending',
-      phone: '+1 (555) 234-5678',
-      address: '450 Coastal Blvd',
-      createdAt: '2026-08-02T10:30:00Z',
-    },
-    {
-      _id: 'usr-3',
-      name: 'Metro City Shelter & Food Bank',
-      email: 'contact@metroshelter.org',
-      role: 'ngo',
-      user_role: 'ngo',
-      verificationStatus: 'approved',
-      phone: '+1 (555) 888-9999',
-      address: '500 Community Plaza',
-      createdAt: '2026-06-15T08:00:00Z',
-    },
-    {
-      _id: 'usr-4',
-      name: 'Alex Rivers',
-      email: 'alex.volunteer@foodbridge.org',
-      role: 'volunteer',
-      user_role: 'volunteer',
-      verificationStatus: 'approved',
-      phone: '+1 (555) 777-3333',
-      address: 'District 4 Transit Hub',
-      createdAt: '2026-07-01T11:20:00Z',
-    },
-  ];
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -76,13 +30,14 @@ const AdminUsersPage = () => {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
-      if (res.ok && data.users && data.users.length > 0) {
+      if (res.ok && data.users) {
         setUsers(data.users);
       } else {
-        setUsers(defaultUsers);
+        setUsers([]);
       }
     } catch (err) {
-      setUsers(defaultUsers);
+      console.warn('Error fetching users:', err);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -96,8 +51,8 @@ const AdminUsersPage = () => {
     const assignedRole = u.user_role || u.role;
     const matchesRole = roleFilter === 'all' || assignedRole === roleFilter;
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (u.organizationName && u.organizationName.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesRole && matchesSearch;
   });
@@ -152,78 +107,91 @@ const AdminUsersPage = () => {
 
       {/* Users Table */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
-              <tr>
-                <th className="px-6 py-4">USER / ORGANIZATION</th>
-                <th className="px-6 py-4">ROLE</th>
-                <th className="px-6 py-4">VERIFICATION STATUS</th>
-                <th className="px-6 py-4">CONTACT & ADDRESS</th>
-                <th className="px-6 py-4 text-right">JOINED DATE</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E7EAF0]">
-              {filteredUsers.map((u) => {
-                const assignedRole = u.user_role || u.role;
-                let roleBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                let RoleIcon = Utensils;
-                if (assignedRole === 'ngo') {
-                  roleBadge = 'bg-amber-50 text-amber-700 border-amber-200';
-                  RoleIcon = Building2;
-                } else if (assignedRole === 'volunteer') {
-                  roleBadge = 'bg-blue-50 text-blue-700 border-blue-200';
-                  RoleIcon = Truck;
-                } else if (assignedRole === 'admin') {
-                  roleBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                  RoleIcon = ShieldAlert;
-                }
+        {loading ? (
+          <div className="p-12 text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-bold">Loading users database...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="p-12 text-center space-y-2">
+            <Users className="w-10 h-10 text-slate-300 mx-auto" />
+            <h3 className="text-base font-bold text-[#0F172A]">No users found</h3>
+            <p className="text-xs text-slate-400 font-medium">There are no registered users matching your query.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#f8fafc] text-[#64748B] text-[11px] font-bold uppercase tracking-wider border-b border-[#E7EAF0]">
+                <tr>
+                  <th className="px-6 py-4">USER / ORGANIZATION</th>
+                  <th className="px-6 py-4">ROLE</th>
+                  <th className="px-6 py-4">VERIFICATION STATUS</th>
+                  <th className="px-6 py-4">CONTACT & ADDRESS</th>
+                  <th className="px-6 py-4 text-right">JOINED DATE</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E7EAF0]">
+                {filteredUsers.map((u) => {
+                  const assignedRole = u.user_role || u.role;
+                  let roleBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                  let RoleIcon = Utensils;
+                  if (assignedRole === 'ngo') {
+                    roleBadge = 'bg-amber-50 text-amber-700 border-amber-200';
+                    RoleIcon = Building2;
+                  } else if (assignedRole === 'volunteer') {
+                    roleBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+                    RoleIcon = Truck;
+                  } else if (assignedRole === 'admin') {
+                    roleBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    RoleIcon = ShieldAlert;
+                  }
 
-                return (
-                  <tr key={u._id} className="hover:bg-[#f8fafc]/60 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-extrabold text-[#0F172A] text-sm">
-                        {u.organizationName || u.name}
-                      </div>
-                      <div className="text-[11px] text-[#64748B] font-medium">{u.email}</div>
-                    </td>
+                  return (
+                    <tr key={u._id} className="hover:bg-[#f8fafc]/60 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-extrabold text-[#0F172A] text-sm">
+                          {u.organizationName || u.name}
+                        </div>
+                        <div className="text-[11px] text-[#64748B] font-medium">{u.email}</div>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${roleBadge} capitalize`}>
-                        <RoleIcon className="w-3.5 h-3.5" />
-                        <span>{assignedRole}</span>
-                      </span>
-                    </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${roleBadge} capitalize`}>
+                          <RoleIcon className="w-3.5 h-3.5" />
+                          <span>{assignedRole}</span>
+                        </span>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        u.verificationStatus === 'approved' 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                          : u.verificationStatus === 'rejected' 
-                          ? 'bg-rose-50 text-rose-700 border border-rose-200' 
-                          : 'bg-amber-50 text-amber-700 border border-amber-200'
-                      }`}>
-                        {u.verificationStatus === 'approved' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
-                        {u.verificationStatus === 'rejected' && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
-                        {u.verificationStatus === 'pending' && <Clock className="w-3.5 h-3.5 text-amber-600" />}
-                        <span className="capitalize">{u.verificationStatus || 'pending'}</span>
-                      </span>
-                    </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                          u.verificationStatus === 'approved' 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                            : u.verificationStatus === 'rejected' 
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200' 
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
+                        }`}>
+                          {u.verificationStatus === 'approved' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                          {u.verificationStatus === 'rejected' && <XCircle className="w-3.5 h-3.5 text-rose-600" />}
+                          {u.verificationStatus === 'pending' && <Clock className="w-3.5 h-3.5 text-amber-600" />}
+                          <span className="capitalize">{u.verificationStatus || 'pending'}</span>
+                        </span>
+                      </td>
 
-                    <td className="px-6 py-4 font-medium text-[#334155]">
-                      <div>{u.phone || 'N/A'}</div>
-                      <div className="text-[11px] text-[#64748B]">{u.address || 'Standard Location'}</div>
-                    </td>
+                      <td className="px-6 py-4 font-medium text-[#334155]">
+                        <div>{u.phone || 'N/A'}</div>
+                        <div className="text-[11px] text-[#64748B]">{u.address || 'Standard Location'}</div>
+                      </td>
 
-                    <td className="px-6 py-4 text-right text-[#64748B] font-medium">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      <td className="px-6 py-4 text-right text-[#64748B] font-medium">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
