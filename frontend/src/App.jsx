@@ -49,6 +49,14 @@ import VolunteerNotificationsPage from './volunteer/notifications/page';
 import DeliveryHistoryPage from './volunteer/history/page';
 import VolunteerProfilePage from './volunteer/profile/page';
 
+// Admin Module Components
+import AdminLayout from './admin/layout';
+import AdminDashboardPage from './admin/page';
+import AdminVerificationsPage from './admin/verifications/page';
+import AdminUsersPage from './admin/users/page';
+import AdminDonationsPage from './admin/donations/page';
+import AdminFeedbackPage from './admin/feedback/page';
+
 /**
  * Landing Page Component
  */
@@ -104,6 +112,15 @@ function App() {
       <Routes>
         {/* Landing Page Route */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Admin Portal Routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="verifications" element={<AdminVerificationsPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="donations" element={<AdminDonationsPage />} />
+          <Route path="feedback" element={<AdminFeedbackPage />} />
+        </Route>
 
         {/* Donor Portal Routes */}
         <Route path="/donor" element={<DonorLayout />}>

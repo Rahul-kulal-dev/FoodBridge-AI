@@ -1,0 +1,147 @@
+import React from 'react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  ShieldCheck,
+  Users,
+  Package,
+  MessageSquare,
+  Leaf,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  ShieldAlert
+} from 'lucide-react';
+
+export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
+  const navItems = [
+    {
+      name: 'Dashboard',
+      path: '/admin',
+      icon: LayoutDashboard,
+      exact: true,
+    },
+    {
+      name: 'Pending Verifications',
+      path: '/admin/verifications',
+      icon: ShieldCheck,
+      badge: 'Review',
+    },
+    {
+      name: 'Manage Users',
+      path: '/admin/users',
+      icon: Users,
+    },
+    {
+      name: 'Monitor Donations',
+      path: '/admin/donations',
+      icon: Package,
+    },
+    {
+      name: 'Feedback Logs',
+      path: '/admin/feedback',
+      icon: MessageSquare,
+    },
+  ];
+
+  return (
+    <aside
+      className={`fixed top-0 left-0 bottom-0 z-40 bg-white border-r border-[#E7EAF0] transition-all duration-300 ease-in-out flex flex-col justify-between ${
+        isCollapsed ? 'w-20' : 'w-72'
+      }`}
+    >
+      {/* Brand Header matching Landing/Donor */}
+      <div className="p-4 sm:p-5 border-b border-[#E7EAF0] flex items-center justify-between">
+        <Link to="/admin" className="flex items-center gap-2.5 overflow-hidden group">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 transition-transform group-hover:scale-105 shrink-0">
+            <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
+          </div>
+          {!isCollapsed && (
+            <div className="truncate">
+              <span className="text-lg font-extrabold text-[#0F172A] tracking-tight block truncate">
+                FoodBridge <span className="text-emerald-600 font-black">AI</span>
+              </span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-block">
+                Admin Control
+              </span>
+            </div>
+          )}
+        </Link>
+
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-[#0F172A] hover:bg-slate-100 transition-colors cursor-pointer"
+          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        >
+          {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Navigation List */}
+      <div className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto">
+        {!isCollapsed && (
+          <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider px-3 mb-2 block">
+            ADMIN MANAGEMENT
+          </span>
+        )}
+
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.exact}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  isActive
+                    ? 'bg-emerald-50 text-emerald-700 shadow-xs border border-emerald-200/80'
+                    : 'text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'
+                }`
+              }
+            >
+              <Icon className="w-5 h-5 shrink-0" />
+              {!isCollapsed && <span className="truncate">{item.name}</span>}
+              {!isCollapsed && item.badge && (
+                <span className="ml-auto text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  {item.badge}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
+      </div>
+
+      {/* Footer / Sign Out */}
+      <div className="p-4 border-t border-[#E7EAF0] space-y-3">
+        {!isCollapsed && (
+          <div className="p-3 bg-slate-50 rounded-2xl border border-[#E7EAF0] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+              AD
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-[#0F172A] truncate">System Administrator</p>
+              <p className="text-[10px] text-slate-500 truncate">admin@foodbridge.org</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#E7EAF0] hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-[#64748B] text-xs font-bold transition-all cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Sign Out</span>}
+        </button>
+      </div>
+    </aside>
+  );
+}
