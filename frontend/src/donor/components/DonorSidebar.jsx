@@ -50,7 +50,6 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
       label: 'My Donations',
       icon: Package,
       route: '/donor/donations',
-      badge: 4,
     },
     {
       label: 'AI Predictions',
