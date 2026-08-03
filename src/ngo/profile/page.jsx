@@ -44,47 +44,47 @@ const NgoProfilePage = () => {
   };
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-5 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold shrink-0">
-            <Building2 className="w-7 h-7 stroke-[2.2]" />
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-4">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold shrink-0">
+            <Building2 className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
                 {profile.ngoName}
               </h1>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit shrink-0">
                 <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
                 {profile.verificationStatus}
               </span>
             </div>
-            <p className="text-xs text-[#64748B] mt-0.5 font-medium">
+            <p className="text-xs text-[#64748B] mt-1 font-medium">
               Registration No: <span className="font-bold text-[#0F172A]">{profile.regNumber}</span>
             </p>
           </div>
         </div>
 
         {savedSuccess && (
-          <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up">
+          <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up shrink-0">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Profile Saved Successfully!</span>
           </div>
         )}
       </div>
 
-      {/* Editable Form Form Container */}
-      <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-6">
+      {/* Editable Form Container */}
+      <form onSubmit={handleSave} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-5 sm:space-y-6">
         <div className="pb-4 border-b border-[#E7EAF0]">
-          <h2 className="text-lg font-extrabold text-[#0F172A]">Organization Profile & Operations</h2>
+          <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Organization Profile & Operations</h2>
           <p className="text-xs text-[#64748B] mt-0.5">
             Update your serving capacity and contact details to ensure accurate surplus dispatching
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">NGO / Organization Name</label>
             <input
@@ -92,7 +92,7 @@ const NgoProfilePage = () => {
               name="ngoName"
               value={profile.ngoName}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -103,7 +103,7 @@ const NgoProfilePage = () => {
               name="email"
               value={profile.email}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -114,7 +114,7 @@ const NgoProfilePage = () => {
               name="phone"
               value={profile.phone}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -125,7 +125,7 @@ const NgoProfilePage = () => {
               name="servingCapacity"
               value={profile.servingCapacity}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -136,7 +136,7 @@ const NgoProfilePage = () => {
               name="address"
               value={profile.address}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -147,7 +147,7 @@ const NgoProfilePage = () => {
               name="operatingHours"
               value={profile.operatingHours}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -158,7 +158,7 @@ const NgoProfilePage = () => {
               name="foodCategories"
               value={profile.foodCategories}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -169,7 +169,7 @@ const NgoProfilePage = () => {
               name="description"
               value={profile.description}
               onChange={handleChange}
-              className="w-full p-3 rounded-xl border border-[#E7EAF0] text-xs font-medium text-[#334155] bg-[#f7f8fb] focus:outline-emerald-500"
+              className="w-full p-3 rounded-xl border border-[#E7EAF0] text-xs font-medium text-[#334155] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
         </div>
@@ -177,7 +177,7 @@ const NgoProfilePage = () => {
         <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end">
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer text-center"
           >
             <Save className="w-4 h-4" />
             <span>Save Profile Changes</span>
