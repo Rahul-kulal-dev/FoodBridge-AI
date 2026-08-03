@@ -1,4 +1,5 @@
 const Donation = require('../models/Donation');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // @desc    Create a new donation
 // @route   POST /api/donations
@@ -100,7 +101,8 @@ const uploadFoodImage = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload an image file' });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Upload food image to Cloudinary
+    const imageUrl = await uploadToCloudinary(req.file.path, 'foodbridge_donations');
     res.json({
       success: true,
       imageUrl,

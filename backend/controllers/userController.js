@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -6,6 +7,9 @@ const User = require('../models/User');
 const getUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
     res.json({ success: true, user });
   } catch (error) {
     next(error);
@@ -17,18 +21,17 @@ const getUserProfile = async (req, res, next) => {
 // @access  Private
 const updateUserProfile = async (req, res, next) => {
   try {
+    const { name, phone, address, organizationName, location } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    user.name = req.body.name || user.name;
-    user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
-    user.address = req.body.address !== undefined ? req.body.address : user.address;
-    user.organizationName = req.body.organizationName !== undefined ? req.body.organizationName : user.organizationName;
-    if (req.body.location) {
-      user.location = req.body.location;
-    }
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
+    if (organizationName) user.organizationName = organizationName;
+    if (location) user.location = location;
 
     if (req.body.password) {
       user.password = req.body.password;
@@ -37,11 +40,13 @@ const updateUserProfile = async (req, res, next) => {
     const updatedUser = await user.save();
     res.json({
       success: true,
+      message: 'Profile updated successfully',
       user: {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
+        user_role: updatedUser.user_role || updatedUser.role,
         verificationStatus: updatedUser.verificationStatus,
         phone: updatedUser.phone,
         address: updatedUser.address,
@@ -63,7 +68,8 @@ const uploadVerificationDoc = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    const docUrl = `/uploads/${req.file.filename}`;
+    // Upload file to Cloudinary
+    const docUrl = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
     const user = await User.findById(req.user._id);
     
     user.verificationDocs.push({ docUrl });
