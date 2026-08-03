@@ -26,11 +26,17 @@ const userSchema = new mongoose.Schema(
       enum: ['donor', 'ngo', 'volunteer', 'admin'],
       default: 'donor',
     },
+    user_role: {
+      type: String,
+      enum: ['donor', 'ngo', 'volunteer', 'admin'],
+      default: 'donor',
+    },
     verificationStatus: {
       type: String,
       enum: ['pending', 'approved', 'rejected'],
       default: function () {
-        return this.role === 'admin' ? 'approved' : 'pending';
+        const assignedRole = this.user_role || this.role;
+        return assignedRole === 'admin' ? 'approved' : 'pending';
       },
     },
     phone: {
@@ -59,8 +65,14 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
+// Pre-save hook to hash password and sync user_role/role
 userSchema.pre('save', async function (next) {
+  if (this.user_role && !this.role) {
+    this.role = this.user_role;
+  } else if (this.role && !this.user_role) {
+    this.user_role = this.role;
+  }
+
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

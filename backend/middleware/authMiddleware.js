@@ -31,9 +31,10 @@ const protect = async (req, res, next) => {
 
 const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const userRole = req.user ? (req.user.user_role || req.user.role) : null;
+    if (!req.user || !userRole || !roles.includes(userRole)) {
       return res.status(403).json({
-        message: `User role '${req.user ? req.user.role : 'guest'}' is not authorized to access this resource`,
+        message: `User role '${userRole || 'guest'}' is not authorized to access this resource`,
       });
     }
     next();

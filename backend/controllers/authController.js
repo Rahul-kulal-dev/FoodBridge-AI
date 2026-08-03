@@ -1,8 +1,8 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'foodbridge_ai_super_secret_jwt_key_2026', {
+const generateToken = (id, user_role) => {
+  return jwt.sign({ id, user_role }, process.env.JWT_SECRET || 'foodbridge_ai_super_secret_jwt_key_2026', {
     expiresIn: '30d',
   });
 };
@@ -12,18 +12,21 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role, phone, address, organizationName, location } = req.body;
+    const { name, email, password, role, user_role, phone, address, organizationName, location } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User with this email already exists' });
     }
 
+    const assignedRole = user_role || role || 'donor';
+
     const user = await User.create({
       name,
       email,
       password,
-      role: role || 'donor',
+      role: assignedRole,
+      user_role: assignedRole,
       phone: phone || '',
       address: address || '',
       organizationName: organizationName || '',
@@ -32,12 +35,13 @@ const registerUser = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.user_role),
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        user_role: user.user_role || user.role,
         verificationStatus: user.verificationStatus,
         phone: user.phone,
         address: user.address,
@@ -67,12 +71,13 @@ const loginUser = async (req, res, next) => {
 
     res.json({
       success: true,
-      token: generateToken(user._id),
+      token: generateToken(user._id, user.user_role || user.role),
       user: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        user_role: user.user_role || user.role,
         verificationStatus: user.verificationStatus,
         phone: user.phone,
         address: user.address,
