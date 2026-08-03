@@ -48,23 +48,23 @@ const PickupVerificationPage = () => {
   const activeAssignment = volunteerData.assignments[0];
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Pickup Photo Verification
           </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">
+          <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
             Upload verification photo of packaged surplus food before departing pickup location
           </p>
         </div>
 
         {/* Verification Status Selector */}
-        <div className="flex items-center gap-2 bg-[#f7f8fb] p-1.5 rounded-xl border border-[#E7EAF0]">
+        <div className="grid grid-cols-3 sm:flex items-center gap-1.5 sm:gap-2 bg-[#f7f8fb] p-1.5 rounded-xl border border-[#E7EAF0] w-full sm:w-auto">
           <button
             onClick={() => setVerificationStatus('Verified')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
               verificationStatus === 'Verified'
                 ? 'bg-emerald-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
@@ -74,7 +74,7 @@ const PickupVerificationPage = () => {
           </button>
           <button
             onClick={() => setVerificationStatus('Pending')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
               verificationStatus === 'Pending'
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
@@ -84,7 +84,7 @@ const PickupVerificationPage = () => {
           </button>
           <button
             onClick={() => setVerificationStatus('Rejected')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center ${
               verificationStatus === 'Rejected'
                 ? 'bg-rose-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
@@ -97,18 +97,18 @@ const PickupVerificationPage = () => {
 
       {/* Verification Status Overview Banner */}
       {verificationStatus === 'Verified' && (
-        <div className="bg-emerald-50/70 border border-emerald-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
-            <CheckCircle2 className="w-6 h-6" />
+        <div className="bg-emerald-50/70 border border-emerald-200 p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
+            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex flex-wrap items-center gap-1.5 sm:gap-2">
               Pickup Photo Verified
               <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
-                Compliance Passed
+                Passed
               </span>
             </h3>
-            <p className="text-xs text-[#334155] mt-0.5 font-medium">
+            <p className="text-[11px] sm:text-xs text-[#334155] mt-0.5 font-medium">
               Photo verification approved for order {activeAssignment.id}. You may proceed to destination NGO dropoff.
             </p>
           </div>
@@ -116,13 +116,13 @@ const PickupVerificationPage = () => {
       )}
 
       {verificationStatus === 'Pending' && (
-        <div className="bg-amber-50/70 border border-amber-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-amber-btn">
-            <Clock className="w-6 h-6 animate-pulse" />
+        <div className="bg-amber-50/70 border border-amber-200 p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-amber-btn">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A]">Awaiting Photo Verification</h3>
-            <p className="text-xs text-[#334155] mt-0.5 font-medium">
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">Awaiting Photo Verification</h3>
+            <p className="text-[11px] sm:text-xs text-[#334155] mt-0.5 font-medium">
               Please take or upload a clear photo showing the food container seals and quantity tag.
             </p>
           </div>
@@ -130,13 +130,13 @@ const PickupVerificationPage = () => {
       )}
 
       {verificationStatus === 'Rejected' && (
-        <div className="bg-rose-50/70 border border-rose-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0">
-            <AlertCircle className="w-6 h-6" />
+        <div className="bg-rose-50/70 border border-rose-200 p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0">
+            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A]">Photo Quality Retake Required</h3>
-            <p className="text-xs text-[#334155] mt-0.5 font-medium">
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">Photo Quality Retake Required</h3>
+            <p className="text-[11px] sm:text-xs text-[#334155] mt-0.5 font-medium">
               The uploaded photo was blurry. Please retake the photo under adequate lighting.
             </p>
           </div>
@@ -144,25 +144,25 @@ const PickupVerificationPage = () => {
       )}
 
       {/* Main Split Upload & Summary Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Left Column: Drag & Drop Photo Upload Zone */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+        <div className="lg:col-span-7 bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-extrabold text-[#0F172A]">Upload Pickup Verification Photo</h2>
+            <h2 className="text-sm sm:text-base font-extrabold text-[#0F172A]">Upload Pickup Photo</h2>
             {previewImage && (
               <button
                 onClick={handleRetake}
                 className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-emerald-600 cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>Retake Photo</span>
+                <span>Retake</span>
               </button>
             )}
           </div>
 
           {previewImage ? (
             <div className="space-y-4">
-              <div className="relative h-72 w-full rounded-xl overflow-hidden border-2 border-emerald-500 bg-slate-900 shadow-md">
+              <div className="relative h-60 sm:h-72 w-full rounded-xl overflow-hidden border-2 border-emerald-500 bg-slate-900 shadow-md">
                 <img src={previewImage} alt="Pickup Preview" className="w-full h-full object-cover" />
                 <div className="absolute bottom-3 left-3 bg-slate-900/90 text-white text-xs font-bold px-3 py-1 rounded-lg border border-slate-700">
                   {fileName || 'pickup_verification_photo.jpg'}
@@ -178,9 +178,9 @@ const PickupVerificationPage = () => {
               </button>
             </div>
           ) : (
-            <label className="border-2 border-dashed border-slate-300 hover:border-emerald-500 p-8 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors bg-[#f7f8fb] space-y-3">
-              <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs">
-                <Camera className="w-7 h-7" />
+            <label className="border-2 border-dashed border-slate-300 hover:border-emerald-500 p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-colors bg-[#f7f8fb] space-y-3">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shadow-xs">
+                <Camera className="w-6 h-6 sm:w-7 sm:h-7" />
               </div>
               <div className="text-center space-y-1">
                 <p className="text-xs font-extrabold text-[#0F172A]">
@@ -201,10 +201,10 @@ const PickupVerificationPage = () => {
         </div>
 
         {/* Right Column: Donation & Donor Summary */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
-          <h2 className="text-base font-extrabold text-[#0F172A]">Pickup Order Summary</h2>
+        <div className="lg:col-span-5 bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+          <h2 className="text-sm sm:text-base font-extrabold text-[#0F172A]">Pickup Order Summary</h2>
 
-          <div className="p-4 rounded-xl bg-[#f7f8fb] border border-[#E7EAF0] space-y-3 text-xs">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#f7f8fb] border border-[#E7EAF0] space-y-3 text-xs">
             <div>
               <span className="text-[10px] text-[#64748B] font-bold uppercase block">Donation ID</span>
               <span className="font-extrabold text-[#0F172A] text-sm">{activeAssignment.id}</span>
@@ -227,7 +227,7 @@ const PickupVerificationPage = () => {
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-[#E7EAF0] space-y-2 text-xs">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-[#E7EAF0] space-y-2 text-xs">
             <span className="text-[10px] text-[#64748B] font-bold uppercase block">Donor Information</span>
             <p className="font-extrabold text-[#0F172A]">{activeAssignment.donorName}</p>
             <p className="text-[#64748B]">{activeAssignment.pickupAddress}</p>

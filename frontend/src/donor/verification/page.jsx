@@ -98,47 +98,47 @@ const DonorVerificationPage = () => {
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* 1. Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
-        <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
-          <ShieldCheck className="w-6 h-6" />
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
+        <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
+          <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
-        <h1 className="text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
+        <h1 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
           Donor Verification & Safety Compliance
         </h1>
       </div>
 
       {/* 2. Verification Status Card */}
-      <div className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card relative overflow-hidden">
-        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-4">
+      <div className="bg-white p-4 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card relative overflow-hidden">
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3 sm:mb-4">
           VERIFICATION STATUS
         </span>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 shrink-0">
-              <ShieldCheck className="w-8 h-8" />
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="p-2.5 sm:p-3.5 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 shrink-0">
+              <ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-emerald-600 tracking-tight">
+              <h2 className="text-lg sm:text-xl font-black text-emerald-600 tracking-tight">
                 Level 1 Verified
               </h2>
-              <p className="text-xs text-slate-500 mt-1 font-medium">
+              <p className="text-xs text-slate-500 mt-0.5 sm:mt-1 font-medium">
                 Your account is fully verified. Thank you!
               </p>
             </div>
           </div>
 
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-50/80 border border-emerald-100 flex items-center justify-center shrink-0">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
-              <Award className="w-7 h-7 sm:w-8 sm:h-8" />
+          <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-emerald-50/80 border border-emerald-100 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 sm:w-14 sm:h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
+              <Award className="w-5 h-5 sm:w-8 sm:h-8" />
             </div>
           </div>
         </div>
       </div>
 
       {/* 3. Required Documents Section */}
-      <div className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
-        <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
+      <div className="bg-white p-4 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+        <h3 className="text-sm sm:text-base font-extrabold text-[#0F172A] tracking-tight">
           Required Documents
         </h3>
 
@@ -148,19 +148,19 @@ const DonorVerificationPage = () => {
             return (
               <div
                 key={doc.id}
-                className="p-4 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 hover:bg-white hover:border-emerald-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="p-3.5 sm:p-4 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 hover:bg-white hover:border-emerald-200 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
               >
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
-                    <IconComponent className="w-5 h-5" />
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
+                    <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <span className="font-bold text-[#0F172A] text-xs sm:text-sm truncate">
                     {doc.title}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80">
+                <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full sm:w-auto shrink-0">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200/80">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                     {doc.status}
                   </span>
@@ -168,7 +168,7 @@ const DonorVerificationPage = () => {
                   <button
                     type="button"
                     onClick={() => setActiveDocModal(doc)}
-                    className="px-4 py-1.5 rounded-xl border border-[#E7EAF0] hover:border-emerald-500 bg-white hover:bg-emerald-50/40 text-[#0F172A] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                    className="px-3.5 py-1.5 rounded-xl border border-[#E7EAF0] hover:border-emerald-500 bg-white hover:bg-emerald-50/40 text-[#0F172A] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                   >
                     <Eye className="w-3.5 h-3.5 text-slate-500" />
                     <span>View</span>
@@ -181,8 +181,8 @@ const DonorVerificationPage = () => {
       </div>
 
       {/* 4. Upload New / Updated Documents Section */}
-      <div className="bg-white p-6 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
-        <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
+      <div className="bg-white p-4 sm:p-7 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+        <h3 className="text-sm sm:text-base font-extrabold text-[#0F172A] tracking-tight">
           Upload New / Updated Documents
         </h3>
 
@@ -202,7 +202,7 @@ const DonorVerificationPage = () => {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-2xl p-8 text-center space-y-3 transition-all cursor-pointer ${
+          className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center space-y-3 transition-all cursor-pointer ${
             isDragging
               ? 'border-emerald-500 bg-emerald-50/60 scale-[1.005]'
               : 'border-emerald-200/90 bg-emerald-50/20 hover:bg-emerald-50/40 hover:border-emerald-300'

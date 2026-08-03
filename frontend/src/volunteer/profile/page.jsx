@@ -34,25 +34,25 @@ const VolunteerProfilePage = () => {
   };
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="relative">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="relative shrink-0">
             <img
               src={profile.avatar}
               alt={profile.name}
-              className="w-16 h-16 rounded-full object-cover ring-4 ring-emerald-500/20 shadow-md"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-4 ring-emerald-500/20 shadow-md"
             />
-            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
                 {profile.name}
               </h1>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
                 {profile.verificationStatus}
               </span>
@@ -65,37 +65,37 @@ const VolunteerProfilePage = () => {
 
         {savedSuccess && (
           <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Profile Saved Successfully!</span>
           </div>
         )}
       </div>
 
       {/* Metrics Summary Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-extrabold">
-            <CheckCircle2 className="w-6 h-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-extrabold shrink-0">
+            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Total Deliveries</span>
-            <p className="text-xl font-black text-[#0F172A]">{profile.totalDeliveries}</p>
+            <p className="text-lg sm:text-xl font-black text-[#0F172A]">{profile.totalDeliveries}</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-extrabold">
-            <Star className="w-6 h-6 fill-amber-400" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-extrabold shrink-0">
+            <Star className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400" />
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Average Courier Rating</span>
-            <p className="text-xl font-black text-[#0F172A]">{profile.rating} / 5.0</p>
+            <p className="text-lg sm:text-xl font-black text-[#0F172A]">{profile.rating} / 5.0</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-extrabold">
-            <ShieldCheck className="w-6 h-6" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-extrabold shrink-0">
+            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Compliance Status</span>
@@ -105,15 +105,15 @@ const VolunteerProfilePage = () => {
       </div>
 
       {/* Editable Profile Form */}
-      <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-6">
-        <div className="pb-4 border-b border-[#E7EAF0]">
-          <h2 className="text-lg font-extrabold text-[#0F172A]">Courier Credentials & Logistics</h2>
-          <p className="text-xs text-[#64748B] mt-0.5">
+      <form onSubmit={handleSave} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4 sm:space-y-6">
+        <div className="pb-3.5 sm:pb-4 border-b border-[#E7EAF0]">
+          <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Courier Credentials & Logistics</h2>
+          <p className="text-[11px] sm:text-xs text-[#64748B] mt-0.5">
             Update vehicle details, preferred delivery radius, and emergency contact numbers
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Full Name</label>
             <input
@@ -206,9 +206,9 @@ const VolunteerProfilePage = () => {
         <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end">
           <button
             type="submit"
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 shrink-0" />
             <span>Save Profile Changes</span>
           </button>
         </div>

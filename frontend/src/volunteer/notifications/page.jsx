@@ -42,11 +42,11 @@ const VolunteerNotificationsPage = () => {
   });
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Courier Notification Radar
           </h1>
           {unreadCount > 0 && (
@@ -58,20 +58,20 @@ const VolunteerNotificationsPage = () => {
 
         <button
           onClick={handleMarkAllAsRead}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 text-xs font-bold transition-all cursor-pointer border border-transparent hover:border-emerald-200"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 text-xs font-bold transition-all cursor-pointer border border-transparent hover:border-emerald-200 w-full md:w-auto"
         >
-          <Check className="w-4 h-4 text-emerald-600" />
+          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Mark All as Read</span>
         </button>
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-2 flex-wrap text-xs">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-wrap items-center gap-2 text-xs">
         {['All', 'Unread', 'Assignments', 'Verification', 'Navigation'].map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-xl font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl font-bold transition-all cursor-pointer ${
               activeFilter === filter
                 ? 'bg-emerald-500 text-white shadow-emerald-btn'
                 : 'bg-slate-100 text-[#64748B] hover:bg-slate-200'
@@ -85,39 +85,39 @@ const VolunteerNotificationsPage = () => {
       {/* Notification Items List */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card divide-y divide-[#E7EAF0]">
         {filteredNotifications.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">
-            <Bell className="w-10 h-10 mx-auto mb-2 text-slate-300" />
-            <p className="text-sm font-bold text-[#0F172A]">No notifications found</p>
+          <div className="p-8 sm:p-12 text-center text-slate-400">
+            <Bell className="w-9 h-9 sm:w-10 sm:h-10 mx-auto mb-2 text-slate-300" />
+            <p className="text-xs sm:text-sm font-bold text-[#0F172A]">No notifications found</p>
           </div>
         ) : (
           filteredNotifications.map((item) => (
             <div
               key={item.id}
-              className={`p-5 flex items-start justify-between gap-4 transition-colors ${
+              className={`p-3.5 sm:p-5 flex items-start justify-between gap-3 sm:gap-4 transition-colors ${
                 !item.read ? 'bg-emerald-50/20' : 'hover:bg-slate-50/70'
               }`}
             >
-              <div className="flex items-start gap-3.5 min-w-0">
-                <div className="p-2.5 rounded-xl shrink-0 bg-emerald-50 text-emerald-600 border border-emerald-200">
-                  <Bell className="w-5 h-5" />
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="p-2 sm:p-2.5 rounded-xl shrink-0 bg-emerald-50 text-emerald-600 border border-emerald-200 mt-0.5">
+                  <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-extrabold text-[#0F172A]">{item.title}</h3>
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">{item.title}</h3>
                     {!item.read && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                     )}
                   </div>
-                  <p className="text-xs text-[#334155] font-medium leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-[#334155] font-medium leading-relaxed">
                     {item.message}
                   </p>
-                  <span className="text-[10px] font-bold text-[#64748B] block pt-1">
+                  <span className="text-[10px] font-bold text-[#64748B] block pt-0.5">
                     {item.time}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                 {!item.read && (
                   <button
                     onClick={() => handleMarkAsRead(item.id)}

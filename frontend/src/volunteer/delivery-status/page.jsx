@@ -37,33 +37,33 @@ const UpdateDeliveryStatusPage = () => {
   };
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Live Delivery Status Tracker
           </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">
+          <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
             Update real-time delivery status for order <span className="font-bold text-[#0F172A]">ASN-701</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 text-xs font-extrabold text-emerald-700">
-          <Truck className="w-4 h-4 text-emerald-600" />
+        <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 text-xs font-extrabold text-emerald-700 w-fit">
+          <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>Status: {steps[currentStepIndex].title}</span>
         </div>
       </div>
 
       {/* Progress Timeline Interactive Card */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-6">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-extrabold text-[#0F172A]">Delivery Stage Progress</h2>
+          <h2 className="text-sm sm:text-base font-extrabold text-[#0F172A]">Delivery Stage Progress</h2>
           <span className="text-xs text-[#64748B] font-bold">Step {currentStepIndex + 1} of 4</span>
         </div>
 
-        {/* Horizontal Step Indicator Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 relative">
+        {/* Step Indicator Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {steps.map((step, idx) => {
             const isCompleted = idx < currentStepIndex;
             const isCurrent = idx === currentStepIndex;
@@ -71,7 +71,7 @@ const UpdateDeliveryStatusPage = () => {
             return (
               <div
                 key={idx}
-                className={`p-4 rounded-xl border transition-all ${
+                className={`p-3.5 sm:p-4 rounded-xl border transition-all ${
                   isCurrent
                     ? 'bg-emerald-50/60 border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
                     : isCompleted
@@ -81,7 +81,7 @@ const UpdateDeliveryStatusPage = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span
-                    className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs ${
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-black text-xs ${
                       isCompleted
                         ? 'bg-emerald-500 text-white'
                         : isCurrent
@@ -101,16 +101,16 @@ const UpdateDeliveryStatusPage = () => {
         </div>
 
         {/* Action Button */}
-        <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-between">
+        <div className="pt-4 border-t border-[#E7EAF0] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div>
-            <span className="text-xs font-bold text-[#64748B] block">Current Active Stage</span>
-            <span className="text-sm font-extrabold text-[#0F172A]">{steps[currentStepIndex].title}</span>
+            <span className="text-[11px] sm:text-xs font-bold text-[#64748B] block">Current Active Stage</span>
+            <span className="text-xs sm:text-sm font-extrabold text-[#0F172A]">{steps[currentStepIndex].title}</span>
           </div>
 
           <button
             disabled={currentStepIndex === steps.length - 1}
             onClick={handleAdvanceStatus}
-            className={`px-6 py-2.5 rounded-xl text-xs font-extrabold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer ${
+            className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer ${
               currentStepIndex === steps.length - 1
                 ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
                 : 'bg-emerald-500 hover:bg-emerald-600 text-white'
@@ -121,21 +121,21 @@ const UpdateDeliveryStatusPage = () => {
                 ? 'Delivery Completed'
                 : `Update Status to "${steps[currentStepIndex + 1].title}"`}
             </span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>
 
       {/* Success Confirmation Modal */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl max-w-md w-full p-6 animate-scale-up text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10" />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
+          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-6 animate-scale-up text-center space-y-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
             </div>
 
             <div>
-              <h3 className="text-xl font-black text-[#0F172A]">Delivery Complete!</h3>
+              <h3 className="text-lg sm:text-xl font-black text-[#0F172A]">Delivery Complete!</h3>
               <p className="text-xs text-[#64748B] mt-1">
                 Order <span className="font-bold text-[#0F172A]">ASN-701</span> has been successfully handed over to Hope Community Kitchen.
               </p>

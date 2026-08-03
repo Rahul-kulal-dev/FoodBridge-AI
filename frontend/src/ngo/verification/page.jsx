@@ -45,16 +45,16 @@ const NgoVerificationPage = () => {
   ];
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-5 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
               NGO Verification & Compliance
             </h1>
             {verificationStatus === 'Approved' && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 w-fit">
                 <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
                 Verified NGO
               </span>
@@ -66,20 +66,20 @@ const NgoVerificationPage = () => {
         </div>
 
         {/* Verification Badges Selector */}
-        <div className="flex items-center gap-2 bg-[#f7f8fb] p-1.5 rounded-xl border border-[#E7EAF0]">
+        <div className="grid grid-cols-3 sm:flex items-center gap-1 sm:gap-2 bg-[#f7f8fb] p-1.5 rounded-xl border border-[#E7EAF0] w-full sm:w-auto shrink-0">
           <button
             onClick={() => setVerificationStatus('Approved')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center truncate ${
               verificationStatus === 'Approved'
                 ? 'bg-emerald-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
             }`}
           >
-            Approved Badge
+            Approved
           </button>
           <button
             onClick={() => setVerificationStatus('Pending')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center truncate ${
               verificationStatus === 'Pending'
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
@@ -89,7 +89,7 @@ const NgoVerificationPage = () => {
           </button>
           <button
             onClick={() => setVerificationStatus('Rejected')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-center truncate ${
               verificationStatus === 'Rejected'
                 ? 'bg-rose-500 text-white shadow-xs'
                 : 'text-[#64748B] hover:text-[#0F172A]'
@@ -102,12 +102,12 @@ const NgoVerificationPage = () => {
 
       {/* Verification Status Overview Banner */}
       {verificationStatus === 'Approved' && (
-        <div className="bg-emerald-50/70 border border-emerald-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
-            <ShieldCheck className="w-6 h-6" />
+        <div className="bg-emerald-50/70 border border-emerald-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
+            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-2">
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex flex-wrap items-center gap-2">
               Verification Tier 1 Active
               <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
                 Green Badge Granted
@@ -121,12 +121,12 @@ const NgoVerificationPage = () => {
       )}
 
       {verificationStatus === 'Pending' && (
-        <div className="bg-amber-50/70 border border-amber-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-amber-btn">
-            <Clock className="w-6 h-6 animate-pulse" />
+        <div className="bg-amber-50/70 border border-amber-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-amber-btn">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A]">Verification Under Review</h3>
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">Verification Under Review</h3>
             <p className="text-xs text-[#334155] mt-0.5 font-medium">
               Our compliance team is auditing your uploaded documents. Approval usually completes within 2-4 business hours.
             </p>
@@ -135,12 +135,12 @@ const NgoVerificationPage = () => {
       )}
 
       {verificationStatus === 'Rejected' && (
-        <div className="bg-rose-50/70 border border-rose-200 p-5 rounded-2xl flex items-center gap-4 shadow-soft-card">
-          <div className="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0">
-            <AlertCircle className="w-6 h-6" />
+        <div className="bg-rose-50/70 border border-rose-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-4 shadow-soft-card">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0">
+            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-extrabold text-[#0F172A]">Document Verification Action Needed</h3>
+            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">Document Verification Action Needed</h3>
             <p className="text-xs text-[#334155] mt-0.5 font-medium">
               Your registered office address proof was expired. Please upload a recent utility bill (less than 3 months old).
             </p>
@@ -149,32 +149,32 @@ const NgoVerificationPage = () => {
       )}
 
       {/* Document Upload Grid */}
-      <div className="bg-white rounded-2xl border border-[#E7EAF0] p-6 shadow-soft-card">
-        <div className="mb-6">
-          <h2 className="text-lg font-extrabold text-[#0F172A]">Mandatory Compliance Documents</h2>
+      <div className="bg-white rounded-2xl border border-[#E7EAF0] p-4 sm:p-6 shadow-soft-card">
+        <div className="mb-5 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Mandatory Compliance Documents</h2>
           <p className="text-xs text-[#64748B] mt-0.5">
             Supported formats: PDF, PNG, JPG (Max file size: 10 MB each)
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {docFields.map((field) => {
             const doc = documents[field.key];
             return (
               <div
                 key={field.key}
-                className="p-4 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] flex flex-col justify-between space-y-3"
+                className="p-3.5 sm:p-4 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] flex flex-col justify-between space-y-3"
               >
                 <div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <h3 className="text-xs font-extrabold text-[#0F172A]">{field.label}</h3>
                     {doc ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         Uploaded
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
                         Required
                       </span>
                     )}
@@ -183,7 +183,7 @@ const NgoVerificationPage = () => {
                 </div>
 
                 {doc ? (
-                  <div className="p-3 rounded-lg bg-white border border-[#E7EAF0] flex items-center justify-between">
+                  <div className="p-3 rounded-lg bg-white border border-[#E7EAF0] flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <FileCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                       <div className="min-w-0">
@@ -192,7 +192,7 @@ const NgoVerificationPage = () => {
                       </div>
                     </div>
 
-                    <label className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 cursor-pointer border border-emerald-200 transition-colors">
+                    <label className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-emerald-600 hover:bg-emerald-50 cursor-pointer border border-emerald-200 transition-colors shrink-0 whitespace-nowrap">
                       Re-upload
                       <input
                         type="file"
@@ -203,7 +203,7 @@ const NgoVerificationPage = () => {
                     </label>
                   </div>
                 ) : (
-                  <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 p-4 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors bg-white">
+                  <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 p-4 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-colors bg-white text-center">
                     <UploadCloud className="w-6 h-6 text-emerald-600 mb-1" />
                     <span className="text-xs font-bold text-[#0F172A]">Click to upload document</span>
                     <span className="text-[10px] text-[#64748B]">PDF or Image up to 10MB</span>
@@ -220,13 +220,13 @@ const NgoVerificationPage = () => {
           })}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-[#E7EAF0] flex items-center justify-between">
+        <div className="mt-6 sm:mt-8 pt-4 border-t border-[#E7EAF0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 sm:gap-4">
           <p className="text-xs text-[#64748B] font-medium">
             All submitted files are encrypted and processed in compliance with FSSAI regulations.
           </p>
           <button
             onClick={() => setVerificationStatus('Pending')}
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer text-center"
           >
             Submit Credentials for Verification
           </button>

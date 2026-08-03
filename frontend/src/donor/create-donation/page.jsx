@@ -99,13 +99,13 @@ const CreateDonationPage = () => {
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
-            <PlusCircle className="w-6 h-6" />
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-500/10 text-emerald-600 shrink-0">
+            <PlusCircle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
+            <h1 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
               Create Surplus Food Listing
             </h1>
           </div>
@@ -547,18 +547,16 @@ const CreateDonationPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-xs shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-emerald-200/60">
+            <div className="grid grid-cols-3 gap-2 text-center text-xs shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-emerald-200/60">
               <div className="text-center">
                 <p className="text-[10px] text-slate-500 font-medium">Predicted Match</p>
                 <p className="font-extrabold text-[#0F172A]">High (98%)</p>
               </div>
-              <div className="h-6 w-px bg-emerald-200"></div>
-              <div className="text-center">
-                <p className="text-[10px] text-slate-500 font-medium">Est. Pickup Window</p>
+              <div className="text-center border-l border-emerald-200 pl-2">
+                <p className="text-[10px] text-slate-500 font-medium">Est. Pickup</p>
                 <p className="font-extrabold text-[#0F172A]">2 – 4 Hours</p>
               </div>
-              <div className="h-6 w-px bg-emerald-200"></div>
-              <div className="text-center">
+              <div className="text-center border-l border-emerald-200 pl-2">
                 <p className="text-[10px] text-slate-500 font-medium">Expiry Risk</p>
                 <p className="font-extrabold text-emerald-600">Low</p>
               </div>
