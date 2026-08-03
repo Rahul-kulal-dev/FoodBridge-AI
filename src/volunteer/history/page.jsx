@@ -61,13 +61,13 @@ const DeliveryHistoryPage = () => {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto overflow-x-auto scrollbar-none">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           <span className="text-xs font-bold text-[#64748B] shrink-0 mr-1">Status:</span>
           {['All', 'Delivered', 'Cancelled', 'Expired'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 statusFilter === st
                   ? 'bg-emerald-500 text-white shadow-xs'
                   : 'bg-slate-100 text-[#64748B] hover:bg-slate-200'

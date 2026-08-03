@@ -66,12 +66,12 @@ const VolunteerNotificationsPage = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-xs scrollbar-none">
+      <div className="bg-white p-3 sm:p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-wrap items-center gap-2 text-xs">
         {['All', 'Unread', 'Assignments', 'Verification', 'Navigation'].map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`px-3.5 py-2 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap ${
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl font-bold transition-all cursor-pointer ${
               activeFilter === filter
                 ? 'bg-emerald-500 text-white shadow-emerald-btn'
                 : 'bg-slate-100 text-[#64748B] hover:bg-slate-200'
