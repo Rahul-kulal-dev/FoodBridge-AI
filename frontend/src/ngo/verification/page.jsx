@@ -74,14 +74,14 @@ const NgoVerificationPage = () => {
       if (res.ok) {
         setUploadMessage({
           type: 'success',
-          text: `${docLabel} uploaded to Cloudinary & saved to MongoDB! Status reset to Pending Review.`,
+          text: `${docLabel} uploaded successfully!`,
         });
         await fetchProfile();
       } else {
         setUploadMessage({ type: 'error', text: data.message || 'Failed to upload document' });
       }
     } catch (err) {
-      setUploadMessage({ type: 'error', text: 'Server error uploading file to Cloudinary' });
+      setUploadMessage({ type: 'error', text: 'Server error uploading file' });
     } finally {
       setUploadingKey(null);
     }
@@ -89,7 +89,7 @@ const NgoVerificationPage = () => {
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 animate-fade-in pb-16">
-      {/* Page Header - Matching Donor Verification Style */}
+      {/* Page Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20 shrink-0">
@@ -100,7 +100,7 @@ const NgoVerificationPage = () => {
               NGO Verification
             </h1>
             <p className="text-xs sm:text-sm text-[#64748B] font-medium">
-              Upload mandatory compliance documents saved to Cloudinary & MongoDB
+              Complete your verification to accept surplus food donations
             </p>
           </div>
         </div>
@@ -121,22 +121,6 @@ const NgoVerificationPage = () => {
         </span>
       </div>
 
-      {/* Rejection Alert Box - Matching Donor Verification Style */}
-      {isRejected && (
-        <div className="bg-rose-50 border-2 border-rose-200 p-5 rounded-3xl space-y-2">
-          <div className="flex items-center gap-2 text-rose-700 font-extrabold text-sm sm:text-base">
-            <AlertTriangle className="w-5 h-5" />
-            <span>Verification Rejected by Admin</span>
-          </div>
-          <p className="text-xs text-rose-800 font-medium leading-relaxed">
-            <strong>Reason for Rejection:</strong> {rejectionReason || 'Document incomplete or illegible. Please re-upload clear mandatory document.'}
-          </p>
-          <p className="text-xs text-rose-600 font-bold pt-1">
-            Please re-upload rejected or missing documents below. Re-uploading will automatically set your status to Pending Review.
-          </p>
-        </div>
-      )}
-
       {/* Upload Success Message Toast */}
       {uploadMessage && (
         <div
@@ -156,7 +140,7 @@ const NgoVerificationPage = () => {
         </div>
       )}
 
-      {/* Verification Status Banner Card - Matching Donor Verification Style */}
+      {/* Verification Status Banner Card */}
       <div className="bg-white p-5 sm:p-7 rounded-3xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between relative overflow-hidden">
         <div className="space-y-2">
           <span className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-widest block">
@@ -205,6 +189,19 @@ const NgoVerificationPage = () => {
         </div>
       </div>
 
+      {/* Rejection Alert Box */}
+      {isRejected && (
+        <div className="bg-rose-50 border-2 border-rose-200 p-5 rounded-3xl space-y-1.5">
+          <div className="flex items-center gap-2 text-rose-700 font-extrabold text-sm sm:text-base">
+            <AlertTriangle className="w-5 h-5" />
+            <span>Verification Rejected by Admin</span>
+          </div>
+          <p className="text-xs text-rose-800 font-medium leading-relaxed">
+            <strong>Reason for Rejection:</strong> {rejectionReason || 'Document incomplete or illegible. Please re-upload clear mandatory document.'}
+          </p>
+        </div>
+      )}
+
       {/* Mandatory Document Upload Grid */}
       <div className="bg-white p-5 sm:p-7 rounded-3xl border border-[#E7EAF0] shadow-soft-card space-y-5">
         <div className="flex items-center justify-between border-b border-[#E7EAF0] pb-4">
@@ -213,7 +210,7 @@ const NgoVerificationPage = () => {
               Mandatory Compliance Documents
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Supported formats: PDF, PNG, JPG (Max 10MB). Uploaded docs stored in Cloudinary.
+              Supported formats: PDF, PNG, JPG (Max 10MB)
             </p>
           </div>
 
@@ -245,7 +242,7 @@ const NgoVerificationPage = () => {
                     {doc ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        Uploaded to Cloudinary
+                        Uploaded
                       </span>
                     ) : (
                       <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 shrink-0">
@@ -265,7 +262,7 @@ const NgoVerificationPage = () => {
                           {doc.fileName || `${field.key}.pdf`}
                         </p>
                         <p className="text-[10px] text-[#64748B]">
-                          {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'Stored in MongoDB'}
+                          {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString() : 'Uploaded'}
                         </p>
                       </div>
                     </div>
@@ -306,7 +303,7 @@ const NgoVerificationPage = () => {
                       <UploadCloud className="w-6 h-6 text-emerald-600 mb-1" />
                     )}
                     <span className="text-xs font-extrabold text-[#0F172A]">
-                      {isUploading ? 'Uploading to Cloudinary...' : `Upload ${field.label}`}
+                      {isUploading ? 'Uploading...' : `Upload ${field.label}`}
                     </span>
                     <span className="text-[10px] text-[#64748B]">PDF, PNG, JPG up to 10MB</span>
                     <input
