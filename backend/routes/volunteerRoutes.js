@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getVolunteerStats,
   getAssignedTasks,
   uploadPickupVerification,
   updateTaskStatus,
@@ -9,6 +10,7 @@ const {
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
+router.get('/stats', protect, authorizeRoles('volunteer', 'admin'), getVolunteerStats);
 router.get('/tasks', protect, authorizeRoles('volunteer', 'admin'), getAssignedTasks);
 router.post(
   '/tasks/:id/pickup-verification',

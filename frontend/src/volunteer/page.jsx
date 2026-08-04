@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Package,
   Navigation,
@@ -10,38 +10,107 @@ import {
   Star,
   ChevronRight,
   Eye,
-  Truck,
-  Building2
+  Building2,
+  Loader2
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import volunteerData from './data/volunteerData.json';
+import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../config/api';
 
 /**
  * Volunteer Dashboard Overview Page (/volunteer)
+ * Connects directly to MongoDB database for volunteer assignments & stats.
  */
 const VolunteerDashboardPage = () => {
   const navigate = useNavigate();
-  const [assignments, setAssignments] = useState(volunteerData.assignments);
+  const { user, token } = useAuth();
+
+  const [statsData, setStatsData] = useState({
+    totalDeliveries: 0,
+    activeTasks: 0,
+    todayPickups: 0,
+    rating: '4.9',
+  });
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) return;
+      setLoading(true);
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [statsRes, tasksRes] = await Promise.all([
+          fetch(getApiUrl('/api/volunteer/stats'), { headers }),
+          fetch(getApiUrl('/api/volunteer/tasks'), { headers }),
+        ]);
+
+        const statsJson = await statsRes.json();
+        const tasksJson = await tasksRes.json();
+
+        if (statsRes.ok && statsJson.stats) {
+          setStatsData(statsJson.stats);
+        }
+
+        if (tasksRes.ok) {
+          const rawTasks = tasksJson.tasks || [];
+          const rawDonations = tasksJson.donations || [];
+
+          if (rawTasks.length > 0) {
+            const formatted = rawTasks.map((t, idx) => ({
+              id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : `TSK-00${idx + 1}`,
+              mongoId: t._id,
+              foodName: t.donationId?.title || 'Surplus Food Package',
+              donorName: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Food Donor',
+              ngoName: t.ngoId?.organizationName || t.ngoId?.name || 'Partner NGO',
+              pickupDeadline: t.pickupDeadline ? new Date(t.pickupDeadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Flexible Pickup',
+              status: t.status === 'picked_up' ? 'In Transit' : t.status === 'delivered' ? 'Delivered' : 'Assigned',
+            }));
+            setAssignments(formatted);
+          } else if (rawDonations.length > 0) {
+            const formatted = rawDonations.map((d, idx) => ({
+              id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : `DON-00${idx + 1}`,
+              mongoId: d._id,
+              foodName: d.title || `${d.foodType} (${d.quantity} ${d.unit})`,
+              donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
+              ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Partner NGO',
+              pickupDeadline: d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today',
+              status: d.status === 'picked_up' ? 'In Transit' : 'Assigned',
+            }));
+            setAssignments(formatted);
+          } else {
+            setAssignments([]);
+          }
+        }
+      } catch (err) {
+        console.warn('Error fetching volunteer dashboard data from MongoDB:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   const stats = [
     {
       label: 'DELIVERIES COMPLETED',
-      value: volunteerData.profile.totalDeliveries,
+      value: statsData.totalDeliveries,
       icon: CheckCircle2,
     },
     {
       label: 'ACTIVE ASSIGNMENTS',
-      value: assignments.length,
+      value: assignments.length || statsData.activeTasks,
       icon: Package,
     },
     {
       label: "TODAY'S PICKUPS",
-      value: '3',
+      value: statsData.todayPickups,
       icon: Clock,
     },
     {
       label: 'AVG DELIVERY RATING',
-      value: `${volunteerData.profile.rating} ★`,
+      value: `${statsData.rating} ★`,
       icon: Star,
     },
   ];
@@ -52,11 +121,11 @@ const VolunteerDashboardPage = () => {
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-            Welcome back, <span className="text-emerald-600">{volunteerData.profile.name}</span>
+            Welcome back, <span className="text-emerald-600">{user?.name || 'Volunteer'}</span>
           </h1>
           <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
             <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
-            Verified Volunteer Badge
+            Verified Volunteer Courier
           </span>
         </div>
 
@@ -79,7 +148,7 @@ const VolunteerDashboardPage = () => {
         </div>
       </div>
 
-      {/* Statistics Cards - 2 Grid Columns on Mobile, 4 on Desktop */}
+      {/* Statistics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {stats.map((stat, idx) => {
           const IconComponent = stat.icon;
@@ -113,7 +182,7 @@ const VolunteerDashboardPage = () => {
             <Sparkles className="w-4 h-4 fill-emerald-600" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-[#0F172A]">
-            <span className="text-emerald-700 font-extrabold">Today's Assignment:</span> 3 food pickups are assigned today.
+            <span className="text-emerald-700 font-extrabold">Today's Assignments:</span> {assignments.length} food pickups active in MongoDB database.
           </p>
         </div>
 
@@ -138,7 +207,7 @@ const VolunteerDashboardPage = () => {
         <div className="p-4 sm:p-6 border-b border-[#E7EAF0] flex items-center justify-between gap-2">
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Assigned Pickup Schedule</h2>
-            <p className="text-[11px] sm:text-xs text-[#64748B] mt-0.5">Real-time assigned surplus food pickups & destinations</p>
+            <p className="text-[11px] sm:text-xs text-[#64748B] mt-0.5">Real-time assigned surplus food pickups & destinations fetched from MongoDB</p>
           </div>
           <Link
             to="/volunteer/assignments"
@@ -149,85 +218,28 @@ const VolunteerDashboardPage = () => {
           </Link>
         </div>
 
-        {/* Mobile View: Cards Layout (< 768px) */}
-        <div className="block md:hidden divide-y divide-[#E7EAF0]">
-          {assignments.map((item) => (
-            <div key={item.id} className="p-4 space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-extrabold text-[#0F172A] text-xs px-2.5 py-1 bg-slate-100 rounded-lg">
-                  {item.id}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    item.status === 'In Transit'
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                      : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                  }`}
-                >
-                  {item.status}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="font-extrabold text-sm text-[#0F172A]">{item.foodName}</h3>
-                <div className="mt-1.5 space-y-1 text-xs text-[#64748B]">
-                  <p className="flex items-center gap-1 text-slate-700 font-medium">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="font-semibold text-[#0F172A]">From:</span> {item.donorName}
-                  </p>
-                  <p className="flex items-center gap-1 text-slate-700 font-medium">
-                    <Building2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span className="font-semibold text-[#0F172A]">To:</span> {item.ngoName}
-                  </p>
-                  <p className="text-[11px] text-amber-600 font-bold pt-0.5">
-                    Pickup Deadline: {item.pickupDeadline}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-1">
-                <button
-                  onClick={() => navigate('/volunteer/assignments')}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 font-bold transition-all border border-transparent hover:border-emerald-200 text-xs cursor-pointer"
-                >
-                  <Eye className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>View Details</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop View: Table Layout (>= 768px) */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#f7f8fb] text-[11px] font-bold text-[#64748B] uppercase tracking-wider border-b border-[#E7EAF0]">
-                <th className="py-3.5 px-6">Assignment ID</th>
-                <th className="py-3.5 px-6">Food</th>
-                <th className="py-3.5 px-6">Pickup Location</th>
-                <th className="py-3.5 px-6">Destination NGO</th>
-                <th className="py-3.5 px-6">Pickup Time</th>
-                <th className="py-3.5 px-6">Status</th>
-                <th className="py-3.5 px-6 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E7EAF0] text-xs font-medium text-[#334155]">
+        {loading ? (
+          <div className="p-8 text-center space-y-2">
+            <Loader2 className="w-6 h-6 text-emerald-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 font-medium">Fetching assigned pickups from MongoDB...</p>
+          </div>
+        ) : assignments.length === 0 ? (
+          <div className="p-8 text-center space-y-2 bg-slate-50">
+            <Package className="w-8 h-8 text-slate-400 mx-auto" />
+            <p className="text-xs font-bold text-slate-700">No active pickup assignments found in MongoDB database.</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile View */}
+            <div className="block md:hidden divide-y divide-[#E7EAF0]">
               {assignments.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-4 px-6 font-bold text-[#0F172A]">{item.id}</td>
-                  <td className="py-4 px-6 font-semibold text-[#0F172A]">{item.foodName}</td>
-                  <td className="py-4 px-6">
-                    <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
-                      <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      {item.donorName}
+                <div key={item.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-extrabold text-[#0F172A] text-xs px-2.5 py-1 bg-slate-100 rounded-lg">
+                      {item.id}
                     </span>
-                  </td>
-                  <td className="py-4 px-6 font-medium text-[#0F172A]">{item.ngoName}</td>
-                  <td className="py-4 px-6 text-[#64748B]">{item.pickupDeadline}</td>
-                  <td className="py-4 px-6">
                     <span
-                      className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                      className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         item.status === 'In Transit'
                           ? 'bg-amber-50 text-amber-700 border border-amber-200'
                           : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
@@ -235,21 +247,92 @@ const VolunteerDashboardPage = () => {
                     >
                       {item.status}
                     </span>
-                  </td>
-                  <td className="py-4 px-6 text-right">
+                  </div>
+
+                  <div>
+                    <h3 className="font-extrabold text-sm text-[#0F172A]">{item.foodName}</h3>
+                    <div className="mt-1.5 space-y-1 text-xs text-[#64748B]">
+                      <p className="flex items-center gap-1 text-slate-700 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="font-semibold text-[#0F172A]">From:</span> {item.donorName}
+                      </p>
+                      <p className="flex items-center gap-1 text-slate-700 font-medium">
+                        <Building2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span className="font-semibold text-[#0F172A]">To:</span> {item.ngoName}
+                      </p>
+                      <p className="text-[11px] text-amber-600 font-bold pt-0.5">
+                        Pickup Deadline: {item.pickupDeadline}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-1">
                     <button
                       onClick={() => navigate('/volunteer/assignments')}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 font-bold transition-all border border-transparent hover:border-emerald-200 cursor-pointer text-xs"
+                      className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 font-bold transition-all border border-transparent hover:border-emerald-200 text-xs cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5 text-emerald-600" />
                       <span>View Details</span>
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#f7f8fb] text-[11px] font-bold text-[#64748B] uppercase tracking-wider border-b border-[#E7EAF0]">
+                    <th className="py-3.5 px-6">Assignment ID</th>
+                    <th className="py-3.5 px-6">Food</th>
+                    <th className="py-3.5 px-6">Pickup Location</th>
+                    <th className="py-3.5 px-6">Destination NGO</th>
+                    <th className="py-3.5 px-6">Pickup Time</th>
+                    <th className="py-3.5 px-6">Status</th>
+                    <th className="py-3.5 px-6 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E7EAF0] text-xs font-medium text-[#334155]">
+                  {assignments.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-4 px-6 font-bold text-[#0F172A]">{item.id}</td>
+                      <td className="py-4 px-6 font-semibold text-[#0F172A]">{item.foodName}</td>
+                      <td className="py-4 px-6">
+                        <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          {item.donorName}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 font-medium text-[#0F172A]">{item.ngoName}</td>
+                      <td className="py-4 px-6 text-[#64748B]">{item.pickupDeadline}</td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                            item.status === 'In Transit'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <button
+                          onClick={() => navigate('/volunteer/assignments')}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-[#0F172A] hover:text-emerald-700 font-bold transition-all border border-transparent hover:border-emerald-200 cursor-pointer text-xs"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>View Details</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

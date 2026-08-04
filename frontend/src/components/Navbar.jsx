@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, Menu, X, ArrowRight, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Leaf, Menu, X, ArrowRight, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -16,6 +20,16 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const isLoggedIn = Boolean(token && user);
+  const userRole = user?.user_role || user?.role || 'donor';
+
+  const getDashboardRoute = () => {
+    if (userRole === 'admin') return '/admin';
+    if (userRole === 'ngo') return '/ngo';
+    if (userRole === 'volunteer') return '/volunteer';
+    return '/donor';
+  };
 
   const navLinks = [
     { name: 'Features', href: '#features' },
@@ -35,14 +49,14 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2.5 group">
+          <Link to="/" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 transition-transform group-hover:scale-105">
               <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
             </div>
             <span className="text-xl font-extrabold text-[#0F172A] tracking-tight">
               FoodBridge <span className="text-emerald-600 font-black">AI</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8">
@@ -59,19 +73,40 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
 
           {/* Desktop Right Side CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={() => onOpenAuthModal('login')}
-              className="text-sm font-semibold text-[#334155] hover:text-[#0F172A] px-3 py-2 transition-colors cursor-pointer"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => onOpenDonateModal('register')}
-              className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <span>Register</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={logout}
+                  className="text-sm font-semibold text-slate-600 hover:text-rose-600 px-3 py-2 transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+                <Link
+                  to={getDashboardRoute()}
+                  className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Go to Dashboard</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => onOpenAuthModal('login')}
+                  className="text-sm font-semibold text-[#334155] hover:text-[#0F172A] px-3 py-2 transition-colors cursor-pointer"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => onOpenDonateModal('register')}
+                  className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <span>Register</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Toggle Button */}
@@ -101,25 +136,50 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
             </a>
           ))}
           <div className="pt-3 flex flex-col gap-2.5">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuthModal('login');
-              }}
-              className="w-full text-center font-semibold text-[#334155] bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl transition-colors"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenDonateModal('register');
-              }}
-              className="w-full text-center font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl shadow-emerald-btn transition-all flex items-center justify-center gap-2"
-            >
-              <span>Register</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isLoggedIn ? (
+              <>
+                <Link
+                  to={getDashboardRoute()}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl shadow-emerald-btn transition-all flex items-center justify-center gap-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Go to Dashboard</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full text-center font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuthModal('login');
+                  }}
+                  className="w-full text-center font-semibold text-[#334155] bg-slate-100 hover:bg-slate-200 py-2.5 rounded-xl transition-colors"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenDonateModal('register');
+                  }}
+                  className="w-full text-center font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl shadow-emerald-btn transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Register</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

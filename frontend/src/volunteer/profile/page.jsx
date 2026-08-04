@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   User,
   Mail,
@@ -13,14 +13,88 @@ import {
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
-import volunteerData from '../data/volunteerData.json';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Volunteer Profile Page (/volunteer/profile)
+ * Connects to MongoDB database for real volunteer profile information and feedback.
  */
 const VolunteerProfilePage = () => {
-  const [profile, setProfile] = useState({ ...volunteerData.profile });
+  const { user, token, updateUser } = useAuth();
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [profile, setProfile] = useState({
+    name: user?.name || 'Volunteer Courier',
+    email: user?.email || '',
+    phone: user?.phone || '+91 98765 43210',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    verificationStatus: user?.verificationStatus === 'approved' ? 'Verified NGO Partner' : 'Verified Volunteer Courier',
+    joinedDate: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'January 2024',
+    vehicleType: 'Delivery Van',
+    vehicleNumber: 'KA-05-EV-4821',
+    emergencyContact: '+91 91234 56789',
+    deliveryRadius: '10 km',
+    availability: 'Mon - Sat (8 AM - 6 PM)',
+    totalDeliveries: 0,
+  });
+
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [averages, setAverages] = useState({
+    punctuality: 5,
+    foodHandling: 5,
+    professionalism: 5,
+    overall: 5,
+  });
+
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+        verificationStatus: user.verificationStatus === 'approved' ? 'Verified NGO Partner' : 'Verified Volunteer Courier',
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const fetchVolunteerFeedback = async () => {
+      try {
+        const authToken = token || localStorage.getItem('foodbridge_token');
+        if (!authToken) return;
+
+        const [feedRes, statsRes] = await Promise.all([
+          fetch(getApiUrl('/api/feedback/volunteer'), {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+          fetch(getApiUrl('/api/volunteer/stats'), {
+            headers: { Authorization: `Bearer ${authToken}` },
+          }),
+        ]);
+
+        const feedData = await feedRes.json();
+        const statsData = await statsRes.json();
+
+        if (feedRes.ok && feedData.feedbacks) {
+          setFeedbacks(feedData.feedbacks);
+          if (feedData.averages) {
+            setAverages(feedData.averages);
+          }
+        }
+
+        if (statsRes.ok && statsData.stats) {
+          setProfile((prev) => ({
+            ...prev,
+            totalDeliveries: statsData.stats.totalDeliveries || 0,
+          }));
+        }
+      } catch (err) {
+        console.warn('Error fetching volunteer profile feedback:', err);
+      }
+    };
+    fetchVolunteerFeedback();
+  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,38 +106,6 @@ const VolunteerProfilePage = () => {
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3000);
   };
-
-  const { token } = useAuth ? useAuth() : { token: null };
-  const [feedbacks, setFeedbacks] = useState([]);
-  const [averages, setAverages] = useState({
-    punctuality: 5,
-    foodHandling: 5,
-    professionalism: 5,
-    overall: 5,
-  });
-
-  useEffect(() => {
-    const fetchVolunteerFeedback = async () => {
-      try {
-        const authToken = token || localStorage.getItem('token');
-        if (!authToken) return;
-
-        const res = await fetch(getApiUrl('/api/feedback/volunteer'), {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        const data = await res.json();
-        if (res.ok && data.feedbacks) {
-          setFeedbacks(data.feedbacks);
-          if (data.averages) {
-            setAverages(data.averages);
-          }
-        }
-      } catch (err) {
-        console.warn('Error fetching volunteer ratings:', err);
-      }
-    };
-    fetchVolunteerFeedback();
-  }, [token]);
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
@@ -131,12 +173,12 @@ const VolunteerProfilePage = () => {
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Compliance Status</span>
-            <p className="text-xs font-black text-emerald-700">Level 1 Verified Partner</p>
+            <p className="text-xs font-black text-emerald-700">Verified Volunteer Courier</p>
           </div>
         </div>
       </div>
 
-      {/* Volunteer Ratings Breakdown (Evaluated by NGOs) */}
+      {/* Volunteer Ratings Breakdown */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
         <div className="flex items-center justify-between border-b border-[#E7EAF0] pb-3">
           <div>
@@ -179,7 +221,6 @@ const VolunteerProfilePage = () => {
           </div>
         )}
       </div>
-
 
       {/* Editable Profile Form */}
       <form onSubmit={handleSave} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4 sm:space-y-6">
