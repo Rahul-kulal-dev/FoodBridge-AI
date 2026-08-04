@@ -12,15 +12,20 @@ import {
   Loader2
 } from 'lucide-react';
 
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl, getImageUrl } from '../../config/api';
+import FileViewerModal from '../../components/FileViewerModal';
+
 /**
- * Admin Verification Management Page (/admin/verifications)
- * Displays real user verification data directly from MongoDB Atlas backend.
- * Zero dummy data fallback.
+ * Admin Pending Verifications Page (/admin/verifications)
+ * Connected directly to MongoDB Atlas database.
+ * On Approve / Reject: updates user in MongoDB Atlas database, sends notifications.
  */
 const AdminVerificationsPage = () => {
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected'
+  const { token, user: loggedInUser, updateUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' | 'approved' | 'rejected'
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDocModal, setActiveDocModal] = useState(null);
   const [rejectModalUser, setRejectModalUser] = useState(null);
@@ -30,27 +35,31 @@ const AdminVerificationsPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/users', {
+      const res = await fetch(getApiUrl('/api/admin/users'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
 
       if (res.ok && data.users) {
-        // Show users who have verification documents uploaded or explicitly have a verification status
-        const verifiableUsers = data.users.filter(
-          (u) =>
+        // Show non-admin users who have verification documents uploaded or explicitly have a verification status
+        const verifiableUsers = data.users.filter((u) => {
+          const userRole = u.user_role || u.role;
+          if (userRole === 'admin' || u.role === 'admin') return false;
+
+          return (
             (u.verificationDocs && u.verificationDocs.length > 0) ||
             u.verificationStatus === 'pending' ||
             u.verificationStatus === 'approved' ||
             u.verificationStatus === 'rejected'
-        );
+          );
+        });
         setUsers(verifiableUsers);
       } else {
+
         setUsers([]);
       }
     } catch (err) {
-      console.warn('Error fetching verification users:', err.message);
+      console.warn('Error fetching verification users from MongoDB Atlas:', err.message);
       setUsers([]);
     } finally {
       setLoading(false);
@@ -59,13 +68,12 @@ const AdminVerificationsPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [token]);
 
   const handleApprove = async (userId) => {
     setActionLoading(userId);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/approve`, {
+      const res = await fetch(getApiUrl(`/api/admin/users/${userId}/approve`), {
         method: 'PATCH',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -74,15 +82,9 @@ const AdminVerificationsPage = () => {
         setUsers((prev) =>
           prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'approved', rejectionReason: '' } : u))
         );
-        // Also update local storage if approving current logged in user
-        const currentUserStr = localStorage.getItem('user');
-        if (currentUserStr) {
-          const currentUser = JSON.parse(currentUserStr);
-          if (currentUser._id === userId) {
-            currentUser.verificationStatus = 'approved';
-            currentUser.rejectionReason = '';
-            localStorage.setItem('user', JSON.stringify(currentUser));
-          }
+        // Also update AuthContext if approving current logged in user
+        if (loggedInUser && loggedInUser._id === userId) {
+          updateUser({ ...loggedInUser, verificationStatus: 'approved', rejectionReason: '' });
         }
       }
     } catch (err) {
@@ -103,8 +105,7 @@ const AdminVerificationsPage = () => {
     setActionLoading(userId);
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/reject`, {
+      const res = await fetch(getApiUrl(`/api/admin/users/${userId}/reject`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -117,15 +118,9 @@ const AdminVerificationsPage = () => {
         setUsers((prev) =>
           prev.map((u) => (u._id === userId ? { ...u, verificationStatus: 'rejected', rejectionReason: rejectionReasonText } : u))
         );
-        // Update local storage if rejecting current logged in user
-        const currentUserStr = localStorage.getItem('user');
-        if (currentUserStr) {
-          const currentUser = JSON.parse(currentUserStr);
-          if (currentUser._id === userId) {
-            currentUser.verificationStatus = 'rejected';
-            currentUser.rejectionReason = rejectionReasonText;
-            localStorage.setItem('user', JSON.stringify(currentUser));
-          }
+        // Update AuthContext if rejecting current logged in user
+        if (loggedInUser && loggedInUser._id === userId) {
+          updateUser({ ...loggedInUser, verificationStatus: 'rejected', rejectionReason: rejectionReasonText });
         }
       }
     } catch (err) {
@@ -379,75 +374,17 @@ const AdminVerificationsPage = () => {
       )}
 
       {/* Document View Preview Modal */}
-      {activeDocModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-[#E7EAF0] space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-900 text-base">
-                  Verification Documents - {activeDocModal.organizationName || activeDocModal.name}
-                </h3>
-              </div>
-              <button
-                onClick={() => setActiveDocModal(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <p className="text-slate-500 font-medium">Submitted Compliance Files:</p>
-                {activeDocModal.verificationDocs && activeDocModal.verificationDocs.length > 0 ? (
-                  activeDocModal.verificationDocs.map((doc, idx) => {
-                    const rawUrl = typeof doc === 'string' ? doc : doc.docUrl || '';
-                    const fileBasename = rawUrl ? rawUrl.split('/').pop() : `Compliance_Document_${idx + 1}.pdf`;
-                    const isPdf = fileBasename.toLowerCase().endsWith('.pdf');
-                    const fullUrl = rawUrl
-                      ? rawUrl.startsWith('http')
-                        ? rawUrl
-                        : `http://localhost:5000${rawUrl}`
-                      : '#';
-
-                    return (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
-                        <span className="font-mono font-bold text-slate-800 truncate max-w-[220px]">
-                          {fileBasename}
-                        </span>
-                        {fullUrl && fullUrl !== '#' && (
-                          <a
-                            href={fullUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg text-xs transition-all flex items-center gap-1 border border-emerald-200"
-                          >
-                            Open File  →
-                          </a>
-                        )}
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-slate-500 font-medium italic">No document file attached</p>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setActiveDocModal(null)}
-                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-emerald-btn"
-              >
-                Close Preview
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FileViewerModal
+        isOpen={!!activeDocModal}
+        onClose={() => setActiveDocModal(null)}
+        docs={activeDocModal?.verificationDocs || []}
+        doc={activeDocModal}
+        title={`Verification Documents — ${activeDocModal?.organizationName || activeDocModal?.name || ''}`}
+        showPreview={true}
+      />
     </div>
   );
 };
 
 export default AdminVerificationsPage;
+

@@ -70,22 +70,27 @@ const uploadVerificationDoc = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    const path = require('path');
-    const isPdf = req.file.originalname.toLowerCase().endsWith('.pdf') || req.file.mimetype === 'application/pdf';
+    // Upload file to Cloudinary and retrieve full metadata
+    const cloudRes = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
+    const finalDocUrl = cloudRes.secure_url || cloudRes.toString();
 
-    // Upload file to Cloudinary
-    const cloudUrl = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
-
-    // For PDFs, use local static endpoint to serve true application/pdf headers for native Chrome PDF viewing
-    const finalDocUrl = isPdf ? `/uploads/${path.basename(req.file.path)}` : cloudUrl;
-
-    // Find the authenticated user and save the doc URL
+    // Find the authenticated user and save doc with metadata
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    user.verificationDocs.push({ docUrl: finalDocUrl });
+    const docMetadata = {
+      docUrl: finalDocUrl,
+      publicId: cloudRes.public_id || '',
+      resourceType: cloudRes.resource_type || 'auto',
+      format: cloudRes.format || '',
+      bytes: cloudRes.bytes || req.file.size || 0,
+      fileName: req.file.originalname || '',
+      uploadedAt: new Date(),
+    };
+
+    user.verificationDocs.push(docMetadata);
     user.verificationStatus = 'pending';
     user.rejectionReason = '';
     await user.save();

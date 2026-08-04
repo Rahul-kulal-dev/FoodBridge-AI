@@ -15,35 +15,30 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../config/api';
 
 /**
  * Donor Dashboard Main Overview Page (/donor)
- * Enforces business logic & rules:
- * - Access control for verified donors
- * - Auto-calculated system statistics updated after every completed donation
- * - Active & recent donation history
- * - Read-only AI surplus predictions
+ * Reads profile and donation stats directly from MongoDB Atlas backend via AuthContext.
  */
 
 const DonorDashboardPage = () => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : { name: 'Donor', verificationStatus: 'pending' };
-  });
+  const { user: authUser, token } = useAuth();
+  const user = authUser || { name: 'Donor', verificationStatus: 'pending' };
 
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchMyDonations = async () => {
     try {
-      const token = localStorage.getItem('token');
       if (!token) {
         setDonations([]);
         setLoading(false);
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/donations/my', {
+      const res = await fetch(getApiUrl('/api/donations/my'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

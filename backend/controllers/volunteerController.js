@@ -1,5 +1,6 @@
 const VolunteerTask = require('../models/VolunteerTask');
 const Donation = require('../models/Donation');
+const { uploadToCloudinary } = require('../config/cloudinary');
 
 // @desc    Get assigned volunteer tasks
 // @route   GET /api/volunteer/tasks
@@ -38,7 +39,7 @@ const uploadPickupVerification = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Task not found' });
     }
 
-    const pickupPhoto = `/uploads/${req.file.filename}`;
+    const pickupPhoto = await uploadToCloudinary(req.file.path, 'foodbridge_pickups');
     task.pickupPhoto = pickupPhoto;
     task.status = 'picked_up';
     task.pickedUpAt = new Date();

@@ -14,47 +14,81 @@ cloudinary.config({
  * @returns {Promise<string>} - Returns Cloudinary secure_url or fallback URL
  */
 const uploadToCloudinary = async (filePath, folder = 'foodbridge_uploads') => {
-  // Check if Cloudinary credentials are configured
-  if (
-    !process.env.CLOUDINARY_CLOUD_NAME ||
-    !process.env.CLOUDINARY_API_KEY ||
-    !process.env.CLOUDINARY_API_SECRET
-  ) {
-    console.warn('Cloudinary credentials missing, keeping file locally.');
-    const fileName = filePath.split('/').pop();
-    return `/uploads/${fileName}`;
-  }
+  const path = require('path');
+  const ext = path.extname(filePath).toLowerCase();
+  const isPdf = ext === '.pdf';
+  const isImage = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'].includes(ext);
 
   let result;
   try {
-    // Use 'auto' for all files – Cloudinary classifies PDFs as 'image' type
-    // which serves them with proper Content-Type headers for browser viewing
-    result = await cloudinary.uploader.upload(filePath, {
-      folder,
-      resource_type: 'auto',
-    });
-  } catch (firstError) {
-    // Retry with 'raw' as fallback
+    if (isPdf) {
+      // Use 'image' resource_type with format 'pdf' so Cloudinary creates public /image/upload/ PDF URLs with 200 OK access
+      result = await cloudinary.uploader.upload(filePath, {
+        folder,
+        resource_type: 'image',
+        format: 'pdf',
+        type: 'upload',
+        access_mode: 'public',
+      });
+    } else if (isImage) {
+      result = await cloudinary.uploader.upload(filePath, {
+        folder,
+        resource_type: 'image',
+        type: 'upload',
+        access_mode: 'public',
+      });
+    } else {
+      result = await cloudinary.uploader.upload(filePath, {
+        folder,
+        resource_type: 'auto',
+        type: 'upload',
+        access_mode: 'public',
+      });
+    }
+  } catch (error) {
+    console.error('Cloudinary primary upload failed, retrying with auto public upload:', error.message);
     try {
       result = await cloudinary.uploader.upload(filePath, {
         folder,
-        resource_type: 'raw',
+        resource_type: 'auto',
+        type: 'upload',
+        access_mode: 'public',
       });
-    } catch (secondError) {
-      console.error('Cloudinary upload failed:', secondError.message);
-      const fileName = filePath.split('/').pop();
-      return `/uploads/${fileName}`;
+    } catch (retryErr) {
+      console.error('Cloudinary upload error:', retryErr.message);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      throw new Error(`Cloudinary upload failed: ${retryErr.message}`);
     }
   }
 
-  // Cleanup local temp file only if it is NOT a PDF (keep PDFs locally to serve as native PDFs with 200 OK application/pdf headers)
-  const isPdf = filePath.toLowerCase().endsWith('.pdf');
-  if (!isPdf && fs.existsSync(filePath)) {
+  // Cleanup local temp file immediately after upload
+  if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
   }
 
-  console.log('Cloudinary upload success:', result.secure_url, '| resource_type:', result.resource_type);
-  return result.secure_url;
+  const formatName = result.format || (isPdf ? 'pdf' : ext.replace('.', ''));
+  console.log('[Cloudinary Upload Success]', {
+    secure_url: result.secure_url,
+    public_id: result.public_id,
+    resource_type: result.resource_type,
+    format: formatName,
+    bytes: result.bytes || 0,
+  });
+
+  const responseObj = {
+    secure_url: result.secure_url,
+    public_id: result.public_id,
+    resource_type: result.resource_type,
+    format: formatName,
+    bytes: result.bytes || 0,
+    toString() {
+      return this.secure_url;
+    },
+  };
+
+  return responseObj;
 };
 
 module.exports = {

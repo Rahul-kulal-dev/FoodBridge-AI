@@ -1,20 +1,21 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * ProtectedRoute Component
- * Restricts access to portal routes unless user is logged in with valid token/user in localStorage.
+ * Restricts access to portal routes unless user is logged in with valid token/user in AuthContext.
  * Optionally checks user role authorization.
  */
 const ProtectedRoute = ({ allowedRoles }) => {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
+  const { token, user, loading } = useAuth();
 
-  let user = null;
-  try {
-    user = userStr ? JSON.parse(userStr) : null;
-  } catch (e) {
-    user = null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
+      </div>
+    );
   }
 
   // If not authenticated, redirect to landing page

@@ -16,23 +16,25 @@ import {
   Utensils
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../config/api';
 
 /**
  * Admin Dashboard Overview Page (/admin)
  * Refactored to match FoodBridge AI design system 1:1
  */
 const AdminDashboardPage = () => {
+  const { token } = useAuth();
   const [analytics, setAnalytics] = useState({
-    users: { total: 42, donors: 18, ngos: 14, volunteers: 10, pending: 3 },
-    donations: { total: 156, completed: 142, active: 14 },
-    feedbacks: { total: 28, averageRating: 4.9 },
+    users: { total: 0, donors: 0, ngos: 0, volunteers: 0, pending: 0 },
+    donations: { total: 0, completed: 0, active: 0 },
+    feedbacks: { total: 0, averageRating: 0 },
   });
   const [loading, setLoading] = useState(true);
 
   const fetchAnalytics = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/analytics', {
+      const res = await fetch(getApiUrl('/api/admin/analytics'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
@@ -40,7 +42,7 @@ const AdminDashboardPage = () => {
         setAnalytics(data.analytics);
       }
     } catch (err) {
-      console.warn('Analytics fetch notice:', err.message);
+      console.warn('Analytics fetch notice from MongoDB Atlas:', err.message);
     } finally {
       setLoading(false);
     }
@@ -53,28 +55,28 @@ const AdminDashboardPage = () => {
   const statCards = [
     {
       label: 'TOTAL REGISTERED USERS',
-      value: analytics.users.total || 42,
-      subText: `${analytics.users.donors} Donors • ${analytics.users.ngos} NGOs`,
+      value: analytics.users.total ?? 0,
+      subText: `${analytics.users.donors ?? 0} Donors • ${analytics.users.ngos ?? 0} NGOs`,
       icon: Users,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     },
     {
       label: 'PENDING VERIFICATIONS',
-      value: analytics.users.pending || 3,
+      value: analytics.users.pending ?? 0,
       subText: 'Requires Admin approval',
       icon: Clock,
       color: 'text-amber-600 bg-amber-50 border-amber-100',
     },
     {
       label: 'TOTAL DONATIONS LISTED',
-      value: analytics.donations.total || 156,
-      subText: `${analytics.donations.active} active in redistribution`,
+      value: analytics.donations.total ?? 0,
+      subText: `${analytics.donations.active ?? 0} active in redistribution`,
       icon: Package,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-100',
     },
     {
       label: 'COMPLETED DELIVERIES',
-      value: analytics.donations.completed || 142,
+      value: analytics.donations.completed ?? 0,
       subText: 'Verified food delivery',
       icon: ShieldCheck,
       color: 'text-blue-600 bg-blue-50 border-blue-100',

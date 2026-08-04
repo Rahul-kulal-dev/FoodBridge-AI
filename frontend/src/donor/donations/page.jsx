@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Package, Search, ArrowUpRight, Filter, Clock, Loader2, Utensils, Building2 } from 'lucide-react';
+import { Package, Search, Filter, Loader2, Utensils } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl, getImageUrl } from '../../config/api';
 
 /**
  * My Food Donations Page (/donor/donations)
- * Safely formats Cloudinary CDN & local URLs with image error fallback.
+ * Displays food donations stored in MongoDB Atlas and images hosted on Cloudinary.
  */
 const MyDonationsPage = () => {
+  const { token } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [donations, setDonations] = useState([]);
@@ -15,13 +18,12 @@ const MyDonationsPage = () => {
   const fetchMyDonations = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
       if (!token) {
         setDonations([]);
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/donations/my', {
+      const res = await fetch(getApiUrl('/api/donations/my'), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -32,7 +34,7 @@ const MyDonationsPage = () => {
         setDonations([]);
       }
     } catch (err) {
-      console.warn('Error fetching my donations:', err.message);
+      console.warn('Error fetching my donations from MongoDB Atlas:', err.message);
       setDonations([]);
     } finally {
       setLoading(false);
@@ -41,14 +43,10 @@ const MyDonationsPage = () => {
 
   useEffect(() => {
     fetchMyDonations();
-  }, []);
+  }, [token]);
 
   const formatImageUrl = (imgUrl) => {
-    if (!imgUrl) return null;
-    if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) {
-      return imgUrl;
-    }
-    return `http://localhost:5000${imgUrl.startsWith('/') ? '' : '/'}${imgUrl}`;
+    return getImageUrl(imgUrl);
   };
 
   const handleImageError = (id) => {

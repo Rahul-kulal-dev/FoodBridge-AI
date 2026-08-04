@@ -53,7 +53,12 @@ const userSchema = new mongoose.Schema(
     },
     verificationDocs: [
       {
-        docUrl: String,
+        docUrl: { type: String, required: true },
+        publicId: { type: String, default: '' },
+        resourceType: { type: String, default: 'auto' },
+        format: { type: String, default: '' },
+        bytes: { type: Number, default: 0 },
+        fileName: { type: String, default: '' },
         uploadedAt: { type: Date, default: Date.now },
       },
     ],

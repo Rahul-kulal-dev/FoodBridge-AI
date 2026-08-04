@@ -21,6 +21,8 @@ import {
   AlertCircle,
   Loader2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Modern Create Donation Page (/donor/create-donation)
@@ -35,9 +37,11 @@ import {
  * 8. Directly persists to MongoDB Atlas database (No localStorage for donation state).
  */
 const CreateDonationPage = () => {
+  const { user: authUser, token, fetchProfile } = useAuth();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+
 
   // Form State
   const [foodName, setFoodName] = useState('');
@@ -56,16 +60,16 @@ const CreateDonationPage = () => {
   const [expiryTime, setExpiryTime] = useState(
     `${String(futureDate.getHours()).padStart(2, '0')}:${String(futureDate.getMinutes()).padStart(2, '0')}`
   );
-
-  const [address, setAddress] = useState('GreenHarvest Main Depot, Bay 4, Springfield Road, Metro City');
+  const [expiryHours, setExpiryHours] = useState('4');
+  const [address, setAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [mapZoom, setMapZoom] = useState(14);
 
-  // Food Images (starts empty - required by business rules)
+  // Food Images
   const [images, setImages] = useState([]);
   const [uploadingImg, setUploadingImg] = useState(false);
 
-  // Food Quality Checklist State (starts false to enforce checking)
+  // Food Quality Checklist State
   const [checklist, setChecklist] = useState({
     freshlyPrepared: true,
     hygienicallyPacked: true,
@@ -74,35 +78,14 @@ const CreateDonationPage = () => {
     noDamage: true,
   });
 
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('user');
-      return saved ? JSON.parse(saved) : { verificationStatus: 'pending' };
-    } catch (e) {
-      return { verificationStatus: 'pending' };
-    }
-  });
+  const user = authUser || { verificationStatus: 'pending' };
 
   // Sync user profile from backend to get verified status
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const res = await fetch('http://localhost:5000/api/users/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok && data.user) {
-          setUser(data.user);
-          localStorage.setItem('user', JSON.stringify(data.user));
-        }
-      } catch (err) {
-        console.warn('Profile fetch warning:', err);
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (token) {
+      fetchProfile();
+    }
+  }, [token]);
 
   const isVerified = user.verificationStatus === 'approved';
 
@@ -110,7 +93,7 @@ const CreateDonationPage = () => {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Upload image to backend /uploads
+  // Upload image to Cloudinary via backend
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -119,11 +102,10 @@ const CreateDonationPage = () => {
     setErrorMsg('');
 
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('image', files[0]);
 
-      const res = await fetch('http://localhost:5000/api/donations/upload-image', {
+      const res = await fetch(getApiUrl('/api/donations/upload-image'), {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
@@ -131,7 +113,7 @@ const CreateDonationPage = () => {
 
       const data = await res.json();
       if (res.ok && data.imageUrl) {
-        const fullImgUrl = data.imageUrl.startsWith('http') ? data.imageUrl : `http://localhost:5000${data.imageUrl}`;
+        const fullImgUrl = getImageUrl(data.imageUrl);
         setImages((prev) => [
           ...prev,
           {
@@ -142,12 +124,6 @@ const CreateDonationPage = () => {
           },
         ].slice(0, 5));
       } else {
-        // Fallback preview
-        const blobUrl = URL.createObjectURL(files[0]);
-        setImages((prev) => [
-          ...prev,
-          { id: `img-${Date.now()}`, url: blobUrl, rawUrl: blobUrl, name: files[0].name },
-        ].slice(0, 5));
       }
     } catch (err) {
       const blobUrl = URL.createObjectURL(files[0]);
@@ -239,7 +215,6 @@ const CreateDonationPage = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
       const payload = {
         title: foodName.trim(),
         foodType: category,
@@ -251,7 +226,7 @@ const CreateDonationPage = () => {
         checklist,
       };
 
-      const res = await fetch('http://localhost:5000/api/donations', {
+      const res = await fetch(getApiUrl('/api/donations'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

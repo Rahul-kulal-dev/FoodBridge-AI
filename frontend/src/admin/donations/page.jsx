@@ -7,6 +7,8 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Admin Monitor Donations Page (/admin/donations)
@@ -14,6 +16,7 @@ import {
  * Zero dummy data fallback.
  */
 const AdminDonationsPage = () => {
+  const { token } = useAuth();
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,8 +25,7 @@ const AdminDonationsPage = () => {
   const fetchDonations = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/donations', {
+      const res = await fetch(getApiUrl('/api/admin/donations'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();

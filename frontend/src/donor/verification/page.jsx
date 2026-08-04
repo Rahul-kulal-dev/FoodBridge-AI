@@ -14,10 +14,14 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl, getImageUrl } from '../../config/api';
+import FileViewerModal from '../../components/FileViewerModal';
+
 /**
  * Modern Donor Verification Page (/donor/verification)
  * Implements complete Verification Workflow:
- * 1. Upload saves document with Pending Review status.
+ * 1. Upload saves document directly to Cloudinary and persists in MongoDB Atlas database with Pending Review status.
  * 2. Sent to Admin Pending Approvals queue.
  * 3. On Approve: status -> Approved / Verified (enables donation creation).
  * 4. On Reject: displays rejection reason, status -> Rejected, enables re-upload.
@@ -26,7 +30,7 @@ import {
 const formatVerificationDocs = (docs = [], verificationStatus = 'pending') => {
   return docs.map((d, i) => {
     const rawUrl = typeof d === 'string' ? d : d.docUrl || '';
-    const fileName = rawUrl ? rawUrl.split('/').pop() : `Verification_Document_${i + 1}.pdf`;
+    const fileName = rawUrl ? rawUrl.split('/').pop().split('?')[0] : `Verification_Document_${i + 1}.pdf`;
     const docStatus =
       verificationStatus === 'approved'
         ? 'Approved'
@@ -34,12 +38,8 @@ const formatVerificationDocs = (docs = [], verificationStatus = 'pending') => {
           ? 'Rejected'
           : 'Pending Review';
 
-    const isPdf = fileName.toLowerCase().endsWith('.pdf');
-    const fileUrl = rawUrl
-      ? rawUrl.startsWith('http')
-        ? rawUrl
-        : `http://localhost:5000${rawUrl}`
-      : '#';
+    const isPdf = fileName.toLowerCase().endsWith('.pdf') || rawUrl.toLowerCase().includes('.pdf');
+    const fileUrl = rawUrl ? getImageUrl(rawUrl) : '#';
 
     const isBroken = !rawUrl;
 
@@ -58,82 +58,21 @@ const formatVerificationDocs = (docs = [], verificationStatus = 'pending') => {
 
 const DonorVerificationPage = () => {
   const fileInputRef = useRef(null);
+  const { user: authUser, token, updateUser, fetchProfile } = useAuth();
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [activeDocModal, setActiveDocModal] = useState(null);
   const [uploadSuccessMsg, setUploadSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('user');
-      return saved ? JSON.parse(saved) : { verificationStatus: 'pending', verificationDocs: [] };
-    } catch (e) {
-      return { verificationStatus: 'pending', verificationDocs: [] };
-    }
-  });
-
-  const [uploadedDocs, setUploadedDocs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('user');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.verificationDocs && parsed.verificationDocs.length > 0) {
-          return formatVerificationDocs(parsed.verificationDocs, parsed.verificationStatus);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-    return [];
-  });
-
-  const fetchProfile = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const savedUserStr = localStorage.getItem('user');
-      let localUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-
-      if (!token) {
-        if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
-          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
-        }
-        return;
-      }
-
-      const res = await fetch('http://localhost:5000/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-
-      if (res.ok && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        if (data.user.verificationDocs && data.user.verificationDocs.length > 0) {
-          setUploadedDocs(formatVerificationDocs(data.user.verificationDocs, data.user.verificationStatus));
-        } else if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
-          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, data.user.verificationStatus));
-        }
-      } else {
-        if (localUser && localUser.verificationDocs && localUser.verificationDocs.length > 0) {
-          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
-        }
-      }
-    } catch (err) {
-      console.warn('Profile sync notice:', err.message);
-      const savedUserStr = localStorage.getItem('user');
-      if (savedUserStr) {
-        const localUser = JSON.parse(savedUserStr);
-        if (localUser.verificationDocs && localUser.verificationDocs.length > 0) {
-          setUploadedDocs(formatVerificationDocs(localUser.verificationDocs, localUser.verificationStatus));
-        }
-      }
-    }
-  };
+  const user = authUser || { verificationStatus: 'pending', verificationDocs: [] };
+  const uploadedDocs = formatVerificationDocs(user.verificationDocs || [], user.verificationStatus || 'pending');
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (token) {
+      fetchProfile();
+    }
+  }, [token]);
 
   const verificationStatus = user.verificationStatus || 'pending'; // 'pending' | 'approved' | 'rejected'
   const isApproved = verificationStatus === 'approved';
@@ -145,15 +84,13 @@ const DonorVerificationPage = () => {
 
     setUploading(true);
     setUploadSuccessMsg('');
-
-    const fileName = filesArray[0].name;
+    setErrorMsg('');
 
     try {
-      const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('document', filesArray[0]);
 
-      const res = await fetch('http://localhost:5000/api/users/upload-verification', {
+      const res = await fetch(getApiUrl('/api/users/upload-verification'), {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
@@ -161,56 +98,14 @@ const DonorVerificationPage = () => {
 
       const data = await res.json();
 
-      if (res.ok && (data.user || data.docUrl)) {
-        const cloudDocUrl = data.docUrl || (data.user && data.user.verificationDocs?.slice(-1)[0]?.docUrl);
-        const existingDocs = user.verificationDocs || [];
-        const newDocsList = data.user?.verificationDocs || (cloudDocUrl ? [...existingDocs, { docUrl: cloudDocUrl }] : existingDocs);
-
-        const updatedUser = data.user || {
-          ...user,
-          verificationStatus: 'pending',
-          rejectionReason: '',
-          verificationDocs: newDocsList,
-        };
-
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUploadedDocs(formatVerificationDocs(newDocsList, updatedUser.verificationStatus));
+      if (res.ok && data.user) {
+        updateUser(data.user);
+        setUploadSuccessMsg('Document uploaded to Cloudinary! Sent for Admin review (Status: Pending Review).');
       } else {
-        // Fallback local update preserving verificationDocs in localStorage
-        const cloudDocUrl = data.docUrl;
-        const existingDocs = user.verificationDocs || [];
-        const newDoc = { docUrl: cloudDocUrl || `/uploads/${fileName}`, uploadedAt: new Date().toISOString() };
-        const updatedDocs = [...existingDocs, newDoc];
-
-        const fallbackUser = {
-          ...user,
-          verificationStatus: 'pending',
-          rejectionReason: '',
-          verificationDocs: updatedDocs,
-        };
-
-        setUser(fallbackUser);
-        localStorage.setItem('user', JSON.stringify(fallbackUser));
-        setUploadedDocs(formatVerificationDocs(updatedDocs, 'pending'));
+        setErrorMsg(data.message || 'Failed to upload verification document to Cloudinary/MongoDB Atlas.');
       }
-      setUploadSuccessMsg('Document uploaded! Sent for Admin review (Status: Pending Review).');
     } catch (err) {
-      const existingDocs = user.verificationDocs || [];
-      const newDoc = { docUrl: `/uploads/${fileName}`, uploadedAt: new Date().toISOString() };
-      const updatedDocs = [...existingDocs, newDoc];
-
-      const fallbackUser = {
-        ...user,
-        verificationStatus: 'pending',
-        rejectionReason: '',
-        verificationDocs: updatedDocs,
-      };
-
-      setUser(fallbackUser);
-      localStorage.setItem('user', JSON.stringify(fallbackUser));
-      setUploadedDocs(formatVerificationDocs(updatedDocs, 'pending'));
-      setUploadSuccessMsg('Document uploaded! Sent for Admin review (Status: Pending Review).');
+      setErrorMsg('Upload error: ' + err.message);
     } finally {
       setUploading(false);
     }
@@ -359,9 +254,7 @@ const DonorVerificationPage = () => {
                 type="button"
                 onClick={() => {
                   const updated = { ...user, verificationDocs: [], verificationStatus: 'pending' };
-                  setUser(updated);
-                  localStorage.setItem('user', JSON.stringify(updated));
-                  setUploadedDocs([]);
+                  updateUser(updated);
                 }}
                 className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
               >
@@ -500,59 +393,12 @@ const DonorVerificationPage = () => {
       </div>
 
       {/* Document View Preview Modal */}
-      {activeDocModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E7EAF0] space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-900 text-sm">{activeDocModal.title}</h3>
-              </div>
-              <button
-                onClick={() => setActiveDocModal(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <p className="text-slate-500 font-medium">Document Name:</p>
-                <p className="font-bold text-slate-800 font-mono truncate">{activeDocModal.title}</p>
-              </div>
-
-              <div className="flex justify-between p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                <span className="text-slate-600 font-medium">Status:</span>
-                <span className="font-bold text-emerald-700">{isApproved ? 'Approved' : isRejected ? 'Rejected' : 'Pending Review'}</span>
-              </div>
-
-              {activeDocModal.fileUrl && activeDocModal.fileUrl !== '#' && (
-                <div className="pt-2">
-                  <a
-                    href={activeDocModal.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-emerald-btn transition-all text-xs"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Open File </span>
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setActiveDocModal(null)}
-                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-emerald-btn"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <FileViewerModal
+        isOpen={!!activeDocModal}
+        onClose={() => setActiveDocModal(null)}
+        doc={activeDocModal}
+        title="Donor Verification Document"
+      />
     </div>
   );
 };

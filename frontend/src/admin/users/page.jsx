@@ -11,12 +11,15 @@ import {
   ShieldAlert,
   Loader2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Admin Manage Users Page (/admin/users)
  * Displays real user data from MongoDB Atlas backend with zero dummy data fallback.
  */
 const AdminUsersPage = () => {
+  const { token } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,8 +28,7 @@ const AdminUsersPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/users', {
+      const res = await fetch(getApiUrl('/api/admin/users'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();

@@ -5,6 +5,8 @@ import {
   RefreshCw,
   Loader2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Admin Feedback Logs Page (/admin/feedback)
@@ -12,14 +14,14 @@ import {
  * Zero dummy data fallback.
  */
 const AdminFeedbackPage = () => {
+  const { token } = useAuth();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFeedbackLogs = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/feedback/admin-logs', {
+      const res = await fetch(getApiUrl('/api/feedback/admin-logs'), {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();

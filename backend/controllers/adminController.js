@@ -111,19 +111,23 @@ const getAllUsers = async (req, res, next) => {
 const getAdminAnalytics = async (req, res, next) => {
   try {
     const totalUsers = await User.countDocuments();
-    const totalDonors = await User.countDocuments({ role: 'donor' });
-    const totalNGOs = await User.countDocuments({ role: 'ngo' });
-    const totalVolunteers = await User.countDocuments({ role: 'volunteer' });
-    const pendingVerifications = await User.countDocuments({ verificationStatus: 'pending' });
+    const totalDonors = await User.countDocuments({ $or: [{ role: 'donor' }, { user_role: 'donor' }] });
+    const totalNGOs = await User.countDocuments({ $or: [{ role: 'ngo' }, { user_role: 'ngo' }] });
+    const totalVolunteers = await User.countDocuments({ $or: [{ role: 'volunteer' }, { user_role: 'volunteer' }] });
+    const pendingVerifications = await User.countDocuments({
+      verificationStatus: 'pending',
+      role: { $ne: 'admin' },
+      user_role: { $ne: 'admin' },
+    });
 
     const totalDonations = await Donation.countDocuments();
-    const completedDonations = await Donation.countDocuments({ status: 'delivered' });
-    const activeDonations = await Donation.countDocuments({ status: { $in: ['available', 'accepted', 'picked_up'] } });
+    const completedDonations = await Donation.countDocuments({ status: { $in: ['completed', 'delivered'] } });
+    const activeDonations = await Donation.countDocuments({ status: { $in: ['available', 'accepted', 'picked_up', 'in_transit'] } });
 
     const feedbacks = await Feedback.find();
     const avgRating = feedbacks.length > 0 
-      ? (feedbacks.reduce((acc, f) => acc + f.rating, 0) / feedbacks.length).toFixed(1)
-      : 5.0;
+      ? (feedbacks.reduce((acc, f) => acc + (f.rating || 0), 0) / feedbacks.length).toFixed(1)
+      : 0;
 
     res.json({
       success: true,

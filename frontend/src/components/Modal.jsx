@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { X, CheckCircle2, Leaf, ArrowRight, Utensils, HeartHandshake, Truck, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../config/api';
 
 export default function Modal({ isOpen, onClose, initialType = 'register' }) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [role, setRole] = useState('donor');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,8 +56,8 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
 
     try {
       const endpoint = initialType === 'login'
-        ? 'http://localhost:5000/api/auth/login'
-        : 'http://localhost:5000/api/auth/register';
+        ? getApiUrl('/api/auth/login')
+        : getApiUrl('/api/auth/register');
 
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -65,9 +68,8 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
       const data = await res.json();
 
       if (res.ok && data.token && data.user) {
-        // Successful authentication — save to localStorage and redirect
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Successful authentication — update AuthContext state (in-memory & MongoDB Atlas)
+        login(data.token, data.user);
 
         const finalRole = data.user.user_role || data.user.role || role;
         const redirectRoute = finalRole === 'admin' ? '/admin'
@@ -86,7 +88,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
       }
     } catch (err) {
       // Network error — server is likely down
-      setErrorMsg('Cannot connect to server. Please make sure the backend is running on port 5000.');
+      setErrorMsg('Cannot connect to server. Please check backend connection to MongoDB Atlas.');
     } finally {
       setLoading(false);
     }

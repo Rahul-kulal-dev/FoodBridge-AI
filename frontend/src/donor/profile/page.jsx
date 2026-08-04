@@ -1,57 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { Save, BadgeCheck, Clock, XCircle, User, Building2, Mail, Phone, MapPin, Loader2, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 const DonorProfilePage = () => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const { user, token, updateUser, fetchProfile } = useAuth();
 
   const [formData, setFormData] = useState({
-    name: user.name || '',
-    organizationName: user.organizationName || '',
-    email: user.email || '',
-    phone: user.phone || '',
-    address: user.address || '',
+    name: '',
+    organizationName: '',
+    email: '',
+    phone: '',
+    address: '',
   });
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
 
-  // Fetch fresh profile data from backend
-  const fetchProfile = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      const res = await fetch('http://localhost:5000/api/users/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-
-      if (res.ok && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setFormData({
-          name: data.user.name || '',
-          organizationName: data.user.organizationName || '',
-          email: data.user.email || '',
-          phone: data.user.phone || '',
-          address: data.user.address || '',
-        });
-      }
-    } catch (err) {
-      console.warn('Failed to fetch profile:', err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        organizationName: user.organizationName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+      });
+    }
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,8 +36,7 @@ const DonorProfilePage = () => {
     setMsg({ type: '', text: '' });
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/users/profile', {
+      const res = await fetch(getApiUrl('/api/users/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -77,9 +53,8 @@ const DonorProfilePage = () => {
       const data = await res.json();
 
       if (res.ok && data.user) {
-        setUser(data.user);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        setMsg({ type: 'success', text: 'Profile updated successfully!' });
+        updateUser(data.user);
+        setMsg({ type: 'success', text: 'Profile updated successfully in MongoDB Atlas!' });
       } else {
         setMsg({ type: 'error', text: data.message || 'Failed to update profile.' });
       }

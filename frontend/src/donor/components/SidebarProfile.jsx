@@ -1,35 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { LogOut, BadgeCheck, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * SidebarProfile component for the bottom section of the Donor Sidebar
  * Styled strictly after the FoodBridge AI Landing Page design theme (Pure White & Emerald Green).
- * Dynamically reads user from localStorage and backend state.
+ * Dynamically reads user from AuthContext and MongoDB Atlas backend state.
  */
 const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
 
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user');
-    return saved ? JSON.parse(saved) : { name: 'Food Donor', email: 'donor@foodbridge.org', verificationStatus: 'pending' };
-  });
-
-  useEffect(() => {
-    const updateUser = () => {
-      const saved = localStorage.getItem('user');
-      if (saved) {
-        setUser(JSON.parse(saved));
-      }
-    };
-
-    window.addEventListener('storage', updateUser);
-    return () => window.removeEventListener('storage', updateUser);
-  }, []);
+  const user = authUser || { name: 'Food Donor', email: 'donor@foodbridge.org', verificationStatus: 'pending' };
 
   const handleLogoutClick = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     if (onLogout) {
       onLogout();
     } else {

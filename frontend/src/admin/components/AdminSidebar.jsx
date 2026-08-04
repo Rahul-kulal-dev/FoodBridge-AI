@@ -6,19 +6,19 @@ import {
   Users,
   Package,
   MessageSquare,
-  Leaf,
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ShieldAlert
+  Leaf,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
     navigate('/');
   };
 
@@ -122,17 +122,21 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
 
       {/* Footer / Sign Out */}
       <div className="p-4 border-t border-[#E7EAF0] space-y-3">
-        {!isCollapsed && (
-          <div className="p-3 bg-slate-50 rounded-2xl border border-[#E7EAF0] flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
-              AD
+        {!isCollapsed && (() => {
+          const userEmail = user?.email || 'admin@gmail.com';
+
+          return (
+            <div className="p-3 bg-slate-50 rounded-2xl border border-[#E7EAF0] flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
+                AD
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#0F172A] truncate">System Administrator</p>
+                <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-[#0F172A] truncate">System Administrator</p>
-              <p className="text-[10px] text-slate-500 truncate">admin@foodbridge.org</p>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         <button
           onClick={handleSignOut}
