@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
+import { ShieldAlert, ArrowRight } from 'lucide-react';
 import NgoSidebar from './components/NgoSidebar';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * NgoLayout Component
@@ -8,7 +10,10 @@ import NgoSidebar from './components/NgoSidebar';
  * Matches Donor portal theme: Crisp White & Emerald Green.
  */
 const NgoLayout = () => {
+  const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const isVerified = user?.verificationStatus === 'approved';
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
@@ -39,6 +44,7 @@ const NgoLayout = () => {
           isCollapsed ? 'md:pl-20' : 'md:pl-20 lg:pl-72'
         }`}
       >
+
         <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>

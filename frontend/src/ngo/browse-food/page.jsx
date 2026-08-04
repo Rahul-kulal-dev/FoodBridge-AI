@@ -61,6 +61,18 @@ const BrowseFoodPage = () => {
   }, [token]);
 
   const handleAcceptDonation = async (foodId) => {
+    // BUSINESS RULE: Only Verified NGOs can accept food donations
+    if (user?.verificationStatus !== 'approved') {
+      setActionMessage({
+        type: 'error',
+        text: 'Only Verified NGOs can accept food donations. Please complete mandatory document verification first.',
+      });
+      setTimeout(() => {
+        navigate('/ngo/verification');
+      }, 1500);
+      return;
+    }
+
     setAcceptingId(foodId);
     try {
       const res = await fetch(getApiUrl(`/api/ngo/donations/${foodId}/accept`), {

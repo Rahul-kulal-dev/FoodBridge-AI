@@ -33,6 +33,38 @@ const VolunteerProfilePage = () => {
     setTimeout(() => setSavedSuccess(false), 3000);
   };
 
+  const { token } = useAuth ? useAuth() : { token: null };
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [averages, setAverages] = useState({
+    punctuality: 5,
+    foodHandling: 5,
+    professionalism: 5,
+    overall: 5,
+  });
+
+  useEffect(() => {
+    const fetchVolunteerFeedback = async () => {
+      try {
+        const authToken = token || localStorage.getItem('token');
+        if (!authToken) return;
+
+        const res = await fetch(getApiUrl('/api/feedback/volunteer'), {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.feedbacks) {
+          setFeedbacks(data.feedbacks);
+          if (data.averages) {
+            setAverages(data.averages);
+          }
+        }
+      } catch (err) {
+        console.warn('Error fetching volunteer ratings:', err);
+      }
+    };
+    fetchVolunteerFeedback();
+  }, [token]);
+
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
@@ -89,7 +121,7 @@ const VolunteerProfilePage = () => {
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Average Courier Rating</span>
-            <p className="text-lg sm:text-xl font-black text-[#0F172A]">{profile.rating} / 5.0</p>
+            <p className="text-lg sm:text-xl font-black text-[#0F172A]">{averages.overall} / 5.0</p>
           </div>
         </div>
 
@@ -103,6 +135,51 @@ const VolunteerProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Volunteer Ratings Breakdown (Evaluated by NGOs) */}
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
+        <div className="flex items-center justify-between border-b border-[#E7EAF0] pb-3">
+          <div>
+            <h2 className="text-base font-extrabold text-[#0F172A]">NGO Courier Performance Ratings</h2>
+            <p className="text-xs text-[#64748B]">Rated by recipient NGOs upon successful donation delivery</p>
+          </div>
+          <span className="text-xs font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+            {feedbacks.length} Delivered Reviews
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-[#E7EAF0] space-y-1">
+            <span className="text-[10px] font-bold text-[#64748B] uppercase block">Punctuality</span>
+            <span className="text-lg font-black text-blue-700">{averages.punctuality} ★</span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-[#E7EAF0] space-y-1">
+            <span className="text-[10px] font-bold text-[#64748B] uppercase block">Food Handling</span>
+            <span className="text-lg font-black text-blue-700">{averages.foodHandling} ★</span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-[#E7EAF0] space-y-1">
+            <span className="text-[10px] font-bold text-[#64748B] uppercase block">Professionalism</span>
+            <span className="text-lg font-black text-blue-700">{averages.professionalism} ★</span>
+          </div>
+        </div>
+
+        {feedbacks.length > 0 && (
+          <div className="space-y-3 pt-2">
+            {feedbacks.map((fb) => (
+              <div key={fb._id} className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#f8fafc] text-xs space-y-1.5">
+                <div className="flex items-center justify-between font-bold text-[#0F172A]">
+                  <span>NGO: {fb.ngoId?.organizationName || fb.ngoId?.name || 'Recipient NGO'}</span>
+                  <span className="text-amber-600">{fb.volunteerRatings?.overall || 5} / 5.0 ★</span>
+                </div>
+                {fb.volunteerComment && (
+                  <p className="text-[#334155] italic">"{fb.volunteerComment}"</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       {/* Editable Profile Form */}
       <form onSubmit={handleSave} className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4 sm:space-y-6">

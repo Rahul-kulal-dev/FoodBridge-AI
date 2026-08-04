@@ -32,6 +32,14 @@ const acceptDonation = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Donation not found' });
     }
 
+    // BUSINESS RULE: Only Verified NGOs can accept food donations
+    if (req.user.verificationStatus !== 'approved') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only Verified NGOs can accept food donations. Please upload mandatory documents and wait for admin approval.',
+      });
+    }
+
     if (donation.status !== 'available') {
       return res.status(400).json({ success: false, message: `Donation is already ${donation.status}` });
     }

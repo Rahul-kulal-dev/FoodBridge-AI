@@ -70,6 +70,8 @@ const uploadVerificationDoc = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
+    const docType = req.body.docType || req.body.docLabel || 'Compliance Document';
+
     // Upload file to Cloudinary and retrieve full metadata
     const cloudRes = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
     const finalDocUrl = cloudRes.secure_url || cloudRes.toString();
@@ -81,6 +83,7 @@ const uploadVerificationDoc = async (req, res, next) => {
     }
 
     const docMetadata = {
+      docType,
       docUrl: finalDocUrl,
       publicId: cloudRes.public_id || '',
       resourceType: cloudRes.resource_type || 'auto',
@@ -90,14 +93,29 @@ const uploadVerificationDoc = async (req, res, next) => {
       uploadedAt: new Date(),
     };
 
-    user.verificationDocs.push(docMetadata);
+    if (!user.verificationDocs) {
+      user.verificationDocs = [];
+    }
+
+    // Check if a document with the same docType already exists and replace it
+    const existingIndex = user.verificationDocs.findIndex(
+      (d) => d.docType && d.docType.toLowerCase() === docType.toLowerCase()
+    );
+
+    if (existingIndex !== -1) {
+      user.verificationDocs[existingIndex] = docMetadata;
+    } else {
+      user.verificationDocs.push(docMetadata);
+    }
+
+    // Verification status starts/resets as Pending after submission
     user.verificationStatus = 'pending';
     user.rejectionReason = '';
     await user.save();
 
     res.json({
       success: true,
-      message: 'Verification document uploaded successfully',
+      message: `${docType} uploaded successfully to Cloudinary & MongoDB`,
       docUrl: finalDocUrl,
       user: {
         _id: user._id,
