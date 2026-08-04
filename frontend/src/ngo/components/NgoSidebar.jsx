@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   BadgeCheck,
@@ -15,18 +15,42 @@ import {
 import SidebarItem from './SidebarItem';
 import SidebarProfile from './SidebarProfile';
 import NgoMobileSidebar from './NgoMobileSidebar';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * NgoSidebar component
- * Master sidebar container for NGO Portal.
+ * Master sidebar container for NGO Portal with dynamic database counts.
  */
 const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: externalSetIsCollapsed }) => {
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(false);
+  const { user, token } = useAuth();
+  const [stats, setStats] = useState({ nearbyDonations: 0, activeDonations: 0 });
 
   const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
   const setIsCollapsed = externalSetIsCollapsed || setInternalIsCollapsed;
 
-  // NGO Navigation Items
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        if (!token) return;
+        const res = await fetch(getApiUrl('/api/ngo/stats'), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.stats) {
+          setStats(data.stats);
+        }
+      } catch (err) {
+        console.warn('Error fetching sidebar stats:', err);
+      }
+    };
+    fetchStats();
+  }, [token]);
+
+  const isVerified = user?.verificationStatus === 'approved';
+
+  // NGO Navigation Items with dynamic data
   const navItems = [
     {
       label: 'Dashboard',
@@ -37,19 +61,19 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
       label: 'Verification',
       icon: BadgeCheck,
       route: '/ngo/verification',
-      badge: 'Verified',
+      badge: isVerified ? 'Verified' : 'Pending',
     },
     {
       label: 'Nearby Food',
       icon: ShoppingBag,
       route: '/ngo/browse-food',
-      badge: 15,
+      badge: stats.nearbyDonations > 0 ? stats.nearbyDonations : undefined,
     },
     {
       label: 'Accepted Donations',
       icon: PackageCheck,
       route: '/ngo/accepted-donations',
-      badge: 8,
+      badge: stats.activeDonations > 0 ? stats.activeDonations : undefined,
     },
     {
       label: 'Google Maps',
@@ -60,7 +84,6 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
       label: 'Notifications',
       icon: Bell,
       route: '/ngo/notifications',
-      badge: 3,
     },
     {
       label: 'Feedback',

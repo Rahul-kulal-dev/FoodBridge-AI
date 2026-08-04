@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   Mail,
@@ -10,38 +10,91 @@ import {
   CheckCircle2,
   Save,
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Editable NGO Profile Page (/ngo/profile)
+ * Persists changes directly to MongoDB Atlas database.
  */
 const NgoProfilePage = () => {
-  const [profile, setProfile] = useState({
-    ngoName: 'Hope Community Kitchen',
-    email: 'ngo@hopekitchen.org',
-    phone: '+91 98765 00112',
-    address: 'Sector 5 Community Hub, Metro City, 560001',
-    operatingHours: '8:00 AM – 10:00 PM (Daily)',
+  const { user, token, updateUser, fetchProfile } = useAuth();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    organizationName: '',
+    email: '',
+    phone: '',
+    address: '',
     servingCapacity: '850 Meals / Day',
+    operatingHours: '8:00 AM – 10:00 PM (Daily)',
     foodCategories: 'Cooked Meals, Bakery Goods, Packaged Dairy, Fresh Fruits & Produce',
-    description: 'Non-profit community kitchen serving hot nutritious meals to underprivileged families, homeless shelters, and youth development centers.',
-    verificationStatus: 'Verified NGO (Tier 1)',
-    regNumber: 'NGO-TRUST-8849-2024',
   });
 
+  const [loading, setLoading] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        organizationName: user.organizationName || user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        servingCapacity: '850 Meals / Day',
+        operatingHours: '8:00 AM – 10:00 PM (Daily)',
+        foodCategories: 'Cooked Meals, Bakery Goods, Packaged Dairy, Fresh Fruits & Produce',
+      });
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setLoading(true);
+    setErrorMessage('');
+    setSavedSuccess(false);
+
+    try {
+      const res = await fetch(getApiUrl('/api/users/profile'), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          organizationName: formData.organizationName,
+          phone: formData.phone,
+          address: formData.address,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.user) {
+        updateUser(data.user);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      } else {
+        setErrorMessage(data.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      setErrorMessage('Server error updating profile');
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const isVerified = user?.verificationStatus === 'approved';
 
   return (
     <div className="w-full space-y-5 sm:space-y-6 animate-fade-in pb-12">
@@ -54,15 +107,17 @@ const NgoProfilePage = () => {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-                {profile.ngoName}
+                {formData.organizationName || formData.name || 'NGO Organization'}
               </h1>
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 w-fit shrink-0">
+              <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full w-fit shrink-0 ${
+                isVerified ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+              }`}>
                 <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
-                {profile.verificationStatus}
+                {isVerified ? 'Verified NGO' : 'Verification Pending'}
               </span>
             </div>
             <p className="text-xs text-[#64748B] mt-1 font-medium">
-              Registration No: <span className="font-bold text-[#0F172A]">{profile.regNumber}</span>
+              Connected MongoDB User ID: <span className="font-mono font-bold text-[#0F172A]">{user?._id || 'N/A'}</span>
             </p>
           </div>
         </div>
@@ -70,7 +125,12 @@ const NgoProfilePage = () => {
         {savedSuccess && (
           <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up shrink-0">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Profile Saved Successfully!</span>
+            <span>Profile Saved to MongoDB!</span>
+          </div>
+        )}
+        {errorMessage && (
+          <div className="bg-rose-50 text-rose-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-rose-200 flex items-center gap-2 animate-scale-up shrink-0">
+            <span>{errorMessage}</span>
           </div>
         )}
       </div>
@@ -80,18 +140,31 @@ const NgoProfilePage = () => {
         <div className="pb-4 border-b border-[#E7EAF0]">
           <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Organization Profile & Operations</h2>
           <p className="text-xs text-[#64748B] mt-0.5">
-            Update your serving capacity and contact details to ensure accurate surplus dispatching
+            Update your organization details. Changes persist directly into MongoDB Atlas.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="text-xs font-bold text-[#0F172A] block mb-1">NGO / Organization Name</label>
+            <label className="text-xs font-bold text-[#0F172A] block mb-1">Organization / NGO Name</label>
             <input
               type="text"
-              name="ngoName"
-              value={profile.ngoName}
+              name="organizationName"
+              value={formData.organizationName}
               onChange={handleChange}
+              placeholder="e.g. Hope Community Kitchen"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-[#0F172A] block mb-1">Contact Person Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="e.g. Admin Contact"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
@@ -101,9 +174,9 @@ const NgoProfilePage = () => {
             <input
               type="email"
               name="email"
-              value={profile.email}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
+              disabled
+              value={formData.email}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#64748B] bg-slate-100 cursor-not-allowed"
             />
           </div>
 
@@ -112,8 +185,21 @@ const NgoProfilePage = () => {
             <input
               type="text"
               name="phone"
-              value={profile.phone}
+              value={formData.phone}
               onChange={handleChange}
+              placeholder="e.g. +91 9876543210"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="text-xs font-bold text-[#0F172A] block mb-1">Primary Pickup / Kitchen Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="e.g. Sector 5 Community Hub, Metro City"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
@@ -123,18 +209,7 @@ const NgoProfilePage = () => {
             <input
               type="text"
               name="servingCapacity"
-              value={profile.servingCapacity}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-xs font-bold text-[#0F172A] block mb-1">Primary Pickup Address</label>
-            <input
-              type="text"
-              name="address"
-              value={profile.address}
+              value={formData.servingCapacity}
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
@@ -145,31 +220,9 @@ const NgoProfilePage = () => {
             <input
               type="text"
               name="operatingHours"
-              value={profile.operatingHours}
+              value={formData.operatingHours}
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-bold text-[#0F172A] block mb-1">Food Categories Handled</label>
-            <input
-              type="text"
-              name="foodCategories"
-              value={profile.foodCategories}
-              onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="text-xs font-bold text-[#0F172A] block mb-1">Organization Description</label>
-            <textarea
-              rows="3"
-              name="description"
-              value={profile.description}
-              onChange={handleChange}
-              className="w-full p-3 rounded-xl border border-[#E7EAF0] text-xs font-medium text-[#334155] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
             />
           </div>
         </div>
@@ -177,10 +230,20 @@ const NgoProfilePage = () => {
         <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer text-center"
+            disabled={loading}
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer text-center disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            <span>Save Profile Changes</span>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Profile Changes</span>
+              </>
+            )}
           </button>
         </div>
       </form>

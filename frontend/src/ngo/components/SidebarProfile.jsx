@@ -1,31 +1,29 @@
 import React from 'react';
 import { LogOut, BadgeCheck, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * SidebarProfile component for the bottom section of the NGO Sidebar
+ * Connects directly to AuthContext & MongoDB user profile.
  */
-const SidebarProfile = ({
-  isCollapsed = false,
-  user = {
-    name: 'Hope Community Kitchen',
-    email: 'ngo@hopekitchen.org',
-    avatar: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=150&q=80',
-    verificationStatus: 'Verified NGO',
-  },
-  onLogout,
-}) => {
+const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogoutClick = () => {
     if (onLogout) {
       onLogout();
     } else {
+      logout();
       navigate('/');
     }
   };
 
-  const isVerified = user.verificationStatus.includes('Verified');
+  const displayName = user?.organizationName || user?.name || 'NGO Partner';
+  const email = user?.email || '';
+  const isVerified = user?.verificationStatus === 'approved';
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <div className={`mt-auto border-t border-[#E7EAF0] pt-3.5 pb-3 transition-all duration-200 ${isCollapsed ? 'px-2' : 'px-3'}`}>
@@ -35,14 +33,11 @@ const SidebarProfile = ({
           <div
             className="relative group cursor-pointer"
             onClick={() => navigate('/ngo/profile')}
-            title={`${user.name} (${user.email}) - ${user.verificationStatus}`}
+            title={`${displayName} (${email}) - ${isVerified ? 'Verified' : 'Pending'}`}
           >
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/30"
-            />
-            {/* Status dot */}
+            <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-black text-sm flex items-center justify-center ring-2 ring-emerald-500/30">
+              {avatarLetter}
+            </div>
             <span
               className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
                 isVerified ? 'bg-emerald-500' : 'bg-amber-500'
@@ -64,11 +59,9 @@ const SidebarProfile = ({
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#f7f8fb] border border-[#E7EAF0]">
             {/* User Avatar */}
             <div className="relative shrink-0">
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/20"
-              />
+              <div className="w-10 h-10 rounded-full bg-emerald-500 text-white font-black text-base flex items-center justify-center ring-2 ring-emerald-500/20">
+                {avatarLetter}
+              </div>
               <span
                 className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ring-2 ring-white ${
                   isVerified ? 'bg-emerald-500' : 'bg-amber-500'
@@ -80,11 +73,11 @@ const SidebarProfile = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <h4 className="text-xs font-bold text-[#0F172A] truncate">
-                  {user.name}
+                  {displayName}
                 </h4>
               </div>
               <p className="text-[11px] text-[#64748B] truncate">
-                {user.email}
+                {email}
               </p>
 
               {/* Verification Badge */}

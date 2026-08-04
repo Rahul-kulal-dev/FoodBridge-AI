@@ -77,8 +77,67 @@ const getDonationHistory = async (req, res, next) => {
   }
 };
 
+// @desc    Get stats for NGO dashboard
+// @route   GET /api/ngo/stats
+// @access  Private (NGO / Admin)
+const getNgoStats = async (req, res, next) => {
+  try {
+    const ngoId = req.user._id;
+
+    const nearbyCount = await Donation.countDocuments({ status: 'available' });
+    const activeDonationsCount = await Donation.countDocuments({
+      ngoId,
+      status: { $in: ['accepted', 'picked_up'] },
+    });
+    const acceptedDonations = await Donation.find({
+      ngoId,
+      status: { $in: ['accepted', 'picked_up', 'delivered'] },
+    });
+
+    const totalMealsReceived = acceptedDonations.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0);
+
+    res.json({
+      success: true,
+      stats: {
+        mealsReceived: totalMealsReceived,
+        activeDonations: activeDonationsCount,
+        nearbyDonations: nearbyCount,
+        volunteerEta: activeDonationsCount > 0 ? '12 mins' : 'N/A',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get single donation details
+// @route   GET /api/ngo/donations/:id
+// @access  Private (NGO / Admin)
+const getDonationDetails = async (req, res, next) => {
+  try {
+    const donation = await Donation.findById(req.params.id)
+      .populate('donorId', 'name email phone address organizationName verificationStatus')
+      .populate('volunteerId', 'name email phone address')
+      .populate('ngoId', 'name email phone address organizationName');
+
+    if (!donation) {
+      return res.status(404).json({ success: false, message: 'Donation not found' });
+    }
+
+    res.json({
+      success: true,
+      donation,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
+  getNgoStats,
   getNearbyDonations,
+  getDonationDetails,
   acceptDonation,
   getDonationHistory,
 };
+
