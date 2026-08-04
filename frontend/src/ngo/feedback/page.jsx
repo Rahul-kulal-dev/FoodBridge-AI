@@ -126,10 +126,10 @@ const NgoFeedbackPage = () => {
         donorComment,
         volunteerRatings: selectedDonation.volunteer
           ? {
-              punctuality,
-              foodHandling,
-              professionalism,
-            }
+            punctuality,
+            foodHandling,
+            professionalism,
+          }
           : undefined,
         volunteerComment,
         overallComment: overallComment || donorComment,
@@ -177,9 +177,8 @@ const NgoFeedbackPage = () => {
             className="p-1 cursor-pointer transition-transform hover:scale-110 disabled:cursor-not-allowed"
           >
             <Star
-              className={`w-5 h-5 ${
-                star <= value ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-100'
-              }`}
+              className={`w-5 h-5 ${star <= value ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-100'
+                }`}
             />
           </button>
         ))}
@@ -203,7 +202,7 @@ const NgoFeedbackPage = () => {
               NGO Feedback & Quality Rating Portal
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Rate Food Donors & Volunteer Couriers for completed delivered donations stored in MongoDB Atlas
+              Rate donors and volunteers for completed food deliveries
             </p>
           </div>
         </div>
@@ -211,16 +210,16 @@ const NgoFeedbackPage = () => {
         {showSuccess && (
           <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2.5 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up shadow-xs">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>Feedback Saved & Stored in MongoDB!</span>
+            <span>Feedback saved successfully!</span>
           </div>
         )}
       </div>
 
       {/* Business Rules Info Strip */}
-      <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-soft-card flex items-center gap-3">
-        <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-        <p className="text-xs text-slate-200 font-medium">
-          <span className="font-bold text-white">NGO Business Rules:</span> Feedback is only enabled for <span className="text-emerald-400 font-bold">Delivered</span> donations. Only the exact Donor & Volunteer involved in that delivery can be rated, and only 1 read-only feedback is allowed per donation.
+      <div className="bg-emerald-50/80 text-emerald-950 border border-emerald-200/80 p-3.5 rounded-2xl shadow-soft-card flex items-center gap-3">
+        <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+        <p className="text-xs font-medium text-emerald-950">
+          Feedback is enabled only for <span className="text-emerald-700 font-extrabold">Delivered</span> donations (1 review per delivery).
         </p>
       </div>
 
@@ -233,7 +232,7 @@ const NgoFeedbackPage = () => {
               <span>Select Delivered Donation</span>
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Only donations with status <strong className="text-emerald-700">Delivered</strong> appear in this dropdown
+              Select a delivered donation to submit feedback
             </p>
           </div>
 
@@ -262,7 +261,7 @@ const NgoFeedbackPage = () => {
             <Clock className="w-8 h-8 text-slate-400 mx-auto" />
             <h3 className="text-sm font-bold text-[#0F172A]">No Delivered Donations Found</h3>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
-              Feedback can only be submitted after a donation is marked as <strong>Delivered</strong>. Once your accepted donations reach Delivered status, they will automatically appear here.
+              No delivered donations available for feedback yet.
             </p>
           </div>
         ) : (

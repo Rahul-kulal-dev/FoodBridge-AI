@@ -27,12 +27,13 @@ const FoodDetailsPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const donationIdParam = searchParams.get('id');
-  const { token } = useAuth();
+  const { user, token } = useAuth();
 
   const [foodItem, setFoodItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [actionMessage, setActionMessage] = useState(null);
+  const [showUnverifiedModal, setShowUnverifiedModal] = useState(false);
 
   const fetchDetails = async () => {
     setLoading(true);
@@ -76,13 +77,7 @@ const FoodDetailsPage = () => {
 
     // BUSINESS RULE: Only Verified NGOs can accept food donations
     if (user?.verificationStatus !== 'approved') {
-      setActionMessage({
-        type: 'error',
-        text: 'Only Verified NGOs can accept food donations. Please complete mandatory document verification first.',
-      });
-      setTimeout(() => {
-        navigate('/ngo/verification');
-      }, 1500);
+      setShowUnverifiedModal(true);
       return;
     }
 
@@ -301,6 +296,40 @@ const FoodDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Verification Required Modal */}
+      {showUnverifiedModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-100 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+              <ShieldCheck className="w-6 h-6 text-rose-600" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-black text-slate-900">Verification Required</h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Only Verified NGOs can accept food donations. Please complete mandatory document verification to unlock this feature.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                onClick={() => setShowUnverifiedModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowUnverifiedModal(false);
+                  navigate('/ngo/verification');
+                }}
+                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-emerald-btn"
+              >
+                Complete Verification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
