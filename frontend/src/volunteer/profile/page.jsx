@@ -23,18 +23,19 @@ import { getApiUrl } from '../../config/api';
 const VolunteerProfilePage = () => {
   const { user, token, updateUser } = useAuth();
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [profile, setProfile] = useState({
-    name: user?.name || 'Volunteer Courier',
+    name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phone || '+91 98765 43210',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    verificationStatus: user?.verificationStatus === 'approved' ? 'Verified NGO Partner' : 'Verified Volunteer Courier',
-    joinedDate: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'January 2024',
-    vehicleType: 'Delivery Van',
-    vehicleNumber: 'KA-05-EV-4821',
-    emergencyContact: '+91 91234 56789',
-    deliveryRadius: '10 km',
-    availability: 'Mon - Sat (8 AM - 6 PM)',
+    phone: user?.phone || '',
+    vehicleType: user?.vehicleType || '',
+    vehicleNumber: user?.vehicleNumber || '',
+    emergencyContact: user?.emergencyContact || '',
+    deliveryRadius: user?.deliveryRadius || '',
+    availability: user?.availability || '',
+    verificationStatus: user?.verificationStatus === 'approved' ? 'Verified Volunteer Courier' : 'Verification Pending',
+    joinedDate: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
     totalDeliveries: 0,
   });
 
@@ -50,10 +51,16 @@ const VolunteerProfilePage = () => {
     if (user) {
       setProfile((prev) => ({
         ...prev,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-        phone: user.phone || prev.phone,
-        verificationStatus: user.verificationStatus === 'approved' ? 'Verified NGO Partner' : 'Verified Volunteer Courier',
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        vehicleType: user.vehicleType || '',
+        vehicleNumber: user.vehicleNumber || '',
+        emergencyContact: user.emergencyContact || '',
+        deliveryRadius: user.deliveryRadius || '',
+        availability: user.availability || '',
+        verificationStatus: user.verificationStatus === 'approved' ? 'Verified Volunteer Courier' : 'Verification Pending',
+        joinedDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
       }));
     }
   }, [user]);
@@ -101,10 +108,44 @@ const VolunteerProfilePage = () => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setSaving(true);
+    setSavedSuccess(false);
+    setErrorMessage('');
+
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      const res = await fetch(getApiUrl('/api/users/profile'), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          name: profile.name,
+          phone: profile.phone,
+          vehicleType: profile.vehicleType,
+          vehicleNumber: profile.vehicleNumber,
+          emergencyContact: profile.emergencyContact,
+          deliveryRadius: profile.deliveryRadius,
+          availability: profile.availability,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.user) {
+        updateUser(data.user);
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      } else {
+        setErrorMessage(data.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      setErrorMessage('Server connection error. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -112,13 +153,8 @@ const VolunteerProfilePage = () => {
       {/* Header Banner */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="relative shrink-0">
-            <img
-              src={profile.avatar}
-              alt={profile.name}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-4 ring-emerald-500/20 shadow-md"
-            />
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-emerald-500 ring-2 ring-white" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold shrink-0">
+            <Truck className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
           </div>
 
           <div>

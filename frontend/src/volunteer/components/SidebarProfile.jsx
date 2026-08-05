@@ -1,29 +1,29 @@
 import React from 'react';
 import { LogOut, BadgeCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * SidebarProfile component for Volunteer Module
+ * Reads real MongoDB profile from AuthContext.
  */
-const SidebarProfile = ({
-  isCollapsed = false,
-  user = {
-    name: 'Alex Johnson',
-    email: 'alex.j@foodbridge.org',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    verificationStatus: 'Verified Courier',
-  },
-  onLogout,
-}) => {
+const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
   const navigate = useNavigate();
+  const { user: authUser, logout } = useAuth();
+  const user = authUser || { name: 'Volunteer Courier', email: '' };
 
   const handleLogoutClick = () => {
     if (onLogout) {
       onLogout();
     } else {
+      logout();
       navigate('/');
     }
   };
+
+  const displayName = user.name || 'Volunteer Courier';
+  const email = user.email || '';
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <div className={`mt-auto border-t border-[#E7EAF0] pt-3.5 pb-3 transition-all duration-200 ${isCollapsed ? 'px-2' : 'px-3'}`}>
@@ -35,11 +35,9 @@ const SidebarProfile = ({
             onClick={() => navigate('/volunteer/profile')}
             title={`${user.name} (${user.email}) - ${user.verificationStatus}`}
           >
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-500/30"
-            />
+            <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-black text-xs flex items-center justify-center ring-2 ring-emerald-500/30">
+              {avatarLetter}
+            </div>
             <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
           </div>
 
@@ -56,20 +54,18 @@ const SidebarProfile = ({
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#f7f8fb] border border-[#E7EAF0]">
             <div className="relative shrink-0">
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-emerald-500/20"
-              />
+              <div className="w-10 h-10 rounded-full bg-emerald-500 text-white font-black text-sm flex items-center justify-center ring-2 ring-emerald-500/20 shadow-xs">
+                {avatarLetter}
+              </div>
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
             </div>
 
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold text-[#0F172A] truncate">
-                {user.name}
+                {displayName}
               </h4>
               <p className="text-[11px] text-[#64748B] truncate">
-                {user.email}
+                {email}
               </p>
 
               <div className="mt-1">

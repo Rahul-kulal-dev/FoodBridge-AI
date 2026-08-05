@@ -29,9 +29,9 @@ const NgoProfilePage = () => {
     email: '',
     phone: '',
     address: '',
-    servingCapacity: '850 Meals / Day',
-    operatingHours: '8:00 AM – 10:00 PM (Daily)',
-    foodCategories: 'Cooked Meals, Bakery Goods, Packaged Dairy, Fresh Fruits & Produce',
+    servingCapacity: '',
+    operatingHours: '',
+    foodCategories: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,9 +46,9 @@ const NgoProfilePage = () => {
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
-        servingCapacity: '850 Meals / Day',
-        operatingHours: '8:00 AM – 10:00 PM (Daily)',
-        foodCategories: 'Cooked Meals, Bakery Goods, Packaged Dairy, Fresh Fruits & Produce',
+        servingCapacity: user.servingCapacity || '',
+        operatingHours: user.operatingHours || '',
+        foodCategories: user.foodCategories || '',
       });
     }
   }, [user]);
@@ -65,17 +65,21 @@ const NgoProfilePage = () => {
     setSavedSuccess(false);
 
     try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
       const res = await fetch(getApiUrl('/api/users/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           name: formData.name,
           organizationName: formData.organizationName,
           phone: formData.phone,
           address: formData.address,
+          servingCapacity: formData.servingCapacity,
+          operatingHours: formData.operatingHours,
+          foodCategories: formData.foodCategories,
         }),
       });
 

@@ -70,6 +70,38 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    vehicleType: {
+      type: String,
+      default: '',
+    },
+    vehicleNumber: {
+      type: String,
+      default: '',
+    },
+    emergencyContact: {
+      type: String,
+      default: '',
+    },
+    deliveryRadius: {
+      type: String,
+      default: '',
+    },
+    availability: {
+      type: String,
+      default: '',
+    },
+    servingCapacity: {
+      type: String,
+      default: '',
+    },
+    operatingHours: {
+      type: String,
+      default: '',
+    },
+    foodCategories: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );

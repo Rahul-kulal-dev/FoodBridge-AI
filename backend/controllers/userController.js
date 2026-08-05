@@ -21,40 +21,52 @@ const getUserProfile = async (req, res, next) => {
 // @access  Private
 const updateUserProfile = async (req, res, next) => {
   try {
-    const { name, phone, address, organizationName, location } = req.body;
+    const {
+      name,
+      phone,
+      address,
+      organizationName,
+      location,
+      vehicleType,
+      vehicleNumber,
+      emergencyContact,
+      deliveryRadius,
+      availability,
+      servingCapacity,
+      operatingHours,
+      foodCategories,
+    } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
-    if (address) user.address = address;
-    if (organizationName) user.organizationName = organizationName;
-    if (location) user.location = location;
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
+    if (organizationName !== undefined) user.organizationName = organizationName;
+    if (location !== undefined) user.location = location;
+    if (vehicleType !== undefined) user.vehicleType = vehicleType;
+    if (vehicleNumber !== undefined) user.vehicleNumber = vehicleNumber;
+    if (emergencyContact !== undefined) user.emergencyContact = emergencyContact;
+    if (deliveryRadius !== undefined) user.deliveryRadius = deliveryRadius;
+    if (availability !== undefined) user.availability = availability;
+    if (servingCapacity !== undefined) user.servingCapacity = servingCapacity;
+    if (operatingHours !== undefined) user.operatingHours = operatingHours;
+    if (foodCategories !== undefined) user.foodCategories = foodCategories;
 
     if (req.body.password) {
       user.password = req.body.password;
     }
 
     const updatedUser = await user.save();
+    const userObject = updatedUser.toObject();
+    delete userObject.password;
+
     res.json({
       success: true,
       message: 'Profile updated successfully',
-      user: {
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        user_role: updatedUser.user_role || updatedUser.role,
-        verificationStatus: updatedUser.verificationStatus,
-        verificationDocs: updatedUser.verificationDocs || [],
-        rejectionReason: updatedUser.rejectionReason || '',
-        phone: updatedUser.phone,
-        address: updatedUser.address,
-        organizationName: updatedUser.organizationName,
-        location: updatedUser.location,
-      },
+      user: userObject,
     });
   } catch (error) {
     next(error);
