@@ -18,8 +18,11 @@ const ProtectedRoute = ({ allowedRoles }) => {
     );
   }
 
-  // If not authenticated, redirect to landing page
+  // If not authenticated, redirect based on portal type
   if (!token || !user) {
+    if (allowedRoles && allowedRoles.includes('admin')) {
+      return <Navigate to="/admin/login" replace />;
+    }
     return <Navigate to="/" replace />;
   }
 
@@ -27,6 +30,9 @@ const ProtectedRoute = ({ allowedRoles }) => {
   if (allowedRoles && allowedRoles.length > 0 && user) {
     const userRole = user.user_role || user.role || 'donor';
     if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
+      if (allowedRoles.includes('admin')) {
+        return <Navigate to="/admin/login" replace />;
+      }
       return <Navigate to="/" replace />;
     }
   }

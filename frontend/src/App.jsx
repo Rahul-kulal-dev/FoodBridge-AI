@@ -58,6 +58,7 @@ import AdminVerificationsPage from './admin/verifications/page';
 import AdminUsersPage from './admin/users/page';
 import AdminDonationsPage from './admin/donations/page';
 import AdminFeedbackPage from './admin/feedback/page';
+import AdminLoginPage from './admin/login/page';
 
 /**
  * Landing Page Component
@@ -114,6 +115,9 @@ function App() {
         <Routes>
           {/* Landing Page Route */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Admin Login Page */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
           {/* Admin Portal Routes */}
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
