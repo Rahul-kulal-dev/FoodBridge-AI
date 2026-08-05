@@ -59,11 +59,15 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       }`}
     >
       {/* Brand Header matching Landing/Donor */}
-      <div className="p-4 sm:p-5 border-b border-[#E7EAF0] flex items-center justify-between">
-        <Link to="/admin" className="flex items-center gap-2.5 overflow-hidden group">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 transition-transform group-hover:scale-105 shrink-0">
+      <div className="p-4 sm:p-5 border-b border-[#E7EAF0] flex items-center min-h-[73px] shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer shrink-0"
+          >
             <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
-          </div>
+          </button>
           {!isCollapsed && (
             <div className="truncate">
               <span className="text-lg font-extrabold text-[#0F172A] tracking-tight block truncate">
@@ -74,15 +78,7 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               </span>
             </div>
           )}
-        </Link>
-
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:text-[#0F172A] hover:bg-slate-100 transition-colors cursor-pointer"
-          title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-        >
-          {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
+        </div>
       </div>
 
       {/* Navigation List */}

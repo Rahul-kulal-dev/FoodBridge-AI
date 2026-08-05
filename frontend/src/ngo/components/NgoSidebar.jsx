@@ -115,20 +115,21 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
             <button
               onClick={() => setIsCollapsed(false)}
               title="Expand Sidebar"
-              className="relative group w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer"
             >
               <Building2 className="w-5 h-5 stroke-[2.2]" />
-              <span className="absolute -bottom-1 -right-1 bg-white border border-[#E7EAF0] rounded-full p-0.5 shadow-xs text-emerald-600">
-                <ChevronRight className="w-3 h-3" />
-              </span>
             </button>
           </div>
         ) : (
-          <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between min-h-[73px] shrink-0">
+          <div className="p-4 border-b border-[#E7EAF0] flex items-center min-h-[73px] shrink-0">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 shrink-0 transition-transform hover:scale-105">
+              <button
+                onClick={() => setIsCollapsed(true)}
+                title="Collapse Sidebar"
+                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer shrink-0"
+              >
                 <Building2 className="w-5 h-5 stroke-[2.2]" />
-              </div>
+              </button>
 
               <div className="flex flex-col min-w-0 transition-opacity duration-200">
                 <span className="text-base font-extrabold text-[#0F172A] tracking-tight leading-tight truncate">
@@ -139,14 +140,6 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
                 </span>
               </div>
             </div>
-
-            <button
-              onClick={() => setIsCollapsed(true)}
-              aria-label="Collapse sidebar"
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#f7f8fb] border border-transparent hover:border-[#E7EAF0] transition-all shrink-0 cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
           </div>
         )}
 
