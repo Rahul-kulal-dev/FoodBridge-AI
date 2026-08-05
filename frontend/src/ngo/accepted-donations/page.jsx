@@ -56,46 +56,48 @@ const AcceptedDonationsPage = () => {
   const getStatusBadgeStyle = (status) => {
     switch (status) {
       case 'accepted':
-        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
       case 'picked_up':
-        return 'bg-amber-50 text-amber-700 border border-amber-200';
+      case 'in_transit':
+        return 'bg-amber-50 text-amber-800 border border-amber-200/80';
       case 'delivered':
-        return 'bg-blue-50 text-blue-700 border border-blue-200';
+        return 'bg-blue-50 text-blue-800 border border-blue-200/80';
       default:
-        return 'bg-slate-100 text-[#0F172A] border border-[#E7EAF0]';
+        return 'bg-slate-100 text-slate-700 border border-slate-200';
     }
   };
 
   const getStatusLabel = (status) => {
     switch (status) {
       case 'accepted':
-        return 'Accepted / Volunteer Queue';
+        return 'Queued for Courier';
       case 'picked_up':
+      case 'in_transit':
         return 'In Transit';
       case 'delivered':
         return 'Delivered';
       default:
-        return status || 'Accepted';
+        return status ? status.replace('_', ' ') : 'Accepted';
     }
   };
 
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-6 animate-fade-in pb-12 bg-[#F8FAFC]">
       {/* Header Banner */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+      <div className="bg-white p-5 sm:p-6 rounded-[20px] border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.03em]">
             Accepted Surplus Food Donations
           </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">
-            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking directly from database
+          <p className="text-xs text-[#64748B] mt-1 font-medium max-w-2xl">
+            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking directly from MongoDB database
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             to="/ngo/track-volunteer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer text-center"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
           >
             <Truck className="w-4 h-4" />
             <span>Track Live Volunteer</span>
@@ -104,80 +106,94 @@ const AcceptedDonationsPage = () => {
       </div>
 
       {/* Table Container */}
-      <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-[#E7EAF0] flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Accepted Donations Queue</h2>
-          <span className="text-xs font-bold text-[#64748B]">{donations.length} Accepted Orders</span>
+      <div className="bg-white rounded-[20px] border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-base sm:text-lg font-black text-[#0F172A]">Accepted Donations Queue</h2>
+          <span className="text-xs font-extrabold text-[#16A34A] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+            {donations.length} Active Orders
+          </span>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center space-y-3">
+          <div className="p-16 text-center space-y-3">
             <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 font-bold">Loading accepted donations from database...</p>
+            <p className="text-xs text-slate-500 font-bold">Fetching accepted donations from database...</p>
           </div>
         ) : donations.length === 0 ? (
-          <div className="p-12 text-center space-y-3">
-            <PackageCheck className="w-10 h-10 text-slate-300 mx-auto" />
-            <h3 className="text-sm font-bold text-[#0F172A]">No Accepted Donations Yet</h3>
+          <div className="p-16 text-center space-y-3">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-[#16A34A] mx-auto flex items-center justify-center border border-emerald-100">
+              <PackageCheck className="w-8 h-8 stroke-[1.5]" />
+            </div>
+            <h3 className="text-base font-black text-[#0F172A]">No Accepted Donations Yet</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Browse available surplus food listings and click "Accept Donation" to add them to your queue.
+              Browse available surplus food listings and click "Accept Donation" to add them to your live dispatch queue.
             </p>
             <Link
               to="/ngo/browse-food"
-              className="inline-block mt-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all"
+              className="inline-block mt-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all"
             >
               Browse Surplus Food
             </Link>
           </div>
         ) : (
           <>
-            {/* Mobile View Card List (< md) */}
+            {/* Mobile View Cards (< md) */}
             <div className="grid grid-cols-1 gap-3 p-4 md:hidden">
               {donations.map((item) => {
                 const docId = `DON-${item._id.slice(-4).toUpperCase()}`;
                 const donorName = item.donorId?.organizationName || item.donorId?.name || 'Donor';
-                const volunteerName = item.volunteerId?.name ? `${item.volunteerId.name} (${item.volunteerId.phone || 'Courier'})` : 'Volunteer Unassigned';
+                const hasVolunteer = Boolean(item.volunteerId?.name);
+                const volunteerName = hasVolunteer
+                  ? `${item.volunteerId.name} (${item.volunteerId.phone || 'Courier'})`
+                  : 'Pending Courier';
                 const dateStr = item.updatedAt ? new Date(item.updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'N/A';
 
                 return (
                   <div
                     key={item._id}
-                    className="p-3.5 rounded-xl border border-[#E7EAF0] bg-[#f8fafc]/50 space-y-2.5"
+                    className="p-4 rounded-xl border border-slate-200/80 bg-white space-y-3 shadow-xs"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-xs text-[#0F172A] bg-white px-2 py-0.5 rounded border border-[#E7EAF0]">
+                      <span className="font-mono font-black text-xs text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md">
                         {docId}
                       </span>
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getStatusBadgeStyle(item.status)} uppercase`}>
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-lg ${getStatusBadgeStyle(item.status)} uppercase`}>
                         {getStatusLabel(item.status)}
                       </span>
                     </div>
 
                     <div>
-                      <div className="font-bold text-xs text-[#0F172A]">{item.title}</div>
-                      <div className="text-[11px] text-[#64748B] font-medium mt-0.5">
-                        Donor: {donorName} • Quantity: {item.quantity} {item.unit || 'kg'}
-                      </div>
+                      <h4 className="font-extrabold text-sm text-[#0F172A]">{item.title}</h4>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        Donor: <span className="font-bold text-slate-700">{donorName}</span> • Quantity: <span className="font-bold text-slate-700">{item.quantity} {item.unit || 'kg'}</span>
+                      </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#E7EAF0]/60 flex items-center justify-between text-[11px]">
-                      <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                        <User className="w-3.5 h-3.5 text-emerald-600" />
-                        {volunteerName}
-                      </span>
+                    <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                      {hasVolunteer ? (
+                        <span className="inline-flex items-center gap-1.5 font-bold text-slate-800">
+                          <User className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>{volunteerName}</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200/60 text-[11px]">
+                          <Clock className="w-3.5 h-3.5 text-amber-500" />
+                          <span>Pending Courier</span>
+                        </span>
+                      )}
 
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => navigate(`/ngo/food-details?id=${item._id}`)}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 text-[#0F172A] text-xs font-bold cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors cursor-pointer"
                         >
                           View
                         </button>
                         <button
                           onClick={() => navigate(`/ngo/track-volunteer?id=${item._id}`)}
-                          className="px-3 py-1 rounded-lg bg-emerald-500 text-white text-xs font-bold flex items-center gap-1 cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                         >
-                          <Truck className="w-3 h-3" />
+                          <Truck className="w-3.5 h-3.5" />
                           <span>Track</span>
                         </button>
                       </div>
@@ -187,57 +203,71 @@ const AcceptedDonationsPage = () => {
               })}
             </div>
 
-            {/* Desktop & Tablet Table View (>= md) */}
+            {/* Desktop Table View (>= md) */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[760px]">
                 <thead>
-                  <tr className="bg-[#f7f8fb] text-[11px] font-bold text-[#64748B] uppercase tracking-wider border-b border-[#E7EAF0]">
-                    <th className="py-3.5 px-6">Donation ID</th>
-                    <th className="py-3.5 px-6">Food</th>
-                    <th className="py-3.5 px-6">Donor</th>
-                    <th className="py-3.5 px-6">Volunteer Courier</th>
-                    <th className="py-3.5 px-6">Accepted Time</th>
-                    <th className="py-3.5 px-6">Status</th>
-                    <th className="py-3.5 px-6 text-right">Actions</th>
+                  <tr className="bg-slate-50/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+                    <th className="py-4 px-6 w-32 whitespace-nowrap">Donation ID</th>
+                    <th className="py-4 px-6 min-w-[180px] whitespace-nowrap">Food Package</th>
+                    <th className="py-4 px-6 min-w-[140px] whitespace-nowrap">Donor</th>
+                    <th className="py-4 px-6 min-w-[180px] whitespace-nowrap">Volunteer Courier</th>
+                    <th className="py-4 px-6 whitespace-nowrap">Accepted Time</th>
+                    <th className="py-4 px-6 whitespace-nowrap">Status</th>
+                    <th className="py-4 px-6 text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E7EAF0] text-xs font-medium text-[#334155]">
+                <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
                   {donations.map((item) => {
                     const docId = `DON-${item._id.slice(-4).toUpperCase()}`;
                     const donorName = item.donorId?.organizationName || item.donorId?.name || 'Donor';
-                    const volunteerName = item.volunteerId?.name ? `${item.volunteerId.name} (${item.volunteerId.phone || 'Courier'})` : 'Volunteer Unassigned';
+                    const hasVolunteer = Boolean(item.volunteerId?.name);
+                    const volunteerName = hasVolunteer
+                      ? `${item.volunteerId.name} (${item.volunteerId.phone || 'Courier'})`
+                      : 'Pending Courier';
                     const dateStr = item.updatedAt ? new Date(item.updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'N/A';
 
                     return (
-                      <tr key={item._id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-4 px-6 font-bold text-[#0F172A] font-mono">{docId}</td>
-                        <td className="py-4 px-6 font-semibold text-[#0F172A]">
-                          {item.title} ({item.quantity} {item.unit || 'kg'})
-                        </td>
-                        <td className="py-4 px-6">{donorName}</td>
-                        <td className="py-4 px-6">
-                          <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                            <User className="w-3.5 h-3.5 text-emerald-600" />
-                            {volunteerName}
+                      <tr key={item._id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-4 px-6 font-black text-slate-900 font-mono whitespace-nowrap">
+                          <span className="bg-slate-100 px-2.5 py-1 rounded-md text-slate-800 border border-slate-200/60">
+                            {docId}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-[#64748B]">{dateStr}</td>
-                        <td className="py-4 px-6">
-                          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${getStatusBadgeStyle(item.status)} uppercase text-[10px]`}>
+                        <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
+                          {item.title} <span className="font-normal text-slate-500">({item.quantity} {item.unit || 'kg'})</span>
+                        </td>
+                        <td className="py-4 px-6 font-semibold text-slate-800 whitespace-nowrap">{donorName}</td>
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          {hasVolunteer ? (
+                            <span className="inline-flex items-center gap-1.5 font-bold text-slate-800">
+                              <User className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>{volunteerName}</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 font-medium text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200/60 text-[11px]">
+                              <Clock className="w-3.5 h-3.5 text-amber-500" />
+                              <span>Pending Courier</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-slate-500 whitespace-nowrap font-medium">{dateStr}</td>
+                        <td className="py-4 px-6 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-black px-3 py-1 rounded-lg ${getStatusBadgeStyle(item.status)}`}>
                             {getStatusLabel(item.status)}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-right">
+                        <td className="py-4 px-6 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => navigate(`/ngo/food-details?id=${item._id}`)}
-                              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all cursor-pointer"
+                              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all cursor-pointer"
                             >
                               View
                             </button>
                             <button
                               onClick={() => navigate(`/ngo/track-volunteer?id=${item._id}`)}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                             >
                               <Truck className="w-3.5 h-3.5" />
                               <span>Track</span>
