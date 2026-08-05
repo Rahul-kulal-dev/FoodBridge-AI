@@ -111,7 +111,7 @@ export default function AboutContactSection() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Sarah Jenkins"
+                    placeholder="Enter your name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"
@@ -124,7 +124,7 @@ export default function AboutContactSection() {
                     <input
                       type="email"
                       required
-                      placeholder="sarah@bistro.com"
+                      placeholder="Enter your email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"

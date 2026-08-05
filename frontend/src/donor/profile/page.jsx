@@ -136,7 +136,7 @@ const DonorProfilePage = () => {
             </label>
             <input
               type="text"
-              placeholder="e.g. Ocean View Bistro"
+              placeholder="Enter organization name"
               value={formData.organizationName}
               onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
               className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] text-xs text-[#0F172A] focus:outline-hidden focus:border-emerald-500 font-medium"
@@ -151,7 +151,7 @@ const DonorProfilePage = () => {
             <input
               type="text"
               required
-              placeholder="e.g. Alex Rivers"
+              placeholder="Enter contact person name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] text-xs text-[#0F172A] focus:outline-hidden focus:border-emerald-500 font-medium"
@@ -178,7 +178,7 @@ const DonorProfilePage = () => {
             </label>
             <input
               type="tel"
-              placeholder="+1 (555) 000-0000"
+              placeholder="Enter phone number"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] text-xs text-[#0F172A] focus:outline-hidden focus:border-emerald-500 font-medium"

@@ -195,7 +195,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Alex Rivers"
+                      placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500"
@@ -208,7 +208,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                   <input
                     type="email"
                     required
-                    placeholder="alex@restaurant.com"
+                    placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500"
@@ -221,7 +221,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                     type="password"
                     required
                     minLength={6}
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500"
@@ -233,7 +233,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                     <label className="block text-xs font-bold text-[#0F172A] uppercase mb-1">Organization Name</label>
                     <input
                       type="text"
-                      placeholder="e.g. Ocean View Bakery & Bistro"
+                      placeholder="Enter your organization name"
                       value={formData.org}
                       onChange={(e) => setFormData({ ...formData, org: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500"
