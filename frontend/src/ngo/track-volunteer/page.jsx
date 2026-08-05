@@ -119,7 +119,7 @@ const TrackVolunteerPage = () => {
             Live Volunteer Courier Dispatch
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-medium">
-            Tracking order <span className="font-mono font-bold text-[#0F172A]">{docId}</span> — {activeDonation.title}
+            Tracking order <span className="font-mono font-bold text-[#0F172A]">{docId}</span> - {activeDonation.title}
           </p>
         </div>
 
@@ -187,20 +187,18 @@ const TrackVolunteerPage = () => {
                 <div key={idx} className="flex items-start gap-3 relative">
                   {idx !== timelineSteps.length - 1 && (
                     <div
-                      className={`absolute left-3.5 top-7 bottom-0 w-0.5 ${
-                        step.completed ? 'bg-emerald-500' : 'bg-slate-200'
-                      }`}
+                      className={`absolute left-3.5 top-7 bottom-0 w-0.5 ${step.completed ? 'bg-emerald-500' : 'bg-slate-200'
+                        }`}
                     />
                   )}
 
                   <div
-                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 font-bold text-xs ${
-                      step.completed
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 font-bold text-xs ${step.completed
                         ? 'bg-emerald-500 text-white shadow-xs'
                         : step.active
-                        ? 'bg-amber-500 text-white animate-pulse shadow-xs'
-                        : 'bg-slate-100 text-slate-400 border border-slate-200'
-                    }`}
+                          ? 'bg-amber-500 text-white animate-pulse shadow-xs'
+                          : 'bg-slate-100 text-slate-400 border border-slate-200'
+                      }`}
                   >
                     {step.completed ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
                   </div>
@@ -208,9 +206,8 @@ const TrackVolunteerPage = () => {
                   <div className="flex-1 pt-0.5">
                     <div className="flex items-center justify-between">
                       <h4
-                        className={`text-xs font-extrabold ${
-                          step.completed || step.active ? 'text-[#0F172A]' : 'text-slate-400'
-                        }`}
+                        className={`text-xs font-extrabold ${step.completed || step.active ? 'text-[#0F172A]' : 'text-slate-400'
+                          }`}
                       >
                         {step.label}
                       </h4>

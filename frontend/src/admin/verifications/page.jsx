@@ -379,7 +379,7 @@ const AdminVerificationsPage = () => {
         onClose={() => setActiveDocModal(null)}
         docs={activeDocModal?.verificationDocs || []}
         doc={activeDocModal}
-        title={`Verification Documents — ${activeDocModal?.organizationName || activeDocModal?.name || ''}`}
+        title={`Verification Documents - ${activeDocModal?.organizationName || activeDocModal?.name || ''}`}
         showPreview={true}
       />
     </div>

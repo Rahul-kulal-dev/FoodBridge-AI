@@ -160,9 +160,8 @@ const FoodDetailsPage = () => {
       </div>
 
       {actionMessage && (
-        <div className={`p-4 rounded-xl border text-xs font-bold flex items-center justify-between animate-fade-in ${
-          actionMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
-        }`}>
+        <div className={`p-4 rounded-xl border text-xs font-bold flex items-center justify-between animate-fade-in ${actionMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+          }`}>
           <span>{actionMessage.text}</span>
           <button onClick={() => setActionMessage(null)} className="font-mono text-sm cursor-pointer">✕</button>
         </div>
@@ -197,7 +196,7 @@ const FoodDetailsPage = () => {
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
               <h4 className="text-xs font-extrabold text-[#0F172A]">AI Dispatch Priority Recommendation</h4>
-              <p className="text-xs text-emerald-800 font-bold mt-0.5">HIGH PRIORITY — Recommended for immediate NGO dispatch</p>
+              <p className="text-xs text-emerald-800 font-bold mt-0.5">HIGH PRIORITY - Recommended for immediate NGO dispatch</p>
             </div>
           </div>
         </div>

@@ -46,13 +46,13 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
     const payload = initialType === 'login'
       ? { email: formData.email, password: formData.password }
       : {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          user_role: role,
-          role: role,
-          organizationName: formData.org || '',
-        };
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        user_role: role,
+        role: role,
+        organizationName: formData.org || '',
+      };
 
     try {
       const endpoint = initialType === 'login'
@@ -68,14 +68,14 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
       const data = await res.json();
 
       if (res.ok && data.token && data.user) {
-        // Successful authentication — update AuthContext state (in-memory & MongoDB Atlas)
+        // Successful authentication - update AuthContext state (in-memory & MongoDB Atlas)
         login(data.token, data.user);
 
         const finalRole = data.user.user_role || data.user.role || role;
         const redirectRoute = finalRole === 'admin' ? '/admin'
           : finalRole === 'ngo' ? '/ngo'
-          : finalRole === 'volunteer' ? '/volunteer'
-          : '/donor';
+            : finalRole === 'volunteer' ? '/volunteer'
+              : '/donor';
 
         setSubmitted(true);
         setTimeout(() => {
@@ -83,11 +83,11 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
           navigate(redirectRoute);
         }, 1200);
       } else {
-        // Server returned an error — show it, do NOT navigate
+        // Server returned an error - show it, do NOT navigate
         setErrorMsg(data.message || 'Authentication failed. Please check your credentials.');
       }
     } catch (err) {
-      // Network error — server is likely down
+      // Network error - server is likely down
       setErrorMsg('Cannot connect to server. Please check backend connection to MongoDB Atlas.');
     } finally {
       setLoading(false);
