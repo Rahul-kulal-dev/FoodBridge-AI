@@ -140,12 +140,61 @@ const CreateDonationPage = () => {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
 
+  // Auto fill donor saved address if available
+  useEffect(() => {
+    if (user && user.address && !address) {
+      setAddress(user.address);
+    }
+  }, [user]);
+
   const handleUseCurrentLocation = () => {
     setIsLocating(true);
-    setTimeout(() => {
-      setAddress('Current Location: Sector 14, Central Boulevard, Tech City, 560034');
+
+    if (!navigator.geolocation) {
+      if (user && user.address) {
+        setAddress(user.address);
+      } else {
+        setAddress('Bengaluru, Karnataka, India');
+      }
       setIsLocating(false);
-    }, 600);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          // Query OpenStreetMap Nominatim API for real physical address
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await res.json();
+          if (data && data.display_name) {
+            setAddress(data.display_name);
+          } else {
+            setAddress(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`);
+          }
+        } catch (err) {
+          if (user && user.address) {
+            setAddress(user.address);
+          } else {
+            setAddress(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`);
+          }
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (err) => {
+        console.warn('Geolocation access error:', err);
+        if (user && user.address) {
+          setAddress(user.address);
+        } else {
+          setAddress('Bengaluru, Karnataka, India');
+        }
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   };
 
   const handleSubmit = async (e) => {
