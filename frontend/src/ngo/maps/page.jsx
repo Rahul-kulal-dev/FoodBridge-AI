@@ -15,9 +15,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import OpenStreetMap from '../../components/OpenStreetMap';
 
 /**
- * NGO Google Maps Integration Page (/ngo/maps)
+ * NGO OpenStreetMap Integration Page (/ngo/maps)
  * Maps live database donations and volunteer dispatch positions.
  */
 const NgoMapsPage = () => {
@@ -117,99 +118,53 @@ const NgoMapsPage = () => {
     };
   });
 
+  const ngoOsmMarker = {
+    lat: user?.location?.lat || 12.9716,
+    lng: user?.location?.lng || 77.5946,
+    title: user?.organizationName || user?.name || 'NGO Hub (Your Location)',
+    description: user?.address || 'NGO Headquarters',
+    iconType: 'ngo',
+  };
+
+  const donationOsmMarkers = donations.map((d, idx) => {
+    const latOffset = (idx % 2 === 0 ? 1 : -1) * (0.008 + (idx * 0.005));
+    const lngOffset = (idx % 3 === 0 ? -1 : 1) * (0.007 + (idx * 0.004));
+    return {
+      lat: (user?.location?.lat || 12.9716) + latOffset,
+      lng: (user?.location?.lng || 77.5946) + lngOffset,
+      title: d.title || `${d.foodType} (${d.quantity} ${d.unit})`,
+      description: `Donor: ${d.donorId?.organizationName || d.donorId?.name || 'Verified Donor'} • Expiry: ${d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'}`,
+      iconType: 'donor',
+    };
+  });
+
+  const allOsmMarkers = [ngoOsmMarker, ...donationOsmMarkers];
+
   return (
-    <div className="w-full space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-            Google Maps Dispatch Radar
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
+            NGO OpenStreetMap Radar & Surplus Heatmap
           </h1>
-          <p className="text-xs text-[#64748B] mt-1 font-medium">
-            Real-time live map displaying surplus food donations directly fetched from MongoDB database
+          <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
+            Live OpenStreetMap tile layer mapping active MongoDB surplus donations and volunteer couriers
           </p>
         </div>
 
-        {/* Legend Pills */}
-        <div className="flex items-center gap-3 bg-[#f7f8fb] p-2 rounded-xl border border-[#E7EAF0] text-xs font-bold">
-          <span className="flex items-center gap-1.5 text-blue-700">
-            <span className="w-3 h-3 rounded-full bg-blue-500 shadow-xs" /> NGO Location
-          </span>
-          <span className="flex items-center gap-1.5 text-emerald-700">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-xs" /> Available Donation
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            {donations.length} Active Donations
           </span>
         </div>
       </div>
 
       {/* Main Interactive Map Container */}
       <div className="relative w-full h-[540px] bg-slate-900 rounded-2xl border border-[#E7EAF0] overflow-hidden shadow-xl">
-        {/* Map Background Canvas Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `radial-gradient(#10b981 1px, transparent 1px), radial-gradient(#0284c7 1px, #0f172a 1px)`,
-            backgroundSize: '30px 30px',
-            backgroundPosition: '0 0, 15px 15px',
-          }}
-        />
-
-        {/* Map Roads Visual Simulation */}
-        <svg className="absolute inset-0 w-full h-full stroke-slate-700/60 stroke-[3] fill-none">
-          <path d="M 0 150 Q 200 180 400 120 T 800 200 T 1200 160" />
-          <path d="M 150 0 Q 180 200 250 400 T 200 600" />
-          <path d="M 600 0 Q 550 250 650 500" />
-          <path d="M 0 350 C 300 300, 500 450, 1200 380" strokeDasharray="6 6" className="stroke-emerald-500/50" />
-        </svg>
-
-        {/* Radar Pulse Effect around NGO */}
-        <div
-          className="absolute w-40 h-40 rounded-full border-2 border-emerald-500/30 animate-ping pointer-events-none"
-          style={{ left: `${ngoLocation.x - 5}%`, top: `${ngoLocation.y - 12}%` }}
-        />
-
-        {/* NGO Main Location Marker (Blue) */}
-        <div
-          onClick={() => setSelectedMarker(ngoLocation)}
-          className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-20"
-          style={{ left: `${ngoLocation.x}%`, top: `${ngoLocation.y}%` }}
-        >
-          <div className="relative flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-blue-600 border-2 border-white shadow-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="absolute -bottom-6 bg-slate-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap border border-slate-700 shadow-md">
-              {ngoLocation.name}
-            </span>
-          </div>
-        </div>
-
-        {/* Dynamic Markers for DB Donations */}
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/60 z-30">
-            <div className="text-center text-white space-y-2">
-              <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto" />
-              <p className="text-xs font-bold">Loading live map markers from database...</p>
-            </div>
-          </div>
-        ) : (
-          markers.map((marker) => (
-            <div
-              key={marker.id}
-              onClick={() => setSelectedMarker(marker)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer group z-20"
-              style={{ left: `${marker.x}%`, top: `${marker.y}%` }}
-            >
-              <div className="relative flex items-center justify-center">
-                <div className="w-9 h-9 rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white group-hover:scale-125 transition-transform bg-emerald-500">
-                  <ShoppingBag className="w-4.5 h-4.5" />
-                </div>
-                <span className="absolute -bottom-6 bg-slate-900/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap border border-slate-700 shadow-md truncate max-w-[140px]">
-                  {marker.name}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
+        <OpenStreetMap markers={allOsmMarkers} drawRoute={false} className="w-full h-full" />
+      </div>
 
         {/* Selected Marker Details Modal Popup Card */}
         {selectedMarker && (

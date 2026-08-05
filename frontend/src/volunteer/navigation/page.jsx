@@ -10,12 +10,12 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  Loader2,
-  PackageCheck
+  Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import OpenStreetMap from '../../components/OpenStreetMap';
 
 /**
  * Google Maps Navigation Page (/volunteer/navigation)
@@ -127,6 +127,30 @@ const NavigationPage = () => {
     );
   }
 
+  const osmMarkers = activeTask ? [
+    {
+      lat: 12.9650,
+      lng: 77.5850,
+      title: 'Courier (You)',
+      description: 'Volunteer Courier Position',
+      iconType: 'courier',
+    },
+    {
+      lat: 12.9750,
+      lng: 77.6000,
+      title: activeTask.donorName,
+      description: activeTask.donorAddress || 'Donor Pickup Location',
+      iconType: 'donor',
+    },
+    {
+      lat: 12.9850,
+      lng: 77.6150,
+      title: activeTask.ngoName,
+      description: activeTask.ngoAddress || 'NGO Dropoff Hub',
+      iconType: 'ngo',
+    },
+  ] : [];
+
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
       {/* Header Banner */}
@@ -136,7 +160,7 @@ const NavigationPage = () => {
             GPS Turn-by-Turn Navigation
           </h1>
           <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            AI optimized dispatch route connecting Volunteer Courier ➔ Donor Pickup ➔ NGO Dropoff
+            OpenStreetMap live dispatch route connecting Volunteer Courier ➔ Donor Pickup ➔ NGO Dropoff
           </p>
         </div>
 
@@ -149,13 +173,13 @@ const NavigationPage = () => {
             <span className="whitespace-nowrap">Refresh Route</span>
           </button>
           <a
-            href="https://maps.google.com"
+            href="https://www.openstreetmap.org"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
           >
             <ExternalLink className="w-4 h-4 shrink-0" />
-            <span className="whitespace-nowrap">Open Maps</span>
+            <span className="whitespace-nowrap">OpenStreetMap</span>
           </a>
         </div>
       </div>
@@ -193,63 +217,15 @@ const NavigationPage = () => {
         </div>
       </div>
 
-      {/* Interactive GPS Route Canvas Map Simulator */}
-      <div className="relative w-full h-[420px] sm:h-[480px] md:h-[540px] bg-slate-900 rounded-2xl border border-[#E7EAF0] overflow-hidden shadow-2xl">
-        {/* Map Background Grid */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `radial-gradient(#10b981 1px, transparent 1px), radial-gradient(#0284c7 1px, #0f172a 1px)`,
-            backgroundSize: '30px 30px',
-          }}
-        />
+      {/* Real Interactive OpenStreetMap Canvas */}
+      <div className="relative w-full h-[440px] sm:h-[500px] rounded-2xl border border-[#E7EAF0] overflow-hidden shadow-2xl">
+        <OpenStreetMap markers={osmMarkers} drawRoute={true} className="w-full h-full" />
 
-        {/* Vector SVG Path Simulation */}
-        <svg className="absolute inset-0 w-full h-full stroke-emerald-400 stroke-[3] sm:stroke-[4] fill-none">
-          <path d="M 100 280 Q 250 180 450 240 T 750 140" strokeDasharray="10 6" className="animate-pulse" />
-        </svg>
-
-        {/* Marker 1: Orange Volunteer Marker */}
-        <div className="absolute top-[60%] left-[18%] sm:left-[22%] -translate-x-1/2 -translate-y-1/2 z-20 group">
-          <div className="relative flex flex-col items-center">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-amber-500 border-2 border-white shadow-2xl flex items-center justify-center text-white animate-bounce">
-              <Bike className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="mt-1 bg-slate-900/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              Courier
-            </span>
-          </div>
-        </div>
-
-        {/* Marker 2: Green Donor Marker */}
-        <div className="absolute top-[48%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-20 group">
-          <div className="relative flex flex-col items-center">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-emerald-500 border-2 border-white shadow-2xl flex items-center justify-center text-white">
-              <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="mt-1 bg-slate-900/90 text-emerald-400 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              {activeTask.donorName}
-            </span>
-          </div>
-        </div>
-
-        {/* Marker 3: Blue NGO Marker */}
-        <div className="absolute top-[32%] left-[82%] sm:left-[80%] -translate-x-1/2 -translate-y-1/2 z-20 group">
-          <div className="relative flex flex-col items-center">
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-blue-600 border-2 border-white shadow-2xl flex items-center justify-center text-white">
-              <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-            <span className="mt-1 bg-slate-900/90 text-blue-400 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              {activeTask.ngoName}
-            </span>
-          </div>
-        </div>
-
-        {/* Top Floating Dashboard Overlay */}
-        <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-auto bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-30 shadow-xl space-y-1.5 sm:space-y-2">
+        {/* Top Floating Overlay */}
+        <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-auto bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-[400] shadow-xl space-y-1.5 sm:space-y-2">
           <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-400">
             <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin shrink-0" />
-            <span>AI GPS Guidance Active</span>
+            <span>OpenStreetMap Live Guidance Active</span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs pt-0.5">
             <div>
@@ -262,6 +238,7 @@ const NavigationPage = () => {
             </div>
           </div>
         </div>
+      </div>
 
         {/* Bottom Floating Address Bar */}
         <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-30 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">

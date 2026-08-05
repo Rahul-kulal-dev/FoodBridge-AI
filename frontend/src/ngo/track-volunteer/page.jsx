@@ -16,6 +16,7 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import OpenStreetMap from '../../components/OpenStreetMap';
 
 /**
  * Track Volunteer Page (/ngo/track-volunteer)
@@ -223,48 +224,44 @@ const TrackVolunteerPage = () => {
         </div>
 
         {/* Right Column: Live GPS Route Map Container */}
-        <div className="lg:col-span-7 bg-slate-900 rounded-2xl border border-[#E7EAF0] shadow-xl overflow-hidden min-h-[480px] relative flex flex-col justify-between p-6">
-          <div
-            className="absolute inset-0 opacity-25"
-            style={{
-              backgroundImage: `radial-gradient(#10b981 1px, transparent 1px), radial-gradient(#3b82f6 1px, #0f172a 1px)`,
-              backgroundSize: '24px 24px',
-            }}
+        <div className="lg:col-span-7 bg-slate-900 rounded-2xl border border-[#E7EAF0] shadow-xl overflow-hidden min-h-[480px] relative">
+          <OpenStreetMap
+            markers={[
+              {
+                lat: 12.9680,
+                lng: 77.5890,
+                title: `Courier: ${volunteerName}`,
+                description: `Status: ${activeDonation.status.toUpperCase()}`,
+                iconType: 'courier',
+              },
+              {
+                lat: 12.9750,
+                lng: 77.6000,
+                title: `Donor: ${donorName}`,
+                description: activeDonation.donorId?.address || activeDonation.pickupAddress || 'Pickup Location',
+                iconType: 'donor',
+              },
+              {
+                lat: 12.9850,
+                lng: 77.6150,
+                title: `NGO: ${ngoName}`,
+                description: user?.address || 'NGO Dropoff Hub',
+                iconType: 'ngo',
+              },
+            ]}
+            drawRoute={true}
+            className="w-full h-full min-h-[480px]"
           />
 
-          {/* Map Vector Lines */}
-          <svg className="absolute inset-0 w-full h-full stroke-emerald-400 stroke-[3] fill-none">
-            <path d="M 120 180 Q 280 220 450 160 T 700 240" strokeDasharray="8 8" className="animate-pulse" />
-          </svg>
-
           {/* Map Live Floating Indicators */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700 text-white text-xs space-y-1">
+          <div className="absolute top-4 left-4 right-4 z-[400] flex items-center justify-between pointer-events-none">
+            <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700 text-white text-xs space-y-1 pointer-events-auto shadow-xl">
               <span className="text-[10px] uppercase font-bold text-emerald-400">Destination</span>
               <p className="font-extrabold">{ngoName}</p>
             </div>
-            <div className="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs font-bold flex items-center gap-2">
+            <div className="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs font-bold flex items-center gap-2 pointer-events-auto shadow-xl">
               <Navigation className="w-4 h-4 text-emerald-400 animate-spin" />
               <span>Status: {activeDonation.status.toUpperCase()}</span>
-            </div>
-          </div>
-
-          <div className="relative z-10 flex justify-center py-12">
-            <div className="bg-emerald-500 text-white font-extrabold text-xs px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
-              <Truck className="w-4 h-4" />
-              <span>{volunteerName} — Live Tracking Active</span>
-            </div>
-          </div>
-
-          <div className="relative z-10 bg-slate-900/90 backdrop-blur-md p-4 rounded-xl border border-slate-700 text-white text-xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold">Pickup Origin</span>
-              <p className="font-bold text-white">{donorName}</p>
-            </div>
-            <ArrowRight className="w-4 h-4 text-emerald-400" />
-            <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold">Delivery Dropoff</span>
-              <p className="font-bold text-white">{ngoName}</p>
             </div>
           </div>
         </div>
