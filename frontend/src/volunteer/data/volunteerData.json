@@ -92,30 +92,5 @@
       "rating": 4.8
     }
   ],
-  "notifications": [
-    {
-      "id": "VNOTIF-1",
-      "title": "New Pickup Assignment",
-      "message": "You have been assigned to pickup 120 Portions of Lunch Meals from Grand Palace Hotel.",
-      "category": "Assignments",
-      "time": "15 mins ago",
-      "read": false
-    },
-    {
-      "id": "VNOTIF-2",
-      "title": "Verification Approved",
-      "message": "Your pickup photo verification for ASN-698 has been approved by compliance.",
-      "category": "Verification",
-      "time": "1 hour ago",
-      "read": false
-    },
-    {
-      "id": "VNOTIF-3",
-      "title": "Route Optimization Update",
-      "message": "Traffic update: Heavy congestion on MG Road. Rerouting via Bypass Flyover.",
-      "category": "Navigation",
-      "time": "2 hours ago",
-      "read": true
-    }
-  ]
+  "notifications": []
 }

@@ -19,35 +19,19 @@ import { getApiUrl } from '../../config/api';
  */
 const VolunteerNotificationsPage = () => {
   const { token } = useAuth();
-  const [notifications, setNotifications] = useState([
-    {
-      id: 'NOT-1',
-      title: 'New Food Pickup Assigned',
-      message: 'You have been assigned to pick up surplus food from Green Garden Restaurant.',
-      time: '10 mins ago',
-      category: 'Assignments',
-      read: false,
-    },
-    {
-      id: 'NOT-2',
-      title: 'Delivery Confirmed by NGO',
-      message: 'Care Foundation NGO verified receipt of surplus meals with a 5-star rating.',
-      time: '1 hour ago',
-      category: 'Verification',
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
   const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!token) return;
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
       try {
         const res = await fetch(getApiUrl('/api/notifications'), {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
         const data = await res.json();
-        if (res.ok && data.notifications && data.notifications.length > 0) {
+        if (res.ok && data.notifications) {
           setNotifications(
             data.notifications.map((n, idx) => ({
               id: n._id || `NOT-${idx + 1}`,
@@ -58,6 +42,8 @@ const VolunteerNotificationsPage = () => {
               read: n.read || false,
             }))
           );
+        } else {
+          setNotifications([]);
         }
       } catch (err) {
         console.warn('Error fetching volunteer notifications:', err);
