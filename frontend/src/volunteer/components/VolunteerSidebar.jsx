@@ -35,7 +35,6 @@ const VolunteerSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: ex
       label: 'Assigned Pickups',
       icon: Package,
       route: '/volunteer/assignments',
-      badge: 3,
     },
     {
       label: 'Navigation',
@@ -51,13 +50,11 @@ const VolunteerSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: ex
       label: 'Delivery Status',
       icon: Truck,
       route: '/volunteer/delivery-status',
-      badge: 1,
     },
     {
       label: 'Notifications',
       icon: Bell,
       route: '/volunteer/notifications',
-      badge: 2,
     },
     {
       label: 'Delivery History',

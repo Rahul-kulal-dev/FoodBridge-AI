@@ -80,7 +80,7 @@ const NgoMapsPage = () => {
 
   const ngoLocation = {
     id: 'NGO-MAIN',
-    name: user?.organizationName || user?.name || 'Hope Community Kitchen (Your Location)',
+    name: user?.organizationName || user?.name || 'NGO Hub (Your Location)',
     type: 'NGO',
     color: 'blue',
     x: 45,

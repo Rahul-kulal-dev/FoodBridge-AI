@@ -47,7 +47,7 @@ const AssignedPickupsPage = () => {
               quantity: t.donationId?.quantity ? `${t.donationId.quantity} ${t.donationId.unit || 'units'}` : 'Bulk Package',
               image: t.donationId?.imageUrl ? getImageUrl(t.donationId.imageUrl) : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
               donorName: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Donor',
-              pickupAddress: t.donationId?.donorId?.address || 'Sector 14, Tech City',
+              pickupAddress: t.donationId?.donorId?.address || 'Donor Pickup Address',
               ngoName: t.ngoId?.organizationName || t.ngoId?.name || 'Partner NGO',
               ngoAddress: t.ngoId?.address || 'NGO Care Center',
               distance: '2.4 km',

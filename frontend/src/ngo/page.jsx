@@ -126,7 +126,7 @@ const NgoDashboardPage = () => {
     },
   ];
 
-  const ngoName = user?.organizationName || user?.name || 'Hope Community Kitchen';
+  const ngoName = user?.organizationName || user?.name || 'NGO Partner';
   const isVerified = user?.verificationStatus === 'approved';
 
   return (

@@ -15,11 +15,14 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 
+import { useNavigate } from 'react-router-dom';
+
 /**
  * Pickup Verification Page (/volunteer/verification)
  * Connects directly to MongoDB & Cloudinary to upload pickup verification photos.
  */
 const PickupVerificationPage = () => {
+  const navigate = useNavigate();
   const { token } = useAuth();
   const [verificationStatus, setVerificationStatus] = useState('Pending');
   const [previewImage, setPreviewImage] = useState(null);
@@ -31,11 +34,12 @@ const PickupVerificationPage = () => {
 
   useEffect(() => {
     const fetchActiveTask = async () => {
-      if (!token) return;
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
       setLoading(true);
       try {
         const res = await fetch(getApiUrl('/api/volunteer/tasks'), {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
         const data = await res.json();
         if (res.ok) {
@@ -44,25 +48,27 @@ const PickupVerificationPage = () => {
           if (tasks.length > 0) {
             const t = tasks[0];
             setActiveAssignment({
-              id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : 'TSK-001',
+              id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : 'TSK-ACTIVE',
               mongoId: t._id,
               foodName: t.donationId?.title || 'Surplus Food Package',
-              quantity: t.donationId?.quantity ? `${t.donationId.quantity} ${t.donationId.unit || 'units'}` : '15 Meals',
+              quantity: t.donationId?.quantity ? `${t.donationId.quantity} ${t.donationId.unit || 'units'}` : '1 Package',
               donorName: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Food Donor',
-              pickupAddress: t.donationId?.donorId?.address || 'City Food Hub',
-              pickupDeadline: t.pickupDeadline ? new Date(t.pickupDeadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Flexible',
+              pickupAddress: t.donationId?.donorId?.address || 'Pickup Location',
+              pickupDeadline: t.pickupDeadline ? new Date(t.pickupDeadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today',
             });
           } else if (donations.length > 0) {
             const d = donations[0];
             setActiveAssignment({
-              id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : 'DON-001',
+              id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : 'DON-ACTIVE',
               mongoId: d._id,
               foodName: d.title || `${d.foodType} Package`,
               quantity: `${d.quantity} ${d.unit || 'kg'}`,
               donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
-              pickupAddress: d.donorId?.address || d.pickupAddress || 'City Food Hub',
+              pickupAddress: d.donorId?.address || d.pickupAddress || 'Pickup Location',
               pickupDeadline: d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today',
             });
+          } else {
+            setActiveAssignment(null);
           }
         }
       } catch (err) {
@@ -125,6 +131,50 @@ const PickupVerificationPage = () => {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="w-full py-16 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <p className="text-xs font-bold text-slate-500">Loading pickup verification details from MongoDB...</p>
+      </div>
+    );
+  }
+
+  if (!activeAssignment) {
+    return (
+      <div className="w-full space-y-6 animate-fade-in pb-12">
+        <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-[#0F172A] tracking-[-0.04em]">
+              Pickup Photo Verification
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-medium">
+              Upload verification photo of packaged surplus food before departing pickup location
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-100">
+            <Camera className="w-8 h-8 stroke-[1.5]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-[#0F172A]">No Pending Pickup Verification</h3>
+            <p className="text-xs text-[#64748B] mt-1">
+              You currently have no active assigned pickup task requiring photo verification. Pick up an assigned donation task to upload verification photos.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/volunteer/assignments')}
+            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
+          >
+            View Assigned Pickups
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">

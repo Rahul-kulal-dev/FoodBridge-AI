@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Navigation,
   MapPin,
@@ -9,31 +9,123 @@ import {
   Compass,
   Clock,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Loader2,
+  PackageCheck
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Google Maps Navigation Page (/volunteer/navigation)
+ * Connects to MongoDB Atlas for active pickup/dropoff navigation routes.
  */
 const NavigationPage = () => {
+  const navigate = useNavigate();
+  const { token } = useAuth();
+  const [activeTask, setActiveTask] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const routeDetails = {
-    volunteerLocation: 'Current Position (Sector 4 Flyover)',
-    donorName: 'Grand Palace Hotel (Pickup)',
-    donorAddress: '74 MG Road, Sector 4, Metro City',
-    ngoName: 'Hope Community Kitchen (Dropoff)',
-    ngoAddress: 'Sector 5 Community Hub, Metro City',
-    remainingDistance: '2.1 km',
-    estimatedETA: '12 Mins',
-    routeSpeed: '38 km/h',
-    trafficCondition: 'Clear Eco Route (Optimized by AI)',
+  const fetchTask = async () => {
+    setLoading(true);
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
+
+      const res = await fetch(getApiUrl('/api/volunteer/tasks'), {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const rawTasks = data.tasks || [];
+        const rawDonations = data.donations || [];
+        const current = rawTasks.find((t) => t.status !== 'delivered') || rawTasks[0];
+
+        if (current) {
+          setActiveTask({
+            donorName: current.donationId?.donorId?.organizationName || current.donationId?.donorId?.name || 'Verified Food Donor',
+            donorAddress: current.donationId?.donorId?.address || current.donationId?.pickupAddress || 'Donor Address',
+            ngoName: current.ngoId?.organizationName || current.ngoId?.name || 'Partner NGO',
+            ngoAddress: current.ngoId?.address || 'NGO Dropoff Hub',
+            remainingDistance: '2.4 km',
+            estimatedETA: '12 Mins',
+          });
+        } else if (rawDonations.length > 0) {
+          const d = rawDonations[0];
+          setActiveTask({
+            donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
+            donorAddress: d.donorId?.address || d.pickupAddress || 'Donor Address',
+            ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Partner NGO',
+            ngoAddress: d.ngoId?.address || 'NGO Dropoff Hub',
+            remainingDistance: '3.1 km',
+            estimatedETA: '15 Mins',
+          });
+        } else {
+          setActiveTask(null);
+        }
+      }
+    } catch (err) {
+      console.warn('Error fetching navigation task:', err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchTask();
+  }, [token]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1200);
+    fetchTask();
+    setTimeout(() => setIsRefreshing(false), 800);
   };
+
+  if (loading) {
+    return (
+      <div className="w-full py-16 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <p className="text-xs font-bold text-slate-500">Loading live GPS route from MongoDB Atlas...</p>
+      </div>
+    );
+  }
+
+  if (!activeTask) {
+    return (
+      <div className="w-full space-y-6 animate-fade-in pb-12">
+        <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-[#0F172A] tracking-[-0.04em]">
+              GPS Turn-by-Turn Navigation
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-medium">
+              AI optimized dispatch route connecting Volunteer Courier ➔ Donor Pickup ➔ NGO Dropoff
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-100">
+            <Navigation className="w-8 h-8 stroke-[1.5]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-[#0F172A]">No Active Navigation Route</h3>
+            <p className="text-xs text-[#64748B] mt-1">
+              You currently have no active food pickups or deliveries in progress. Accept an assigned pickup to view turn-by-turn navigation.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/volunteer/assignments')}
+            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
+          >
+            View Assigned Pickups
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
@@ -76,7 +168,7 @@ const NavigationPage = () => {
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">Volunteer Courier</span>
-            <span className="text-xs font-extrabold text-[#0F172A] truncate block">Orange Pin (Live)</span>
+            <span className="text-xs font-extrabold text-[#0F172A] truncate block">Live GPS Position</span>
           </div>
         </div>
 
@@ -86,7 +178,7 @@ const NavigationPage = () => {
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">Donor Pickup</span>
-            <span className="text-xs font-extrabold text-emerald-700 truncate block">Green Pin (Grand Palace)</span>
+            <span className="text-xs font-extrabold text-emerald-700 truncate block">{activeTask.donorName}</span>
           </div>
         </div>
 
@@ -96,7 +188,7 @@ const NavigationPage = () => {
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">NGO Dropoff</span>
-            <span className="text-xs font-extrabold text-blue-700 truncate block">Blue Pin (Hope Kitchen)</span>
+            <span className="text-xs font-extrabold text-blue-700 truncate block">{activeTask.ngoName}</span>
           </div>
         </div>
       </div>
@@ -124,7 +216,7 @@ const NavigationPage = () => {
               <Bike className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <span className="mt-1 bg-slate-900/90 text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              You (Courier)
+              Courier
             </span>
           </div>
         </div>
@@ -136,7 +228,7 @@ const NavigationPage = () => {
               <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <span className="mt-1 bg-slate-900/90 text-emerald-400 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              Grand Palace
+              {activeTask.donorName}
             </span>
           </div>
         </div>
@@ -148,7 +240,7 @@ const NavigationPage = () => {
               <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <span className="mt-1 bg-slate-900/90 text-blue-400 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md border border-slate-700 whitespace-nowrap">
-              Hope Kitchen
+              {activeTask.ngoName}
             </span>
           </div>
         </div>
@@ -162,11 +254,11 @@ const NavigationPage = () => {
           <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs pt-0.5">
             <div>
               <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Remaining Dist</span>
-              <span className="font-black text-base sm:text-lg text-white">{routeDetails.remainingDistance}</span>
+              <span className="font-black text-base sm:text-lg text-white">{activeTask.remainingDistance}</span>
             </div>
             <div>
               <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">ETA</span>
-              <span className="font-black text-base sm:text-lg text-emerald-400">{routeDetails.estimatedETA}</span>
+              <span className="font-black text-base sm:text-lg text-emerald-400">{activeTask.estimatedETA}</span>
             </div>
           </div>
         </div>

@@ -60,7 +60,6 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
       label: 'Notifications',
       icon: Bell,
       route: '/donor/notifications',
-      badge: 2,
     },
     {
       label: 'Feedback',
