@@ -76,7 +76,7 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
       badge: stats.activeDonations > 0 ? stats.activeDonations : undefined,
     },
     {
-      label: 'Google Maps',
+      label: 'Live Map',
       icon: Map,
       route: '/ngo/maps',
     },
