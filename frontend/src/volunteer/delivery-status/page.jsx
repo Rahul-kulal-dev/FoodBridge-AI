@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Truck,
   CheckCircle2,
@@ -9,32 +9,162 @@ import {
   Building2,
   ShieldCheck,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 
 /**
  * Update Delivery Status Page (/volunteer/delivery-status)
+ * Connects directly to MongoDB Atlas for active tasks and real-time status progression.
  */
 const UpdateDeliveryStatusPage = () => {
-  const [currentStepIndex, setCurrentStepIndex] = useState(1); // 0: Assigned, 1: Picked Up, 2: On the Way, 3: Delivered
+  const navigate = useNavigate();
+  const { token } = useAuth();
+  const [activeTask, setActiveTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const steps = [
-    { title: 'Assigned', time: '2:30 PM', desc: 'Order dispatched to volunteer courier' },
-    { title: 'Picked Up', time: '3:00 PM', desc: 'Package collected from Grand Palace Hotel' },
-    { title: 'On the Way', time: '3:15 PM', desc: 'Transit to Hope Community Kitchen' },
-    { title: 'Delivered', time: 'Estimated 3:27 PM', desc: 'Handed over to NGO recipient' },
-  ];
+  const statusKeyMap = ['assigned', 'picked_up', 'on_the_way', 'delivered'];
 
-  const handleAdvanceStatus = () => {
-    if (currentStepIndex < steps.length - 1) {
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
-      if (nextIndex === steps.length - 1) {
-        setShowSuccessModal(true);
+  const fetchActiveTask = async () => {
+    setLoading(true);
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
+
+      const res = await fetch(getApiUrl('/api/volunteer/tasks'), {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        const rawTasks = data.tasks || [];
+        const rawDonations = data.donations || [];
+
+        let current = rawTasks.find((t) => t.status !== 'delivered' && t.status !== 'cancelled') || rawTasks[0];
+        if (!current && rawDonations.length > 0) {
+          const d = rawDonations[0];
+          current = {
+            _id: d._id,
+            donationId: d,
+            ngoId: d.ngoId,
+            status: d.status || 'assigned',
+          };
+        }
+
+        if (current) {
+          setActiveTask(current);
+          const stIndex = statusKeyMap.indexOf(current.status);
+          setCurrentStepIndex(stIndex >= 0 ? stIndex : 1);
+        } else {
+          setActiveTask(null);
+        }
       }
+    } catch (err) {
+      console.warn('Error fetching active delivery task:', err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchActiveTask();
+  }, [token]);
+
+  const orderCode = activeTask?._id ? `ASN-${activeTask._id.slice(-4).toUpperCase()}` : 'DONATION';
+  const donorName = activeTask?.donationId?.donorId?.organizationName || activeTask?.donationId?.donorId?.name || activeTask?.donationId?.title || 'Donor Location';
+  const ngoName = activeTask?.ngoId?.organizationName || activeTask?.ngoId?.name || 'Recipient NGO';
+
+  const steps = [
+    { title: 'Assigned', time: 'Dispatched', desc: `Order assigned for pickup from ${donorName}` },
+    { title: 'Picked Up', time: 'Collected', desc: `Food collected from ${donorName}` },
+    { title: 'On the Way', time: 'In Transit', desc: `Transporting meals to ${ngoName}` },
+    { title: 'Delivered', time: 'Completed', desc: `Successfully handed over to ${ngoName}` },
+  ];
+
+  const handleAdvanceStatus = async () => {
+    if (!activeTask || currentStepIndex >= steps.length - 1) return;
+    const nextIndex = currentStepIndex + 1;
+    const nextStatus = statusKeyMap[nextIndex];
+    setUpdating(true);
+
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      const endpoint = activeTask._id.startsWith('DON-') || !activeTask.volunteerId
+        ? `/api/donations/${activeTask.donationId?._id || activeTask._id}/status`
+        : `/api/volunteer/tasks/${activeTask._id}/status`;
+
+      const res = await fetch(getApiUrl(endpoint), {
+        method: activeTask._id.startsWith('DON-') ? 'PUT' : 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+
+      if (res.ok) {
+        setCurrentStepIndex(nextIndex);
+        setActiveTask((prev) => ({ ...prev, status: nextStatus }));
+        if (nextIndex === steps.length - 1) {
+          setShowSuccessModal(true);
+        }
+      }
+    } catch (err) {
+      console.warn('Error updating task status:', err);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full py-16 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <p className="text-xs font-bold text-slate-500">Connecting to Live Dispatch Engine...</p>
+      </div>
+    );
+  }
+
+  if (!activeTask) {
+    return (
+      <div className="w-full space-y-6 animate-fade-in pb-12">
+        <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black text-[#0F172A] tracking-[-0.04em]">
+              Live Delivery Status Tracker
+            </h1>
+            <p className="text-xs text-[#64748B] mt-1 font-medium">
+              Real-time GPS dispatch & pickup verification hub
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-100">
+            <PackageCheck className="w-8 h-8 stroke-[1.5]" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-[#0F172A]">No Active Delivery Task Found</h3>
+            <p className="text-xs text-[#64748B] mt-1">
+              You currently have no active food deliveries in transit. Pick up an assigned donation task to start tracking.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/volunteer/assignments')}
+            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
+          >
+            View Assigned Pickups
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
@@ -45,7 +175,7 @@ const UpdateDeliveryStatusPage = () => {
             Live Delivery Status Tracker
           </h1>
           <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            Update real-time delivery status for order <span className="font-bold text-[#0F172A]">ASN-701</span>
+            Update real-time delivery status for order <span className="font-bold text-[#0F172A]">{orderCode}</span>
           </p>
         </div>
 
@@ -108,7 +238,7 @@ const UpdateDeliveryStatusPage = () => {
           </div>
 
           <button
-            disabled={currentStepIndex === steps.length - 1}
+            disabled={currentStepIndex === steps.length - 1 || updating}
             onClick={handleAdvanceStatus}
             className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer ${
               currentStepIndex === steps.length - 1
@@ -116,6 +246,7 @@ const UpdateDeliveryStatusPage = () => {
                 : 'bg-emerald-500 hover:bg-emerald-600 text-white'
             }`}
           >
+            {updating && <Loader2 className="w-4 h-4 animate-spin shrink-0" />}
             <span>
               {currentStepIndex === steps.length - 1
                 ? 'Delivery Completed'
@@ -137,19 +268,22 @@ const UpdateDeliveryStatusPage = () => {
             <div>
               <h3 className="text-lg sm:text-xl font-black text-[#0F172A]">Delivery Complete!</h3>
               <p className="text-xs text-[#64748B] mt-1">
-                Order <span className="font-bold text-[#0F172A]">ASN-701</span> has been successfully handed over to Hope Community Kitchen.
+                Order <span className="font-bold text-[#0F172A]">{orderCode}</span> has been successfully handed over to {ngoName}.
               </p>
             </div>
 
             <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold">
-              +150 Volunteer Impact Points Added to Profile
+              Status updated in MongoDB Atlas Database
             </div>
 
             <button
-              onClick={() => setShowSuccessModal(false)}
+              onClick={() => {
+                setShowSuccessModal(false);
+                navigate('/volunteer/assignments');
+              }}
               className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold shadow-emerald-btn transition-all cursor-pointer"
             >
-              Done & Return to Dashboard
+              Done & Return to Assignments
             </button>
           </div>
         </div>
