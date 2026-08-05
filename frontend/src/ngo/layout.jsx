@@ -48,22 +48,6 @@ const NgoLayout = () => {
         <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
-
-        {/* Global NGO Dashboard Footer Bar */}
-        <footer className="py-4 px-6 border-t border-[#E7EAF0] bg-white/80 backdrop-blur-xs text-xs text-[#64748B] flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            &copy; 2026 FoodBridge AI — Food Donation & Surplus Intelligence. All rights reserved.
-          </div>
-          <div className="flex items-center gap-4 text-[11px] font-medium">
-            <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              NGO Dispatch & Matching Active
-            </span>
-            <a href="/ngo/feedback" className="hover:text-emerald-600 transition-colors">
-              Support & Help
-            </a>
-          </div>
-        </footer>
       </div>
     </div>
   );
