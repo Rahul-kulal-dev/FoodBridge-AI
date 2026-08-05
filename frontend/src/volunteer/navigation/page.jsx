@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Navigation,
   MapPin,
@@ -8,9 +8,14 @@ import {
   ExternalLink,
   Compass,
   Clock,
-  Sparkles,
   ArrowRight,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Phone,
+  Crosshair,
+  Plus,
+  Minus,
+  Store
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -18,15 +23,25 @@ import { getApiUrl } from '../../config/api';
 import OpenStreetMap from '../../components/OpenStreetMap';
 
 /**
- * Google Maps Navigation Page (/volunteer/navigation)
- * Connects to MongoDB Atlas for active pickup/dropoff navigation routes.
+ * Modern Logistics Navigation Page (/volunteer/navigation)
+ * Inspired by Uber Driver, Porter, Zepto Fleet, and Delhivery.
  */
 const NavigationPage = () => {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+
   const [activeTask, setActiveTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(2); // Step 2: Navigating
+
+  const steps = [
+    { label: 'Assigned', step: 1 },
+    { label: 'Navigating', step: 2 },
+    { label: 'Picked Up', step: 3 },
+    { label: 'On the Way', step: 4 },
+    { label: 'Delivered', step: 5 },
+  ];
 
   const fetchTask = async () => {
     setLoading(true);
@@ -46,21 +61,28 @@ const NavigationPage = () => {
         if (current) {
           setActiveTask({
             donorName: current.donationId?.donorId?.organizationName || current.donationId?.donorId?.name || 'Verified Food Donor',
-            donorAddress: current.donationId?.donorId?.address || current.donationId?.pickupAddress || 'Donor Address',
+            donorAddress: current.donationId?.donorId?.address || current.donationId?.pickupAddress || 'Donor Pickup Address',
+            donorPhone: current.donationId?.donorId?.phone || '+91 98765 43210',
             ngoName: current.ngoId?.organizationName || current.ngoId?.name || 'Partner NGO',
             ngoAddress: current.ngoId?.address || 'NGO Dropoff Hub',
-            remainingDistance: '2.4 km',
-            estimatedETA: '12 Mins',
+            remainingDistance: '3.1 km',
+            estimatedETA: '15 mins',
+            statusText: current.status === 'picked_up' ? 'In Transit to NGO' : 'Heading to Pickup',
           });
+          if (current.status === 'assigned') setCurrentStep(1);
+          if (current.status === 'picked_up') setCurrentStep(3);
+          if (current.status === 'on_the_way') setCurrentStep(4);
         } else if (rawDonations.length > 0) {
           const d = rawDonations[0];
           setActiveTask({
             donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
-            donorAddress: d.donorId?.address || d.pickupAddress || 'Donor Address',
+            donorAddress: d.donorId?.address || d.pickupAddress || 'Donor Pickup Address',
+            donorPhone: d.donorId?.phone || '+91 98765 43210',
             ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Partner NGO',
             ngoAddress: d.ngoId?.address || 'NGO Dropoff Hub',
             remainingDistance: '3.1 km',
-            estimatedETA: '15 Mins',
+            estimatedETA: '15 mins',
+            statusText: 'Heading to Pickup',
           });
         } else {
           setActiveTask(null);
@@ -77,6 +99,16 @@ const NavigationPage = () => {
     fetchTask();
   }, [token]);
 
+  const handleRouteCalculated = useCallback(({ distance, duration, error }) => {
+    if (!error && distance && duration) {
+      setActiveTask((prev) => {
+        if (!prev) return prev;
+        if (prev.remainingDistance === distance && prev.estimatedETA === duration) return prev;
+        return { ...prev, remainingDistance: distance, estimatedETA: duration };
+      });
+    }
+  }, []);
+
   const handleRefresh = () => {
     setIsRefreshing(true);
     fetchTask();
@@ -85,40 +117,40 @@ const NavigationPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full py-16 flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
-        <p className="text-xs font-bold text-slate-500">Loading live GPS route from MongoDB Atlas...</p>
+      <div className="w-full py-24 flex flex-col items-center justify-center space-y-3 bg-[#F8FAFC]">
+        <Loader2 className="w-8 h-8 text-[#16A34A] animate-spin" />
+        <p className="text-xs font-bold text-slate-500">Initializing OpenStreetMap GPS engine...</p>
       </div>
     );
   }
 
   if (!activeTask) {
     return (
-      <div className="w-full space-y-6 animate-fade-in pb-12">
-        <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between">
+      <div className="w-full space-y-6 animate-fade-in pb-12 bg-[#F8FAFC]">
+        <div className="bg-white p-6 rounded-[20px] border border-slate-200/80 shadow-xs flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-[#0F172A] tracking-[-0.04em]">
+            <h1 className="text-2xl font-black text-[#0F172A] tracking-[-0.03em]">
               GPS Turn-by-Turn Navigation
             </h1>
             <p className="text-xs text-[#64748B] mt-1 font-medium">
-              AI optimized dispatch route connecting Volunteer Courier ➔ Donor Pickup ➔ NGO Dropoff
+              Live logistics routing connecting Courier ➔ Donor ➔ NGO
             </p>
           </div>
         </div>
 
-        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-100">
+        <div className="bg-white p-12 rounded-[20px] border border-slate-200/80 shadow-xs text-center space-y-4 max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-[#16A34A] mx-auto flex items-center justify-center border border-emerald-100">
             <Navigation className="w-8 h-8 stroke-[1.5]" />
           </div>
           <div>
             <h3 className="text-lg font-black text-[#0F172A]">No Active Navigation Route</h3>
             <p className="text-xs text-[#64748B] mt-1">
-              You currently have no active food pickups or deliveries in progress. Accept an assigned pickup to view turn-by-turn navigation.
+              You currently have no active food pickups in transit. Accept an assigned pickup to view turn-by-turn navigation.
             </p>
           </div>
           <button
             onClick={() => navigate('/volunteer/assignments')}
-            className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
+            className="px-6 py-2.5 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer"
           >
             View Assigned Pickups
           </button>
@@ -127,140 +159,253 @@ const NavigationPage = () => {
     );
   }
 
-  const osmMarkers = activeTask ? [
+  const osmMarkers = currentStep >= 3 ? [
+    {
+      lat: 12.9750,
+      lng: 77.6000,
+      title: `Volunteer Courier (${user?.name || 'You'})`,
+      description: 'In Transit to NGO',
+      iconType: 'courier',
+    },
+    {
+      lat: 12.9850,
+      lng: 77.6150,
+      title: activeTask.ngoName,
+      description: activeTask.ngoAddress,
+      iconType: 'ngo',
+    },
+  ] : [
     {
       lat: 12.9650,
       lng: 77.5850,
-      title: 'Courier (You)',
-      description: 'Volunteer Courier Position',
+      title: `Volunteer Courier (${user?.name || 'You'})`,
+      description: 'Current Location',
       iconType: 'courier',
     },
     {
       lat: 12.9750,
       lng: 77.6000,
       title: activeTask.donorName,
-      description: activeTask.donorAddress || 'Donor Pickup Location',
+      description: activeTask.donorAddress,
       iconType: 'donor',
     },
     {
       lat: 12.9850,
       lng: 77.6150,
       title: activeTask.ngoName,
-      description: activeTask.ngoAddress || 'NGO Dropoff Hub',
+      description: activeTask.ngoAddress,
       iconType: 'ngo',
     },
-  ] : [];
+  ];
 
   return (
-    <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
-      {/* Header Banner */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-            GPS Turn-by-Turn Navigation
-          </h1>
-          <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            OpenStreetMap live dispatch route connecting Volunteer Courier ➔ Donor Pickup ➔ NGO Dropoff
-          </p>
+    <div className="w-full space-y-5 animate-fade-in pb-12 bg-[#F8FAFC]">
+      {/* 1. Header & Stepper Section */}
+      <div className="bg-white p-5 rounded-[20px] border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-[-0.03em]">
+              Live GPS Dispatch Navigation
+            </h1>
+            <p className="text-xs text-[#64748B] font-medium mt-0.5">
+              Optimized logistics route for surplus food recovery
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#0F172A] border border-slate-200 text-xs font-bold transition-all cursor-pointer shadow-xs"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#16A34A] ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto">
-          <button
-            onClick={handleRefresh}
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold transition-all cursor-pointer shadow-xs"
-          >
-            <RefreshCw className={`w-4 h-4 text-emerald-600 shrink-0 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="whitespace-nowrap">Refresh Route</span>
-          </button>
-          <a
-            href="https://www.openstreetmap.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer"
-          >
-            <ExternalLink className="w-4 h-4 shrink-0" />
-            <span className="whitespace-nowrap">OpenStreetMap</span>
-          </a>
+        {/* Stepper Progress Timeline Bar (Req 8) */}
+        <div className="pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-between max-w-3xl mx-auto px-2 relative">
+            {/* Connecting Track Line */}
+            <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1 bg-slate-100 z-0" />
+            <div
+              className="absolute left-8 top-1/2 -translate-y-1/2 h-1 bg-[#16A34A] transition-all duration-500 z-0"
+              style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 92}%` }}
+            />
+
+            {steps.map((s) => {
+              const isDone = s.step < currentStep;
+              const isCurrent = s.step === currentStep;
+
+              return (
+                <div key={s.step} className="relative z-10 flex flex-col items-center group">
+                  <div
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-extrabold text-xs transition-all ${
+                      isDone
+                        ? 'bg-[#16A34A] text-white shadow-xs'
+                        : isCurrent
+                        ? 'bg-[#16A34A] text-white ring-4 ring-emerald-100 shadow-md scale-110'
+                        : 'bg-white text-slate-400 border-2 border-slate-200'
+                    }`}
+                  >
+                    {isDone ? <CheckCircle2 className="w-4 h-4" /> : s.step}
+                  </div>
+                  <span
+                    className={`text-[10px] sm:text-xs font-bold mt-1.5 whitespace-nowrap ${
+                      isCurrent ? 'text-[#16A34A]' : isDone ? 'text-slate-800' : 'text-slate-400'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Legend & Stats Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold shrink-0">
-            <Bike className="w-4 h-4 sm:w-5 sm:h-5" />
+      {/* 2. Compact Horizontal Route Summary Bar (Req 1) */}
+      <div className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs font-semibold">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200/80 font-bold">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            <Bike className="w-3.5 h-3.5" />
+            <span>Volunteer (Current Location)</span>
           </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">Volunteer Courier</span>
-            <span className="text-xs font-extrabold text-[#0F172A] truncate block">Live GPS Position</span>
+
+          <ArrowRight className="w-3.5 h-3.5 text-slate-300 hidden sm:block" />
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold">
+            <Store className="w-3.5 h-3.5 text-[#16A34A]" />
+            <span>Pickup: <span className="font-extrabold">{activeTask.donorName}</span></span>
+          </div>
+
+          <ArrowRight className="w-3.5 h-3.5 text-slate-300 hidden sm:block" />
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/80 font-bold">
+            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <span>Destination: <span className="font-extrabold">{activeTask.ngoName}</span></span>
           </div>
         </div>
 
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
-            <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">Donor Pickup</span>
-            <span className="text-xs font-extrabold text-emerald-700 truncate block">{activeTask.donorName}</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shrink-0">
-            <Building2 className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold text-[#64748B] uppercase block truncate">NGO Dropoff</span>
-            <span className="text-xs font-extrabold text-blue-700 truncate block">{activeTask.ngoName}</span>
-          </div>
-        </div>
+        <a
+          href="https://www.openstreetmap.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 ml-auto"
+        >
+          <ExternalLink className="w-3 h-3" />
+          <span>OpenStreetMap</span>
+        </a>
       </div>
 
-      {/* Real Interactive OpenStreetMap Canvas */}
-      <div className="relative w-full h-[440px] sm:h-[500px] rounded-2xl border border-[#E7EAF0] overflow-hidden shadow-2xl">
-        <OpenStreetMap markers={osmMarkers} drawRoute={true} className="w-full h-full" />
+      {/* 3. Main Leaflet OpenStreetMap Container (Req 2 - 7) */}
+      <div className="relative w-full h-[520px] rounded-[20px] border border-slate-200 overflow-hidden shadow-xl bg-slate-900">
+        <OpenStreetMap
+          markers={osmMarkers}
+          drawRoute={true}
+          onRouteCalculated={handleRouteCalculated}
+          className="w-full h-full"
+        />
 
-        {/* Top Floating Overlay */}
-        <div className="absolute top-3 left-3 right-3 sm:top-5 sm:left-5 sm:right-auto bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-[400] shadow-xl space-y-1.5 sm:space-y-2">
-          <div className="flex items-center gap-2 text-xs font-extrabold text-emerald-400">
-            <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin shrink-0" />
-            <span>OpenStreetMap Live Guidance Active</span>
+        {/* 4. Top-Left Floating Controls (Req 7) */}
+        <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2 pointer-events-auto">
+          <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl border border-slate-200 shadow-lg flex flex-col gap-1 text-slate-700">
+            <button
+              onClick={handleRefresh}
+              title="Locate Me / Center Map"
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-[#16A34A]"
+            >
+              <Crosshair className="w-4 h-4" />
+            </button>
+            <div className="h-px bg-slate-200 my-0.5" />
+            <button
+              title="Zoom In"
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-slate-700"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+            <button
+              title="Zoom Out"
+              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-slate-700"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 text-xs pt-0.5">
+        </div>
+
+        {/* 5. Top-Right Floating Navigation Card (Req 5) */}
+        <div className="absolute top-4 right-4 z-[400] bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 text-white shadow-2xl space-y-2 min-w-[210px] pointer-events-auto">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 border-b border-slate-800 pb-2">
+            <Compass className="w-4 h-4 animate-spin text-[#16A34A]" />
+            <span>{activeTask.statusText}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <div>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">Remaining Dist</span>
-              <span className="font-black text-base sm:text-lg text-white">{activeTask.remainingDistance}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">Distance</span>
+              <span className="text-base font-black text-white">{activeTask.remainingDistance}</span>
             </div>
             <div>
-              <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold block">ETA</span>
-              <span className="font-black text-base sm:text-lg text-emerald-400">{activeTask.estimatedETA}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">ETA</span>
+              <span className="text-base font-black text-[#16A34A]">{activeTask.estimatedETA}</span>
             </div>
           </div>
         </div>
 
-        {/* Bottom Floating Address Bar */}
-        <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-[400] shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="min-w-0">
-              <span className="text-[9px] sm:text-[10px] text-emerald-400 font-bold block uppercase">Pickup Origin</span>
-              <p className="font-bold truncate text-xs">{activeTask.donorName}</p>
+        {/* 6. Bottom-Right Compact Map Legend (Req 7) */}
+        <div className="absolute bottom-24 sm:bottom-24 right-4 z-[400] bg-white/95 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-200 shadow-md text-[11px] font-bold text-slate-700 hidden sm:flex items-center gap-3">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse" /> Volunteer
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A]" /> Donor
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> NGO
+          </span>
+        </div>
+
+        {/* 7. Bottom Floating Action Panel / Mobile Bottom Sheet (Req 6 & 9) */}
+        <div className="absolute bottom-4 left-4 right-4 z-[400] bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs pointer-events-auto">
+          {/* Left: Origin ➔ Dropoff stack */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#16A34A] flex items-center justify-center shrink-0 border border-emerald-100">
+              <MapPin className="w-4 h-4" />
             </div>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <div className="min-w-0">
-              <span className="text-[9px] sm:text-[10px] text-blue-400 font-bold block uppercase">Destination NGO</span>
-              <p className="font-bold truncate text-xs">{activeTask.ngoName}</p>
+              <div className="flex items-center gap-1 text-[11px]">
+                <span className="text-slate-400 font-medium">Pickup:</span>
+                <span className="font-extrabold text-slate-900 truncate">{activeTask.donorName}</span>
+              </div>
+              <div className="flex items-center gap-1 text-[11px] mt-0.5">
+                <span className="text-slate-400 font-medium">Dropoff:</span>
+                <span className="font-extrabold text-slate-900 truncate">{activeTask.ngoName}</span>
+              </div>
             </div>
           </div>
 
-          <a
-            href="https://www.openstreetmap.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-emerald-btn transition-all shrink-0 cursor-pointer"
-          >
-            Launch OpenStreetMap Navigation
-          </a>
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-2 shrink-0">
+            {activeTask.donorPhone && (
+              <a
+                href={`tel:${activeTask.donorPhone}`}
+                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition-all cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5" />
+                <span>Call Donor</span>
+              </a>
+            )}
+            <button
+              onClick={() => {
+                window.open('https://www.openstreetmap.org', '_blank');
+              }}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white font-extrabold shadow-md transition-all cursor-pointer"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Start Navigation</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

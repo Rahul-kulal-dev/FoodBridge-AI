@@ -1,28 +1,28 @@
 import React, { useEffect, useRef, useState } from 'react';
+import RoutingMachine from './maps/RoutingMachine';
 
 /**
- * Reusable OpenStreetMap component using Leaflet tile layer & OSM.
- * Dynamically loads Leaflet CSS & JS via CDN to ensure zero extra build dependencies.
+ * Reusable OpenStreetMap component using Leaflet tile layer & Leaflet Routing Machine.
  */
 const OpenStreetMap = ({
   markers = [],
-  center = [12.9716, 77.5946], // Default latitude & longitude
+  center = [12.9716, 77.5946],
   zoom = 13,
   drawRoute = true,
+  onRouteCalculated,
   className = 'w-full h-full rounded-2xl overflow-hidden',
 }) => {
   const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+  const [mapInstance, setMapInstance] = useState(null);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [routeError, setRouteError] = useState(false);
 
-  // Load Leaflet CSS and JS dynamically from CDN
   useEffect(() => {
     if (window.L) {
       setLeafletLoaded(true);
       return;
     }
 
-    // Add Leaflet CSS
     if (!document.getElementById('leaflet-css')) {
       const link = document.createElement('link');
       link.id = 'leaflet-css';
@@ -31,7 +31,6 @@ const OpenStreetMap = ({
       document.head.appendChild(link);
     }
 
-    // Add Leaflet JS
     if (!document.getElementById('leaflet-js')) {
       const script = document.createElement('script');
       script.id = 'leaflet-js';
@@ -44,128 +43,149 @@ const OpenStreetMap = ({
     }
   }, []);
 
-  // Initialize and update Map when Leaflet and mapContainer are ready
+  const markersKey = JSON.stringify(markers);
+  const centerKey = Array.isArray(center) ? center.join(',') : center;
+
   useEffect(() => {
     if (!leafletLoaded || !mapContainerRef.current) return;
     const L = window.L;
 
-    // Destroy previous map instance if re-initializing
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
+    setRouteError(false);
 
-    // Create Map
-    const initialCenter = markers.length > 0 && markers[0].lat && markers[0].lng
-      ? [markers[0].lat, markers[0].lng]
-      : center;
+    const validMarkers = markers.filter((m) => typeof m.lat === 'number' && typeof m.lng === 'number');
+    const initialCenter = validMarkers.length > 0 ? [validMarkers[0].lat, validMarkers[0].lng] : (Array.isArray(center) ? center : [12.9716, 77.5946]);
 
     const map = L.map(mapContainerRef.current, {
-      zoomControl: true,
+      zoomControl: false,
       scrollWheelZoom: true,
     }).setView(initialCenter, zoom);
 
-    mapInstanceRef.current = map;
+    setMapInstance(map);
 
-    // OpenStreetMap Tile Layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    const latLngList = [];
+    const createCustomIcon = (type) => {
+      let bgColor = '#16A34A';
+      let iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>`;
 
-    // Helper to create custom HTML pin markers
-    const createCustomIcon = (type, label) => {
-      let bgColor = '#10B981'; // Emerald default
-      if (type === 'courier') bgColor = '#F59E0B'; // Amber
-      if (type === 'ngo') bgColor = '#2563EB'; // Blue
-      if (type === 'donor') bgColor = '#10B981'; // Green
+      if (type === 'courier') {
+        bgColor = '#F97316';
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>`;
+      } else if (type === 'ngo') {
+        bgColor = '#2563EB';
+        iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>`;
+      }
+
+      const pulseRing = type === 'courier' ? `
+        <span style="
+          position: absolute;
+          inset: -6px;
+          border-radius: 50%;
+          background-color: ${bgColor};
+          opacity: 0.35;
+          animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+        "></span>
+      ` : '';
 
       return L.divIcon({
-        className: 'custom-osm-pin',
+        className: 'custom-osm-marker-badge',
         html: `
-          <div style="
-            background-color: ${bgColor};
-            color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            border: 2px solid white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-family: inherit;
-          ">
-            <span>●</span>
-            <span>${label || 'Point'}</span>
+          <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+            ${pulseRing}
+            <div style="
+              position: relative;
+              background-color: ${bgColor};
+              color: white;
+              width: 36px;
+              height: 36px;
+              border-radius: 50%;
+              border: 2.5px solid white;
+              box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: transform 0.2s ease;
+            ">
+              ${iconSvg}
+            </div>
           </div>
         `,
-        iconSize: [100, 30],
-        iconAnchor: [50, 15],
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       });
     };
 
-    // Add Markers
-    markers.forEach((m) => {
-      if (typeof m.lat === 'number' && typeof m.lng === 'number') {
-        const point = [m.lat, m.lng];
-        latLngList.push(point);
+    validMarkers.forEach((m) => {
+      const point = [m.lat, m.lng];
+      const customIcon = createCustomIcon(m.iconType);
+      const marker = L.marker(point, { icon: customIcon }).addTo(map);
 
-        const customIcon = createCustomIcon(m.iconType, m.title);
-        const marker = L.marker(point, { icon: customIcon }).addTo(map);
-
-        if (m.popupContent || m.title || m.description) {
-          const content = `
-            <div style="font-family: sans-serif; padding: 4px;">
-              <strong style="font-size: 13px; color: #0F172A; display: block; margin-bottom: 2px;">${m.title || ''}</strong>
-              <span style="font-size: 11px; color: #64748B;">${m.description || m.popupContent || ''}</span>
-            </div>
-          `;
-          marker.bindPopup(content);
-        }
+      if (m.title || m.description) {
+        const content = `
+          <div style="font-family: system-ui, -apple-system, sans-serif; padding: 2px 4px;">
+            <div style="font-weight: 800; font-size: 12px; color: #0F172A; margin-bottom: 2px;">${m.title || ''}</div>
+            ${m.description ? `<div style="font-size: 11px; color: #64748B; font-weight: 500;">${m.description}</div>` : ''}
+          </div>
+        `;
+        marker.bindTooltip(m.title || 'Location', { direction: 'top', offset: [0, -12], opacity: 0.95 });
+        marker.bindPopup(content);
       }
     });
 
-    // Draw route polyline if enabled and multiple points exist
-    if (drawRoute && latLngList.length >= 2) {
-      L.polyline(latLngList, {
-        color: '#10B981',
-        weight: 4,
-        dashArray: '8, 8',
-        opacity: 0.85,
-      }).addTo(map);
-    }
-
-    // Auto fit map bounds if points exist
-    if (latLngList.length > 0) {
-      const bounds = L.latLngBounds(latLngList);
-      if (latLngList.length === 1) {
-        map.setView(latLngList[0], zoom);
-      } else {
-        map.fitBounds(bounds, { padding: [40, 40] });
-      }
-    }
-
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
+      try {
+        map.remove();
+      } catch (e) {
+        // ignore
       }
+      setMapInstance(null);
     };
-  }, [leafletLoaded, JSON.stringify(markers), center, zoom, drawRoute]);
+  }, [leafletLoaded, markersKey, centerKey, zoom]);
+
+  const validMarkers = markers.filter((m) => typeof m.lat === 'number' && typeof m.lng === 'number');
+  const fromMarker = validMarkers.length > 0 ? validMarkers[0] : null;
+  const toMarker = validMarkers.length > 1 ? validMarkers[validMarkers.length - 1] : null;
+  const waypointMarkers = validMarkers.length > 2 ? validMarkers.slice(1, validMarkers.length - 1) : [];
 
   return (
     <div className={`relative ${className}`}>
       {!leafletLoaded && (
         <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center text-white text-xs font-bold z-10">
-          <span>Loading OpenStreetMap engine...</span>
+          <span>Loading OpenStreetMap & Leaflet Routing Machine...</span>
         </div>
       )}
+
+      {routeError && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-black shadow-xl z-[500] border border-rose-500 flex items-center gap-2">
+          <span>⚠️ Unable to calculate driving route.</span>
+        </div>
+      )}
+
       <div ref={mapContainerRef} className="w-full h-full z-0" />
+
+      {drawRoute && mapInstance && fromMarker && toMarker && (
+        <RoutingMachine
+          map={mapInstance}
+          from={fromMarker}
+          to={toMarker}
+          waypoints={waypointMarkers}
+          onRouteFound={({ distance, duration }) => {
+            setRouteError(false);
+            if (onRouteCalculated) {
+              onRouteCalculated({ distance, duration, error: false });
+            }
+          }}
+          onError={() => {
+            setRouteError(true);
+            if (onRouteCalculated) {
+              onRouteCalculated({ error: true });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };
