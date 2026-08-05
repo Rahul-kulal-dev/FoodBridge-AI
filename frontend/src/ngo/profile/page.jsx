@@ -210,24 +210,34 @@ const NgoProfilePage = () => {
 
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Daily Serving Capacity</label>
-            <input
-              type="text"
+            <select
               name="servingCapacity"
               value={formData.servingCapacity}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors cursor-pointer"
+            >
+              <option value="">Select Serving Capacity</option>
+              <option value="Under 100 Meals / Day">Under 100 Meals / Day</option>
+              <option value="100 - 500 Meals / Day">100 - 500 Meals / Day</option>
+              <option value="500 - 1000 Meals / Day">500 - 1000 Meals / Day</option>
+              <option value="1000+ Meals / Day">1000+ Meals / Day</option>
+            </select>
           </div>
 
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Operating Hours</label>
-            <input
-              type="text"
+            <select
               name="operatingHours"
               value={formData.operatingHours}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors cursor-pointer"
+            >
+              <option value="">Select Operating Hours</option>
+              <option value="8:00 AM – 10:00 PM (Daily)">8:00 AM – 10:00 PM (Daily)</option>
+              <option value="24 Hours (Round the Clock)">24 Hours (Round the Clock)</option>
+              <option value="Morning Shift (6 AM - 2 PM)">Morning Shift (6 AM - 2 PM)</option>
+              <option value="Evening Shift (2 PM - 10 PM)">Evening Shift (2 PM - 10 PM)</option>
+            </select>
           </div>
         </div>
 

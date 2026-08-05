@@ -314,13 +314,20 @@ const VolunteerProfilePage = () => {
 
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Vehicle Type</label>
-            <input
-              type="text"
+            <select
               name="vehicleType"
               value={profile.vehicleType}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors cursor-pointer"
+            >
+              <option value="">Select Vehicle Type</option>
+              <option value="Delivery Van">Delivery Van</option>
+              <option value="Two-Wheeler / Motorcycle">Two-Wheeler / Motorcycle</option>
+              <option value="Three-Wheeler / Electric Auto">Three-Wheeler / Electric Auto</option>
+              <option value="Refrigerated Van">Refrigerated Van</option>
+              <option value="Bicycle / On-Foot">Bicycle / On-Foot</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
 
           <div>
@@ -330,30 +337,43 @@ const VolunteerProfilePage = () => {
               name="vehicleNumber"
               value={profile.vehicleNumber}
               onChange={handleChange}
+              placeholder="e.g. KA-05-EV-4821"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
             />
           </div>
 
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Preferred Delivery Radius</label>
-            <input
-              type="text"
+            <select
               name="deliveryRadius"
               value={profile.deliveryRadius}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors cursor-pointer"
+            >
+              <option value="">Select Preferred Radius</option>
+              <option value="5 km">5 km</option>
+              <option value="10 km">10 km</option>
+              <option value="15 km">15 km</option>
+              <option value="25 km">25 km</option>
+              <option value="50+ km (Citywide)">50+ km (Citywide)</option>
+            </select>
           </div>
 
           <div>
             <label className="text-xs font-bold text-[#0F172A] block mb-1">Availability Schedule</label>
-            <input
-              type="text"
+            <select
               name="availability"
               value={profile.availability}
               onChange={handleChange}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors cursor-pointer"
+            >
+              <option value="">Select Availability Schedule</option>
+              <option value="Mon - Sat (8 AM - 6 PM)">Mon - Sat (8 AM - 6 PM)</option>
+              <option value="Weekdays Only (Mon - Fri)">Weekdays Only (Mon - Fri)</option>
+              <option value="Weekends Only (Sat - Sun)">Weekends Only (Sat - Sun)</option>
+              <option value="Evening Shift (4 PM - 10 PM)">Evening Shift (4 PM - 10 PM)</option>
+              <option value="Flexible / On-Demand">Flexible / On-Demand</option>
+            </select>
           </div>
         </div>
 
