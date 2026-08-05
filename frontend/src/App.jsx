@@ -89,7 +89,6 @@ function LandingPage() {
         <TrustSection />
         <FeaturesSection onOpenDonateModal={handleOpenDonateModal} />
         <HowItWorks />
-        <TestimonialsSection />
         <AboutContactSection />
         <FinalCTA onOpenDonateModal={handleOpenDonateModal} />
       </main>

@@ -82,3 +82,39 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Smooth Fade-In Animations */
+@keyframes fadeInSmooth {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.03);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInSmooth 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* Universal Smooth Cubic-Bezier Transitions */
+a, button, input, select, textarea {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
