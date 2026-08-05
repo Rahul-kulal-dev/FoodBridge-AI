@@ -70,7 +70,7 @@ const DonorProfilePage = () => {
   const initialLetter = (user.organizationName || user.name || 'D').charAt(0).toUpperCase();
 
   return (
-    <div className="max-w-3xl space-y-6 animate-fade-in pb-12">
+    <div className="w-full space-y-6 animate-fade-in pb-12">
       {/* Profile Summary Card */}
       <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
