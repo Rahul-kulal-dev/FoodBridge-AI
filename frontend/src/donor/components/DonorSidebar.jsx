@@ -52,11 +52,6 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
       route: '/donor/donations',
     },
     {
-      label: 'AI Predictions',
-      icon: Brain,
-      route: '/donor/ai-predictions',
-    },
-    {
       label: 'Notifications',
       icon: Bell,
       route: '/donor/notifications',
