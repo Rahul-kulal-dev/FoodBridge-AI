@@ -238,29 +238,28 @@ const NavigationPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Bottom Floating Address Bar */}
-        <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-30 shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">
+        <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 bg-slate-900/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-700 text-white z-[400] shadow-xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 text-xs">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="min-w-0">
               <span className="text-[9px] sm:text-[10px] text-emerald-400 font-bold block uppercase">Pickup Origin</span>
-              <p className="font-bold truncate text-xs">{routeDetails.donorName}</p>
+              <p className="font-bold truncate text-xs">{activeTask.donorName}</p>
             </div>
             <ArrowRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <div className="min-w-0">
               <span className="text-[9px] sm:text-[10px] text-blue-400 font-bold block uppercase">Destination NGO</span>
-              <p className="font-bold truncate text-xs">{routeDetails.ngoName}</p>
+              <p className="font-bold truncate text-xs">{activeTask.ngoName}</p>
             </div>
           </div>
 
           <a
-            href="https://maps.google.com"
+            href="https://www.openstreetmap.org"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto text-center px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs shadow-emerald-btn transition-all shrink-0 cursor-pointer"
           >
-            Launch GPS Navigation
+            Launch OpenStreetMap Navigation
           </a>
         </div>
       </div>

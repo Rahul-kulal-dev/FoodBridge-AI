@@ -164,7 +164,6 @@ const NgoMapsPage = () => {
       {/* Main Interactive Map Container */}
       <div className="relative w-full h-[540px] bg-slate-900 rounded-2xl border border-[#E7EAF0] overflow-hidden shadow-xl">
         <OpenStreetMap markers={allOsmMarkers} drawRoute={false} className="w-full h-full" />
-      </div>
 
         {/* Selected Marker Details Modal Popup Card */}
         {selectedMarker && (
