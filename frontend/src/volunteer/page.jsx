@@ -151,6 +151,9 @@ const VolunteerDashboardPage = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
         {stats.map((stat, idx) => {
           const IconComponent = stat.icon;
+          const isRatingStat = stat.label === 'AVG DELIVERY RATING';
+          const hasNoRatings = isRatingStat && (statsData.totalDeliveries === 0 || !statsData.ratingCount);
+
           return (
             <div
               key={idx}
@@ -165,9 +168,12 @@ const VolunteerDashboardPage = () => {
                 </div>
               </div>
               <div className="mt-3 sm:mt-4">
-                <div className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
-                  {stat.value}
+                <div className={`text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em] transition-all duration-300 ${hasNoRatings ? 'blur-md select-none opacity-40' : ''}`}>
+                  {hasNoRatings ? '0.0 ★' : stat.value}
                 </div>
+                {hasNoRatings && (
+                  <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+                )}
               </div>
             </div>
           );

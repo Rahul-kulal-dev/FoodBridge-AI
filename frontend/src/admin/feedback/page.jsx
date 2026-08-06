@@ -104,10 +104,13 @@ const AdminFeedbackPage = () => {
             <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
               AVG DONOR RATING
             </span>
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-black text-[#0F172A]">{stats.avgDonorRating}</span>
+            <div className={`flex items-center gap-1 transition-all duration-300 ${stats.totalLogs === 0 || logs.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+              <span className="text-2xl font-black text-[#0F172A]">{stats.totalLogs === 0 || logs.length === 0 ? '0.0' : stats.avgDonorRating}</span>
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             </div>
+            {(stats.totalLogs === 0 || logs.length === 0) && (
+              <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+            )}
           </div>
           <div className="p-3 rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
             <Building2 className="w-5 h-5" />
@@ -119,10 +122,13 @@ const AdminFeedbackPage = () => {
             <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
               AVG VOLUNTEER RATING
             </span>
-            <div className="flex items-center gap-1">
-              <span className="text-2xl font-black text-[#0F172A]">{stats.avgVolunteerRating}</span>
+            <div className={`flex items-center gap-1 transition-all duration-300 ${stats.totalLogs === 0 || logs.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+              <span className="text-2xl font-black text-[#0F172A]">{stats.totalLogs === 0 || logs.length === 0 ? '0.0' : stats.avgVolunteerRating}</span>
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             </div>
+            {(stats.totalLogs === 0 || logs.length === 0) && (
+              <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+            )}
           </div>
           <div className="p-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
             <UserCheck className="w-5 h-5" />

@@ -199,7 +199,12 @@ const VolunteerProfilePage = () => {
           </div>
           <div>
             <span className="text-[10px] font-bold text-[#64748B] uppercase">Average Courier Rating</span>
-            <p className="text-lg sm:text-xl font-black text-[#0F172A]">{averages.overall} / 5.0</p>
+            <p className={`text-lg sm:text-xl font-black text-[#0F172A] transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+              {feedbacks.length === 0 ? '0.0 / 5.0' : `${averages.overall} / 5.0`}
+            </p>
+            {feedbacks.length === 0 && (
+              <span className="text-[9px] font-bold text-slate-400 block">No Ratings Yet</span>
+            )}
           </div>
         </div>
 

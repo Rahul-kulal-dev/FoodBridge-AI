@@ -82,50 +82,65 @@ const DonorFeedbackPage = () => {
           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
             OVERALL RATING
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-[#0F172A]">{averages.overall}</span>
+          <div className={`flex items-center gap-1.5 transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+            <span className="text-2xl font-black text-[#0F172A]">{feedbacks.length === 0 ? '0.0' : averages.overall}</span>
             <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
           </div>
+          {feedbacks.length === 0 && (
+            <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-1">
           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
             FOOD QUALITY
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-emerald-700">{averages.foodQuality}</span>
+          <div className={`flex items-center gap-1.5 transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+            <span className="text-2xl font-black text-emerald-700">{feedbacks.length === 0 ? '0.0' : averages.foodQuality}</span>
             <span className="text-xs text-slate-400 font-bold">/ 5.0</span>
           </div>
+          {feedbacks.length === 0 && (
+            <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-1">
           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
             PACKAGING
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-emerald-700">{averages.packaging}</span>
+          <div className={`flex items-center gap-1.5 transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+            <span className="text-2xl font-black text-emerald-700">{feedbacks.length === 0 ? '0.0' : averages.packaging}</span>
             <span className="text-xs text-slate-400 font-bold">/ 5.0</span>
           </div>
+          {feedbacks.length === 0 && (
+            <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-1">
           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
             FRESHNESS
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-emerald-700">{averages.freshness}</span>
+          <div className={`flex items-center gap-1.5 transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+            <span className="text-2xl font-black text-emerald-700">{feedbacks.length === 0 ? '0.0' : averages.freshness}</span>
             <span className="text-xs text-slate-400 font-bold">/ 5.0</span>
           </div>
+          {feedbacks.length === 0 && (
+            <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-1 col-span-2 lg:col-span-1">
           <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
             HYGIENE
           </span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-2xl font-black text-emerald-700">{averages.hygiene}</span>
+          <div className={`flex items-center gap-1.5 transition-all duration-300 ${feedbacks.length === 0 ? 'blur-md select-none opacity-40' : ''}`}>
+            <span className="text-2xl font-black text-emerald-700">{feedbacks.length === 0 ? '0.0' : averages.hygiene}</span>
             <span className="text-xs text-slate-400 font-bold">/ 5.0</span>
           </div>
+          {feedbacks.length === 0 && (
+            <span className="text-[9px] font-bold text-slate-400 block mt-0.5">No Ratings Yet</span>
+          )}
         </div>
       </div>
 
