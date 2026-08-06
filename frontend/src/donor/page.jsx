@@ -8,6 +8,7 @@ import {
   Heart,
   ChevronRight,
   ShieldCheck,
+  CheckCircle2,
   AlertTriangle,
   Lock,
   Upload,
@@ -98,10 +99,10 @@ const DonorDashboardPage = () => {
       subText: 'Real-time active items',
     },
     {
-      label: 'AI MATCH ACCURACY',
-      value: '98.4%',
-      icon: Brain,
-      subText: 'Read-only engine score',
+      label: 'COMPLETED DELIVERIES',
+      value: completedDonations.length.toString(),
+      icon: CheckCircle2,
+      subText: 'Verified food distributions',
     },
     {
       label: 'VERIFICATION LEVEL',
@@ -218,7 +219,13 @@ const DonorDashboardPage = () => {
                 </div>
               </div>
               <div className="mt-3 sm:mt-4">
-                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em] truncate">
+                <div
+                  className={`font-black text-[#0F172A] tracking-[-0.03em] ${
+                    typeof stat.value === 'string' && stat.value.length > 6
+                      ? 'text-sm sm:text-base lg:text-lg leading-snug'
+                      : 'text-xl sm:text-2xl lg:text-3xl'
+                  }`}
+                >
                   {stat.value}
                 </div>
                 <span className="text-[10px] text-slate-400 font-medium block mt-1">
@@ -230,44 +237,7 @@ const DonorDashboardPage = () => {
         })}
       </div>
 
-      {/* 4. AI Surplus Prediction Banner - Read-Only (Business Logic 3 & Business Rule 2) */}
-      <div className="bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-200/70 shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3.5 sm:gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 sm:p-2.5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
-            <Brain className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-xs sm:text-sm font-bold text-[#0F172A]">
-              Predicted Surplus Alert (Read-Only): <span className="text-emerald-600 font-black">120 kg Produce</span> in 8 Hours
-            </p>
-            <span className="text-[11px] text-slate-500 font-medium">
-              System AI surplus intelligence calculated automatically based on historical distribution patterns.
-            </span>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
-          {isVerified ? (
-            <Link
-              to="/donor/create-donation"
-              className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all duration-200 text-center truncate"
-            >
-              Auto-List Surplus
-            </Link>
-          ) : (
-            <span className="px-3.5 py-2 rounded-xl bg-slate-200 text-slate-400 text-xs font-bold text-center truncate cursor-not-allowed">
-              Auto-List Surplus
-            </span>
-          )}
-          <Link
-            to="/donor/ai-predictions"
-            className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] border border-[#E7EAF0] text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 truncate"
-          >
-            <span>Analytics</span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-          </Link>
-        </div>
-      </div>
 
       {/* 5. Recent Food Donations Container (Business Logic 2) */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card overflow-hidden">

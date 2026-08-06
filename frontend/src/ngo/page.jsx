@@ -192,7 +192,13 @@ const NgoDashboardPage = () => {
                 </div>
               </div>
               <div className="mt-3 sm:mt-4">
-                <div className="text-lg sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em] truncate">
+                <div
+                  className={`font-black text-[#0F172A] tracking-[-0.03em] ${
+                    typeof stat.value === 'string' && stat.value.length > 6
+                      ? 'text-sm sm:text-base lg:text-lg leading-snug'
+                      : 'text-xl sm:text-2xl lg:text-3xl'
+                  }`}
+                >
                   {loading ? '...' : stat.value}
                 </div>
               </div>
