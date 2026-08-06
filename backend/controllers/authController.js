@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id, user_role) => {
@@ -32,6 +33,19 @@ const registerUser = async (req, res, next) => {
       organizationName: organizationName || '',
       location: location || { lat: 0, lng: 0 },
     });
+
+    // Create initial welcome notification for new user
+    try {
+      await Notification.create({
+        userId: user._id,
+        title: 'Welcome to FoodBridge AI!',
+        message: `Welcome ${user.name || 'Partner'}! Your ${assignedRole.toUpperCase()} account is active. Connect with local donors, shelters, and volunteers to eliminate surplus food waste.`,
+        type: 'system',
+        isRead: false,
+      });
+    } catch (notifErr) {
+      console.warn('Welcome notification creation notice:', notifErr.message);
+    }
 
     res.status(201).json({
       success: true,

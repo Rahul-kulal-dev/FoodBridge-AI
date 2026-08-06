@@ -31,7 +31,7 @@ const VolunteerNotificationsPage = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const data = await res.json();
-        if (res.ok && data.notifications) {
+        if (res.ok && data.notifications && data.notifications.length > 0) {
           setNotifications(
             data.notifications.map((n, idx) => ({
               id: n._id || `NOT-${idx + 1}`,
@@ -43,10 +43,25 @@ const VolunteerNotificationsPage = () => {
             }))
           );
         } else {
-          setNotifications([]);
+          setNotifications([{
+            id: 'welcome-volunteer',
+            title: 'Welcome to FoodBridge AI!',
+            message: 'Welcome to FoodBridge AI! Your Volunteer Courier account is active. Check assigned food pickups and navigate live delivery routes.',
+            time: 'Just now',
+            category: 'Assignments',
+            read: false,
+          }]);
         }
       } catch (err) {
         console.warn('Error fetching volunteer notifications:', err);
+        setNotifications([{
+          id: 'welcome-volunteer',
+          title: 'Welcome to FoodBridge AI!',
+          message: 'Welcome to FoodBridge AI! Your Volunteer Courier account is active. Check assigned food pickups and navigate live delivery routes.',
+          time: 'Just now',
+          category: 'Assignments',
+          read: false,
+        }]);
       }
     };
     fetchNotifications();

@@ -19,13 +19,24 @@ const DonorNotificationsPage = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const data = await res.json();
-        if (res.ok && data.notifications) {
+        if (res.ok && data.notifications && data.notifications.length > 0) {
           setNotifications(data.notifications);
         } else {
-          setNotifications([]);
+          setNotifications([{
+            _id: 'welcome-donor',
+            title: 'Welcome to FoodBridge AI!',
+            message: 'Welcome to FoodBridge AI! Your Food Donor account is active. Start creating surplus food listings to connect with nearby verified NGOs and volunteers.',
+            createdAt: new Date().toISOString(),
+          }]);
         }
       } catch (err) {
         console.warn('Error fetching donor notifications:', err);
+        setNotifications([{
+          _id: 'welcome-donor',
+          title: 'Welcome to FoodBridge AI!',
+          message: 'Welcome to FoodBridge AI! Your Food Donor account is active. Start creating surplus food listings to connect with nearby verified NGOs and volunteers.',
+          createdAt: new Date().toISOString(),
+        }]);
       } finally {
         setLoading(false);
       }

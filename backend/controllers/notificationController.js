@@ -28,7 +28,21 @@ const sendNotification = async (req, res, next) => {
 // @access  Private
 const getNotifications = async (req, res, next) => {
   try {
-    const notifications = await Notification.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    let notifications = await Notification.find({ userId: req.user._id }).sort({ createdAt: -1 });
+
+    // Auto-seed initial welcome notification for any user with 0 notifications
+    if (notifications.length === 0) {
+      const userRole = (req.user.user_role || req.user.role || 'partner').toUpperCase();
+      const welcomeNotif = await Notification.create({
+        userId: req.user._id,
+        title: 'Welcome to FoodBridge AI!',
+        message: `Welcome ${req.user.name || 'Partner'}! Your ${userRole} account is active. Connect with local donors, shelters, and volunteers to eliminate surplus food waste.`,
+        type: 'system',
+        isRead: false,
+      });
+      notifications = [welcomeNotif];
+    }
+
     const unreadCount = await Notification.countDocuments({ userId: req.user._id, isRead: false });
 
     res.json({

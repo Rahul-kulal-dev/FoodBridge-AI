@@ -35,13 +35,28 @@ const NgoNotificationsPage = () => {
       });
       const data = await res.json();
 
-      if (res.ok && data.notifications) {
+      if (res.ok && data.notifications && data.notifications.length > 0) {
         setNotifications(data.notifications);
       } else {
-        setNotifications([]);
+        setNotifications([{
+          _id: 'welcome-ngo',
+          title: 'Welcome to FoodBridge AI!',
+          message: 'Welcome to FoodBridge AI! Your NGO / Hub account is active. Browse nearby surplus food listings and request instant volunteer dispatch.',
+          type: 'system',
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        }]);
       }
     } catch (err) {
       console.warn('Error fetching notifications from database:', err);
+      setNotifications([{
+        _id: 'welcome-ngo',
+        title: 'Welcome to FoodBridge AI!',
+        message: 'Welcome to FoodBridge AI! Your NGO / Hub account is active. Browse nearby surplus food listings and request instant volunteer dispatch.',
+        type: 'system',
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      }]);
     } finally {
       setLoading(false);
     }
