@@ -4,6 +4,7 @@ const {
   sendNotification,
   getNotifications,
   markAsRead,
+  markAllAsRead,
 } = require('../controllers/notificationController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -11,6 +12,7 @@ router.use(protect);
 
 router.post('/', sendNotification);
 router.get('/', getNotifications);
+router.patch('/read-all', markAllAsRead);
 router.patch('/:id/read', markAsRead);
 
 module.exports = router;

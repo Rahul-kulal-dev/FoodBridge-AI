@@ -61,10 +61,16 @@ const getNotifications = async (req, res, next) => {
 // @access  Private
 const markAsRead = async (req, res, next) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.json({ success: true, message: 'Notification marked as read' });
+    }
+
+    const notification = await Notification.findById(id);
 
     if (!notification) {
-      return res.status(404).json({ success: false, message: 'Notification not found' });
+      return res.json({ success: true, message: 'Notification marked as read' });
     }
 
     if (notification.userId.toString() !== req.user._id.toString()) {
@@ -84,8 +90,24 @@ const markAsRead = async (req, res, next) => {
   }
 };
 
+// @desc    Mark all notifications as read
+// @route   PATCH /api/notifications/read-all
+// @access  Private
+const markAllAsRead = async (req, res, next) => {
+  try {
+    await Notification.updateMany({ userId: req.user._id, isRead: false }, { $set: { isRead: true } });
+    res.json({
+      success: true,
+      message: 'All notifications marked as read',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   sendNotification,
   getNotifications,
   markAsRead,
+  markAllAsRead,
 };
