@@ -193,11 +193,37 @@ const getAvailableVolunteers = async (req, res, next) => {
   }
 };
 
+const revertDonationAcceptance = async (req, res, next) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+
+    if (!donation) {
+      return res.status(404).json({ success: false, message: 'Donation not found' });
+    }
+
+    donation.status = 'available';
+    donation.ngoId = null;
+    donation.volunteerId = null;
+    await donation.save();
+
+    await NgoRequest.deleteMany({ donationId: donation._id });
+
+    res.json({
+      success: true,
+      message: 'Donation acceptance reverted successfully',
+      donation,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNgoStats,
   getNearbyDonations,
   getDonationDetails,
   acceptDonation,
+  revertDonationAcceptance,
   getDonationHistory,
   getAvailableVolunteers,
 };

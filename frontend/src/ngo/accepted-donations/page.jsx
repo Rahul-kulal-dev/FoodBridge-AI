@@ -27,6 +27,9 @@ const AcceptedDonationsPage = () => {
 
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [clickCounts, setClickCounts] = useState({});
+  const [revertingId, setRevertingId] = useState(null);
+  const [revertMessage, setRevertMessage] = useState(null);
 
   const fetchAcceptedDonations = async () => {
     setLoading(true);
@@ -53,6 +56,46 @@ const AcceptedDonationsPage = () => {
   useEffect(() => {
     fetchAcceptedDonations();
   }, [token]);
+
+  const handleImageTripleClick = async (donationId) => {
+    const currentCount = (clickCounts[donationId] || 0) + 1;
+
+    if (currentCount >= 3) {
+      setClickCounts((prev) => ({ ...prev, [donationId]: 0 }));
+      setRevertingId(donationId);
+      try {
+        const res = await fetch(getApiUrl(`/api/ngo/donations/${donationId}/revert`), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setRevertMessage({ type: 'success', text: 'Food donation acceptance reverted successfully! Listing is back in nearby food.' });
+          fetchAcceptedDonations();
+        } else {
+          setRevertMessage({ type: 'error', text: data.message || 'Failed to revert acceptance' });
+        }
+      } catch (err) {
+        setRevertMessage({ type: 'error', text: 'Server error while reverting donation acceptance' });
+      } finally {
+        setRevertingId(null);
+      }
+    } else {
+      setClickCounts((prev) => ({ ...prev, [donationId]: currentCount }));
+
+      setTimeout(() => {
+        setClickCounts((prev) => {
+          if (prev[donationId] === currentCount) {
+            return { ...prev, [donationId]: 0 };
+          }
+          return prev;
+        });
+      }, 1500);
+    }
+  };
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {
@@ -91,7 +134,7 @@ const AcceptedDonationsPage = () => {
             Accepted Surplus Food Donations
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-medium max-w-2xl">
-            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking
+            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking (click food photo 3x to revert acceptance)
           </p>
         </div>
 
@@ -105,6 +148,15 @@ const AcceptedDonationsPage = () => {
           </Link>
         </div>
       </div>
+
+      {revertMessage && (
+        <div className={`p-4 rounded-xl border text-xs font-bold flex items-center justify-between animate-fade-in ${
+          revertMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+        }`}>
+          <span>{revertMessage.text}</span>
+          <button onClick={() => setRevertMessage(null)} className="font-mono text-sm cursor-pointer">✕</button>
+        </div>
+      )}
 
       {/* Table Container */}
       <div className="bg-white rounded-[20px] border border-slate-200/80 shadow-xs overflow-hidden">
@@ -163,11 +215,35 @@ const AcceptedDonationsPage = () => {
                       </span>
                     </div>
 
-                    <div>
-                      <h4 className="font-extrabold text-sm text-[#0F172A]">{item.title}</h4>
-                      <p className="text-xs text-slate-500 font-medium mt-0.5">
-                        Donor: <span className="font-bold text-slate-700">{donorName}</span> • Quantity: <span className="font-bold text-slate-700">{item.quantity} {item.unit || 'kg'}</span>
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        onClick={() => handleImageTripleClick(item._id)}
+                        title="Click photo 3 times to revert acceptance"
+                        className="relative cursor-pointer group shrink-0"
+                      >
+                        <FoodImageSlideshow
+                          image={item.image}
+                          images={item.images}
+                          alt={item.title}
+                          className="w-12 h-12 rounded-xl object-cover border-2 border-slate-200 group-hover:border-rose-400 transition-all bg-slate-50 shadow-xs"
+                        />
+                        {clickCounts[item._id] > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white font-black text-[10px] px-1.5 py-0.5 rounded-full shadow-md animate-pulse z-10">
+                            {clickCounts[item._id]}/3
+                          </span>
+                        )}
+                        {revertingId === item._id && (
+                          <div className="absolute inset-0 bg-slate-900/60 rounded-xl flex items-center justify-center z-20">
+                            <Loader2 className="w-4 h-4 text-white animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-sm text-[#0F172A]">{item.title}</h4>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          Donor: <span className="font-bold text-slate-700">{donorName}</span> • Quantity: <span className="font-bold text-slate-700">{item.quantity} {item.unit || 'kg'}</span>
+                        </p>
+                      </div>
                     </div>
 
                     <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
@@ -237,12 +313,28 @@ const AcceptedDonationsPage = () => {
                         </td>
                         <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <FoodImageSlideshow
-                              image={item.image}
-                              images={item.images}
-                              alt={item.title}
-                              className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-50 shadow-xs"
-                            />
+                            <div
+                              onClick={() => handleImageTripleClick(item._id)}
+                              title="Click photo 3 times to revert acceptance"
+                              className="relative cursor-pointer group shrink-0"
+                            >
+                              <FoodImageSlideshow
+                                image={item.image}
+                                images={item.images}
+                                alt={item.title}
+                                className="w-11 h-11 rounded-xl object-cover border-2 border-slate-200 group-hover:border-rose-400 transition-all bg-slate-50 shadow-xs"
+                              />
+                              {clickCounts[item._id] > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white font-black text-[10px] px-1.5 py-0.5 rounded-full shadow-md animate-pulse z-10">
+                                  {clickCounts[item._id]}/3
+                                </span>
+                              )}
+                              {revertingId === item._id && (
+                                <div className="absolute inset-0 bg-slate-900/60 rounded-xl flex items-center justify-center z-20">
+                                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                </div>
+                              )}
+                            </div>
                             <div>
                               <div className="font-extrabold text-slate-900">{item.title}</div>
                               <div className="font-normal text-[#64748B] text-[11px] mt-0.5">{item.quantity} {item.unit || 'kg'}</div>
