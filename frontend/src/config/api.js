@@ -23,7 +23,7 @@ export const getApiUrl = (endpoint) => {
  * @param {string} fallback - Default image fallback
  */
 export const getImageUrl = (url, fallback = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80') => {
-  if (!url || typeof url !== 'string' || url.trim() === '') {
+  if (!url || typeof url !== 'string' || url.trim() === '' || url.trim().startsWith('blob:')) {
     return fallback;
   }
   const targetUrl = url.trim();

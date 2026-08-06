@@ -6,7 +6,7 @@ const { uploadToCloudinary } = require('../config/cloudinary');
 // @access  Private (Donor / Admin)
 const createDonation = async (req, res, next) => {
   try {
-    const { title, description, foodType, quantity, unit, expiryTime, location, image, checklist } = req.body;
+    const { title, description, foodType, quantity, unit, expiryTime, location, image, images, checklist } = req.body;
 
     // Business Rule 7: Only verified donors can publish donations
     if (req.user.verificationStatus !== 'approved') {
@@ -68,6 +68,11 @@ const createDonation = async (req, res, next) => {
       }
     }
 
+    const imageArray = Array.isArray(images) && images.length > 0
+      ? images.map((img) => (typeof img === 'object' ? img.rawUrl || img.url : img)).filter(Boolean)
+      : (image ? [image] : []);
+    const primaryImage = imageArray[0] || (typeof image === 'string' ? image : '');
+
     // Business Rule 5: Donation becomes Available (status: 'available')
     const donation = await Donation.create({
       donorId: req.user._id,
@@ -78,7 +83,8 @@ const createDonation = async (req, res, next) => {
       unit: unit || 'kg',
       expiryTime: new Date(expiryTime),
       location: typeof location === 'object' ? location : { address: addressStr },
-      image,
+      image: primaryImage,
+      images: imageArray.length > 0 ? imageArray : [primaryImage],
       status: 'available',
     });
 
@@ -101,8 +107,12 @@ const uploadFoodImage = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload an image file' });
     }
 
-    // Upload food image to Cloudinary
-    const imageUrl = await uploadToCloudinary(req.file.path, 'foodbridge_donations');
+    // Upload food image to Cloudinary (or fallback upload server)
+    const cloudRes = await uploadToCloudinary(req.file.path, 'foodbridge_donations');
+    const imageUrl = typeof cloudRes === 'string'
+      ? cloudRes
+      : (cloudRes.secure_url || cloudRes.url || cloudRes.toString());
+
     res.json({
       success: true,
       imageUrl,

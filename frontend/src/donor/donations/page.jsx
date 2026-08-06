@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Package, Search, Filter, Loader2, Utensils } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
+import FoodImageSlideshow from '../../components/FoodImageSlideshow';
 
 /**
  * My Food Donations Page (/donor/donations)
@@ -214,18 +215,12 @@ const MyDonationsPage = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {imgSrc && !hasImageFailed ? (
-                      <img
-                        src={imgSrc}
-                        alt={item.title}
-                        onError={() => handleImageError(item._id)}
-                        className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-100 bg-slate-50"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-                        <Utensils className="w-5 h-5" />
-                      </div>
-                    )}
+                    <FoodImageSlideshow
+                      image={item.image}
+                      images={item.images}
+                      alt={item.title}
+                      className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-50 shadow-xs"
+                    />
                     <div>
                       <h4 className="font-extrabold text-[#0F172A] text-sm">{item.title}</h4>
                       <p className="text-xs font-bold text-emerald-600 mt-0.5">{item.quantity} {item.unit || 'kg'}</p>
@@ -266,18 +261,12 @@ const MyDonationsPage = () => {
                       <tr key={item._id} className="hover:bg-[#f8fafc]/60 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            {imgSrc && !hasImageFailed ? (
-                              <img
-                                src={imgSrc}
-                                alt={item.title}
-                                onError={() => handleImageError(item._id)}
-                                className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-100 bg-slate-50"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
-                                <Utensils className="w-4 h-4" />
-                              </div>
-                            )}
+                            <FoodImageSlideshow
+                              image={item.image}
+                              images={item.images}
+                              alt={item.title}
+                              className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-50 shadow-xs"
+                            />
                             <div>
                               <span className="font-mono font-bold text-[10px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                                 {docId}

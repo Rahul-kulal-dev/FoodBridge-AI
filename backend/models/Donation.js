@@ -37,6 +37,11 @@ const donationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    images: [
+      {
+        type: String,
+      },
+    ],
     location: {
       address: { type: String, default: '' },
       lat: { type: Number, default: 0 },

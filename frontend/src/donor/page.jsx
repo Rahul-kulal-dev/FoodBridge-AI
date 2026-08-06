@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getApiUrl } from '../config/api';
+import { getApiUrl, getImageUrl } from '../config/api';
+import FoodImageSlideshow from '../components/FoodImageSlideshow';
 
 /**
  * Donor Dashboard Main Overview Page (/donor)
@@ -59,6 +60,8 @@ const DonorDashboardPage = () => {
             time: new Date(d.updatedAt || d.createdAt).toLocaleDateString(),
             rawQuantity: Number(d.quantity) || 0,
             rawStatus: d.status,
+            image: d.image,
+            images: d.images,
           };
         });
         setDonations(formatted);
@@ -327,8 +330,18 @@ const DonorDashboardPage = () => {
                         {row.id}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-[#0F172A]">{row.title}</div>
-                        <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{row.quantity}</div>
+                        <div className="flex items-center gap-3">
+                          <FoodImageSlideshow
+                            image={row.image}
+                            images={row.images}
+                            alt={row.title}
+                            className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-50 shadow-xs"
+                          />
+                          <div>
+                            <div className="font-bold text-[#0F172A]">{row.title}</div>
+                            <div className="text-[11px] text-[#64748B] font-medium mt-0.5">{row.quantity}</div>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 font-medium text-[#334155]">
                         {row.recipient}

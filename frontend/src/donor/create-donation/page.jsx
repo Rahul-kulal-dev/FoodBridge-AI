@@ -113,24 +113,31 @@ const CreateDonationPage = () => {
 
       const data = await res.json();
       if (res.ok && data.imageUrl) {
-        const fullImgUrl = getImageUrl(data.imageUrl);
+        const rawPath = typeof data.imageUrl === 'object' ? data.imageUrl.secure_url : data.imageUrl;
+        const fullImgUrl = getImageUrl(rawPath);
         setImages((prev) => [
           ...prev,
           {
             id: `img-${Date.now()}`,
             url: fullImgUrl,
-            rawUrl: data.imageUrl,
+            rawUrl: rawPath,
             name: files[0].name,
           },
         ].slice(0, 5));
       } else {
+        setErrorMsg(data.message || 'Image upload failed');
       }
     } catch (err) {
-      const blobUrl = URL.createObjectURL(files[0]);
-      setImages((prev) => [
-        ...prev,
-        { id: `img-${Date.now()}`, url: blobUrl, rawUrl: blobUrl, name: files[0].name },
-      ].slice(0, 5));
+      // Fallback to Base64 Data URL if server upload encounters network error (never store temporary blob URLs)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Url = reader.result;
+        setImages((prev) => [
+          ...prev,
+          { id: `img-${Date.now()}`, url: base64Url, rawUrl: base64Url, name: files[0].name },
+        ].slice(0, 5));
+      };
+      reader.readAsDataURL(files[0]);
     } finally {
       setUploadingImg(false);
     }
@@ -264,6 +271,7 @@ const CreateDonationPage = () => {
     setLoading(true);
 
     try {
+      const rawImagesList = images.map((img) => img.rawUrl || img.url).filter(Boolean);
       const payload = {
         title: foodName.trim(),
         foodType: category,
@@ -271,7 +279,8 @@ const CreateDonationPage = () => {
         unit,
         expiryTime: expDateTime.toISOString(),
         location: { address: address.trim() },
-        image: images[0]?.rawUrl || images[0]?.url || '',
+        image: rawImagesList[0] || '',
+        images: rawImagesList,
         checklist,
       };
 

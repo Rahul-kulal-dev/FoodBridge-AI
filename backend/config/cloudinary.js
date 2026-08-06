@@ -55,11 +55,19 @@ const uploadToCloudinary = async (filePath, folder = 'foodbridge_uploads') => {
         access_mode: 'public',
       });
     } catch (retryErr) {
-      console.error('Cloudinary upload error:', retryErr.message);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-      throw new Error(`Cloudinary upload failed: ${retryErr.message}`);
+      console.warn('Cloudinary upload fallback to static upload server path:', retryErr.message);
+      const filename = path.basename(filePath);
+      const staticUrl = `/uploads/${filename}`;
+      return {
+        secure_url: staticUrl,
+        public_id: filename,
+        resource_type: isPdf ? 'raw' : 'image',
+        format: isPdf ? 'pdf' : ext.replace('.', ''),
+        bytes: 0,
+        toString() {
+          return staticUrl;
+        },
+      };
     }
   }
 
