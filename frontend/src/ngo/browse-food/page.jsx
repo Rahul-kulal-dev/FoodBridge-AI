@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search,
   Filter,
@@ -16,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
+import FoodImageSlideshow from '../../components/FoodImageSlideshow';
 
 /**
  * Browse Nearby Food Page (/ngo/browse-food)
@@ -231,22 +233,12 @@ const BrowseFoodPage = () => {
               >
                 {/* Image Header Container */}
                 <div className="relative h-48 w-full overflow-hidden bg-slate-100 flex items-center justify-center">
-                  {imgSrc ? (
-                    <img
-                      src={imgSrc}
-                      alt=""
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : null}
-
-                  {/* Fallback pattern when image is missing or loading error */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-slate-100 text-emerald-700 flex flex-col items-center justify-center gap-2 z-0">
-                    <Utensils className="w-9 h-9 text-[#16A34A]" />
-                    <span className="text-xs font-black text-slate-800 uppercase tracking-wider">Surplus Food</span>
-                  </div>
+                  <FoodImageSlideshow
+                    image={item.image}
+                    images={item.images}
+                    alt={item.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-all duration-500"
+                  />
 
                   <div className="absolute top-3 left-3 z-10">
                     <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-[11px] font-black text-slate-800 shadow-sm uppercase border border-slate-200/60">
@@ -324,38 +316,40 @@ const BrowseFoodPage = () => {
       )}
 
       {/* Verification Required Modal */}
-      {showUnverifiedModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-100 shadow-2xl space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
-              <ShieldAlert className="w-6 h-6" />
+      {showUnverifiedModal &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-100 shadow-2xl space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-black text-slate-900">Verification Required</h3>
+                <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                  Only Verified NGOs can accept food donations. Please complete mandatory document verification to unlock this feature.
+                </p>
+              </div>
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  onClick={() => setShowUnverifiedModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowUnverifiedModal(false);
+                    navigate('/ngo/verification');
+                  }}
+                  className="px-5 py-2 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md"
+                >
+                  Complete Verification
+                </button>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-black text-slate-900">Verification Required</h3>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Only Verified NGOs can accept food donations. Please complete mandatory document verification to unlock this feature.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-              <button
-                onClick={() => setShowUnverifiedModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setShowUnverifiedModal(false);
-                  navigate('/ngo/verification');
-                }}
-                className="px-5 py-2 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white text-xs font-extrabold transition-all cursor-pointer shadow-md"
-              >
-                Complete Verification
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

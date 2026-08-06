@@ -17,6 +17,7 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
+import FoodImageSlideshow from '../../components/FoodImageSlideshow';
 
 /**
  * Food Details Page (/ngo/food-details)
@@ -171,19 +172,13 @@ const FoodDetailsPage = () => {
         <div className="lg:col-span-6 space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-3">
             <div className="relative h-80 w-full rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center">
-              {imgSrc ? (
-                <img
-                  src={imgSrc}
-                  alt={foodItem.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-emerald-50 text-emerald-600 flex flex-col items-center justify-center gap-2">
-                  <Utensils className="w-12 h-12" />
-                  <span className="text-sm font-bold text-emerald-700">Surplus Food Photo</span>
-                </div>
-              )}
-              <div className="absolute top-3 right-3 bg-emerald-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+              <FoodImageSlideshow
+                image={foodItem.image}
+                images={foodItem.images}
+                alt={foodItem.title}
+                className="w-full h-80 object-cover"
+              />
+              <div className="absolute top-3 right-3 bg-emerald-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md flex items-center gap-1 z-10">
                 <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                 AI Freshness Verified
               </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { X, CheckCircle2, Leaf, ArrowRight, Utensils, HeartHandshake, Truck, Loader2 } from 'lucide-react';
@@ -94,7 +95,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
@@ -258,6 +259,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
           )}
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
