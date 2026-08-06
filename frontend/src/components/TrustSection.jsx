@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building2, HeartHandshake, UtensilsCrossed, ShieldAlert, Award, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 export default function TrustSection() {
   const partners = [
-    { name: 'Hope Food Shelter', category: 'NGO Network', icon: HeartHandshake },
-    { name: 'Grand Harvest Bistro', category: 'Restaurant Partner', icon: UtensilsCrossed },
-    { name: 'City Relief Alliance', category: 'Healthcare & Rescue', icon: ShieldAlert },
-    { name: 'Urban Meal Foundation', category: 'Community Kitchen', icon: Building2 },
-    { name: 'Green Table Dining', category: 'Hospitality Group', icon: UtensilsCrossed },
-    { name: 'Metro Rescue Volunteers', category: 'Logistics Network', icon: Award },
+    { name: 'Hope Food Shelter', category: 'NGO Network', image: '/imgs/heart.png' },
+    { name: 'Grand Harvest Bistro', category: 'Restaurant Partner', image: '/imgs/Cutlery.png' },
+    { name: 'City Relief Alliance', category: 'Healthcare & Rescue', image: '/imgs/shield.png' },
+    { name: 'Urban Meal Foundation', category: 'Community Kitchen', image: '/imgs/urban.png' },
+    { name: 'Green Table Dining', category: 'Hospitality Group', image: '/imgs/Cutlery.png' },
+    { name: 'Metro Rescue Volunteers', category: 'Logistics Network', image: '/imgs/metro.png' },
   ];
 
   return (
@@ -28,7 +28,6 @@ export default function TrustSection() {
         {/* Partners Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {partners.map((partner, index) => {
-            const IconComponent = partner.icon;
             return (
               <motion.div
                 key={partner.name}
@@ -37,12 +36,10 @@ export default function TrustSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.08 }}
                 whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col items-center justify-center text-center group cursor-pointer hover:border-emerald-200 hover:shadow-md transition-all duration-200"
+                className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col items-center justify-center text-center group cursor-pointer hover:border-green-200 hover:shadow-md transition-all duration-200"
               >
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-50 transition-colors mb-3">
-                  <IconComponent className="w-6 h-6" />
-                </div>
-                <span className="text-sm font-bold text-[#0F172A] group-hover:text-emerald-700 transition-colors line-clamp-1">
+                <img src={partner.image} alt={partner.name} className="w-10 h-10 object-contain mb-3" />
+                <span className="text-sm font-bold text-[#0F172A] group-hover:text-green-700 transition-colors line-clamp-1">
                   {partner.name}
                 </span>
                 <span className="text-[11px] text-[#64748B] font-medium mt-0.5">

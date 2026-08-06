@@ -52,7 +52,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
           <Link to="/" className="flex items-center gap-3 group">
             <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
             <span className="text-xl font-extrabold text-[#0F172A] tracking-tight">
-              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+              FoodBridge <span className="text-green-600 font-black">AI</span>
             </span>
           </Link>
 
@@ -62,7 +62,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-sm font-medium text-[#334155] hover:text-emerald-600 transition-colors"
+                className="text-sm font-medium text-[#334155] hover:text-green-600 transition-colors"
               >
                 {link.name}
               </a>
@@ -82,7 +82,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
                 </button>
                 <Link
                   to={getDashboardRoute()}
-                  className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="text-sm font-semibold bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl shadow-green-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   <span>Go to Dashboard</span>
@@ -98,7 +98,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
                 </button>
                 <button
                   onClick={() => onOpenDonateModal('register')}
-                  className="text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="text-sm font-semibold bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl shadow-green-btn transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span>Register</span>
                   <ArrowRight className="w-4 h-4" />
@@ -128,7 +128,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-base font-medium text-[#334155] hover:text-emerald-600 py-2 border-b border-slate-100"
+              className="block text-base font-medium text-[#334155] hover:text-green-600 py-2 border-b border-slate-100"
             >
               {link.name}
             </a>
@@ -139,7 +139,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
                 <Link
                   to={getDashboardRoute()}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl shadow-emerald-btn transition-all flex items-center justify-center gap-2"
+                  className="w-full text-center font-semibold bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl shadow-green-btn transition-all flex items-center justify-center gap-2"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   <span>Go to Dashboard</span>
@@ -171,7 +171,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
                     setMobileMenuOpen(false);
                     onOpenDonateModal('register');
                   }}
-                  className="w-full text-center font-semibold bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl shadow-emerald-btn transition-all flex items-center justify-center gap-2"
+                  className="w-full text-center font-semibold bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl shadow-green-btn transition-all flex items-center justify-center gap-2"
                 >
                   <span>Register</span>
                   <ArrowRight className="w-4 h-4" />

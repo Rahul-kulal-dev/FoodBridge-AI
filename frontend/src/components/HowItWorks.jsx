@@ -16,8 +16,8 @@ export default function HowItWorks() {
       title: 'Food Donor Uploads Surplus',
       description: 'Restaurant or caterer logs surplus food items with photos, quantity, and pickup availability.',
       icon: Upload,
-      accent: 'emerald',
-      bgColor: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      accent: 'green',
+      bgColor: 'bg-green-50 text-green-600 border-green-200',
       badge: 'Step 1'
     },
     {
@@ -75,12 +75,12 @@ export default function HowItWorks() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: idx * 0.12 }}
                   whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-3xl p-6 border border-[#E7EAF0] shadow-soft-card flex flex-col justify-between relative group hover:border-emerald-300 hover:shadow-soft-hover transition-all"
+                  className="bg-white rounded-3xl p-6 border border-[#E7EAF0] shadow-soft-card flex flex-col justify-between relative group hover:border-green-300 hover:shadow-soft-hover transition-all"
                 >
                   <div>
                     {/* Header: Step Number & Icon */}
                     <div className="flex items-center justify-between mb-5">
-                      <span className="text-2xl font-black text-slate-300 group-hover:text-emerald-500 transition-colors">
+                      <span className="text-2xl font-black text-slate-300 group-hover:text-green-500 transition-colors">
                         {step.number}
                       </span>
                       <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center font-bold ${step.bgColor} shadow-xs`}>
@@ -89,7 +89,7 @@ export default function HowItWorks() {
                     </div>
 
                     {/* Step Title */}
-                    <h3 className="text-lg font-black text-[#0F172A] mb-2 tracking-tight group-hover:text-emerald-700 transition-colors">
+                    <h3 className="text-lg font-black text-[#0F172A] mb-2 tracking-tight group-hover:text-green-700 transition-colors">
                       {step.title}
                     </h3>
 
@@ -102,7 +102,7 @@ export default function HowItWorks() {
                   {/* Step status pill */}
                   <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-[#64748B]">
                     <span>Status</span>
-                    <span className="text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md text-[11px] font-bold">
+                    <span className="text-green-600 bg-green-50 px-2.5 py-0.5 rounded-md text-[11px] font-bold">
                       Automated
                     </span>
                   </div>
