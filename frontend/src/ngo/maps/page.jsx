@@ -34,6 +34,7 @@ const NgoMapsPage = () => {
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVolunteerId, setSelectedVolunteerId] = useState('');
   const [loadingVolunteers, setLoadingVolunteers] = useState(false);
+  const [volunteerError, setVolunteerError] = useState('');
 
   const fetchMapData = async () => {
     setLoading(true);
@@ -51,7 +52,7 @@ const NgoMapsPage = () => {
         setDonations([]);
       }
     } catch (err) {
-      console.warn('Error fetching map data from database:', err);
+      console.warn('Error fetching map donations from database:', err);
     } finally {
       setLoading(false);
     }
@@ -82,23 +83,26 @@ const NgoMapsPage = () => {
     setSelectedMarker(null);
     setVolunteerPickerDonationId(id);
     setSelectedVolunteerId('');
+    setVolunteerError('');
     fetchVolunteers();
   };
 
   const confirmAccept = async () => {
     if (!volunteerPickerDonationId) return;
+    if (!selectedVolunteerId) {
+      setVolunteerError('Please select a volunteer courier to proceed.');
+      return;
+    }
+    setVolunteerError('');
     setAcceptingId(volunteerPickerDonationId);
     try {
-      const body = {};
-      if (selectedVolunteerId) body.volunteerId = selectedVolunteerId;
-
       const res = await fetch(getApiUrl(`/api/ngo/donations/${volunteerPickerDonationId}/accept`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ volunteerId: selectedVolunteerId }),
       });
 
       if (res.ok) {
@@ -280,22 +284,32 @@ const NgoMapsPage = () => {
                 </div>
               </div>
 
+              {volunteerError && (
+                <div className="p-3 text-xs bg-rose-50 text-rose-600 rounded-xl border border-rose-200 font-bold flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{volunteerError}</span>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Select Volunteer</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Select Volunteer Courier *</label>
                 {loadingVolunteers ? (
                   <div className="flex items-center gap-2 py-3 text-xs text-slate-500">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading volunteers...
                   </div>
                 ) : volunteers.length === 0 ? (
-                  <p className="text-xs text-slate-500 py-3">No volunteers registered yet.</p>
+                  <p className="text-xs text-rose-500 py-3 font-semibold">No volunteers registered in system yet.</p>
                 ) : (
                   <select
                     value={selectedVolunteerId}
-                    onChange={(e) => setSelectedVolunteerId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedVolunteerId(e.target.value);
+                      if (e.target.value) setVolunteerError('');
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
                   >
-                    <option value="">-- No volunteer (assign later) --</option>
+                    <option value="">-- Select a volunteer courier --</option>
                     {volunteers.map((v) => (
                       <option key={v._id} value={v._id}>
                         {v.name} {v.phone ? `(${v.phone})` : ''} {v.verificationStatus === 'approved' ? '✓' : ''}

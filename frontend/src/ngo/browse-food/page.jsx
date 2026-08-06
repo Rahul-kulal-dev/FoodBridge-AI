@@ -41,6 +41,7 @@ const BrowseFoodPage = () => {
   const [volunteers, setVolunteers] = useState([]);
   const [selectedVolunteerId, setSelectedVolunteerId] = useState('');
   const [loadingVolunteers, setLoadingVolunteers] = useState(false);
+  const [volunteerError, setVolunteerError] = useState('');
 
   const fetchAvailableDonations = async () => {
     setLoading(true);
@@ -93,23 +94,26 @@ const BrowseFoodPage = () => {
     const item = donations.find((d) => d._id === foodId);
     setVolunteerPickerItem(item || { _id: foodId, title: 'Donation' });
     setSelectedVolunteerId('');
+    setVolunteerError('');
     fetchVolunteers();
   };
 
   const confirmAccept = async () => {
     if (!volunteerPickerItem) return;
+    if (!selectedVolunteerId) {
+      setVolunteerError('Please select a volunteer courier to proceed.');
+      return;
+    }
+    setVolunteerError('');
     setAcceptingId(volunteerPickerItem._id);
     try {
-      const body = {};
-      if (selectedVolunteerId) body.volunteerId = selectedVolunteerId;
-
       const res = await fetch(getApiUrl(`/api/ngo/donations/${volunteerPickerItem._id}/accept`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ volunteerId: selectedVolunteerId }),
       });
 
       const data = await res.json();
@@ -400,22 +404,32 @@ const BrowseFoodPage = () => {
                 </div>
               </div>
 
+              {volunteerError && (
+                <div className="p-3 text-xs bg-rose-50 text-rose-600 rounded-xl border border-rose-200 font-bold flex items-center gap-1.5">
+                  <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600" />
+                  <span>{volunteerError}</span>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Select Volunteer</label>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Select Volunteer Courier *</label>
                 {loadingVolunteers ? (
                   <div className="flex items-center gap-2 py-3 text-xs text-slate-500">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading volunteers...
                   </div>
                 ) : volunteers.length === 0 ? (
-                  <p className="text-xs text-slate-500 py-3">No volunteers registered yet.</p>
+                  <p className="text-xs text-rose-500 py-3 font-semibold">No volunteers registered in system yet.</p>
                 ) : (
                   <select
                     value={selectedVolunteerId}
-                    onChange={(e) => setSelectedVolunteerId(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedVolunteerId(e.target.value);
+                      if (e.target.value) setVolunteerError('');
+                    }}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
                   >
-                    <option value="">-- No volunteer (assign later) --</option>
+                    <option value="">-- Select a volunteer courier --</option>
                     {volunteers.map((v) => (
                       <option key={v._id} value={v._id}>
                         {v.name} {v.phone ? `(${v.phone})` : ''} {v.verificationStatus === 'approved' ? '✓' : ''}

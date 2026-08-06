@@ -80,11 +80,16 @@ const acceptDonation = async (req, res, next) => {
       return res.status(400).json({ success: false, message: `Donation is already ${donation.status}` });
     }
 
+    if (!req.body.volunteerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'A volunteer courier must be selected to accept a food donation.',
+      });
+    }
+
     donation.status = 'accepted';
     donation.ngoId = req.user._id;
-    if (req.body.volunteerId) {
-      donation.volunteerId = req.body.volunteerId;
-    }
+    donation.volunteerId = req.body.volunteerId;
     await donation.save();
 
     const ngoRequest = await NgoRequest.create({
