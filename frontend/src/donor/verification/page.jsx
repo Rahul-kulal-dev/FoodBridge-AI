@@ -281,14 +281,15 @@ const DonorVerificationPage = () => {
                     </span>
 
                     {!doc.isBroken && (
-                      <button
-                        type="button"
-                        onClick={() => setActiveDocModal(doc)}
+                      <a
+                        href={doc.fileUrl || doc.rawUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>View</span>
-                      </button>
+                      </a>
                     )}
                   </div>
                 </div>
@@ -449,14 +450,6 @@ const DonorVerificationPage = () => {
           <span>Your documents are secure and will only be used for verification purposes.</span>
         </div>
       </div>
-
-      {/* Document View Preview Modal */}
-      <FileViewerModal
-        isOpen={!!activeDocModal}
-        onClose={() => setActiveDocModal(null)}
-        doc={activeDocModal}
-        title="Donor Verification Document"
-      />
     </div>
   );
 };

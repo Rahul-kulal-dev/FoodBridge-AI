@@ -59,7 +59,19 @@ const SidebarItem = ({ icon: Icon, label, route, isCollapsed = false, badge, onC
                       ? 'absolute -top-0.5 -right-0.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full text-[9px] bg-emerald-500 text-white font-bold shadow-xs'
                       : 'hidden'
                     : 'px-2 py-0.5 rounded-full ' +
-                      (isActive
+                      (badge === 'Verified' || badge === 'approved'
+                        ? isActive
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+                        : badge === 'Pending' || badge === 'pending'
+                        ? isActive
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200/80'
+                        : badge === 'Rejected' || badge === 'rejected'
+                        ? isActive
+                          ? 'bg-rose-500 text-white'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200/80'
+                        : isActive
                         ? 'bg-emerald-500 text-white'
                         : 'bg-slate-100 text-[#64748B] group-hover:bg-emerald-50 group-hover:text-emerald-600')
                 }

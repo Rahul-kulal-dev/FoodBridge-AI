@@ -15,6 +15,7 @@ import {
 import SidebarItem from './SidebarItem';
 import SidebarProfile from './SidebarProfile';
 import MobileSidebar from './MobileSidebar';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * DonorSidebar component
@@ -24,9 +25,14 @@ import MobileSidebar from './MobileSidebar';
 const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: externalSetIsCollapsed }) => {
   // Fallback internal collapsed state if props are not provided
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(false);
+  const { user } = useAuth();
 
   const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
   const setIsCollapsed = externalSetIsCollapsed || setInternalIsCollapsed;
+
+  const isVerified = user?.verificationStatus === 'approved' || user?.verificationStatus === 'Verified';
+  const isRejected = user?.verificationStatus === 'rejected';
+  const verificationBadge = isVerified ? 'Verified' : isRejected ? 'Rejected' : 'Pending';
 
   // Navigation Items defined strictly according to requirements
   const navItems = [
@@ -39,7 +45,7 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
       label: 'Verification',
       icon: BadgeCheck,
       route: '/donor/verification',
-      badge: 'Verified',
+      badge: verificationBadge,
     },
     {
       label: 'Create Donation',

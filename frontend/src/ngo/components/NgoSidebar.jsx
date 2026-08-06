@@ -48,7 +48,9 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
     fetchStats();
   }, [token]);
 
-  const isVerified = user?.verificationStatus === 'approved';
+  const isVerified = user?.verificationStatus === 'approved' || user?.verificationStatus === 'Verified';
+  const isRejected = user?.verificationStatus === 'rejected';
+  const verificationBadge = isVerified ? 'Verified' : isRejected ? 'Rejected' : 'Pending';
 
   // NGO Navigation Items with dynamic data
   const navItems = [
@@ -61,7 +63,7 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
       label: 'Verification',
       icon: BadgeCheck,
       route: '/ngo/verification',
-      badge: isVerified ? 'Verified' : 'Pending',
+      badge: verificationBadge,
     },
     {
       label: 'Nearby Food',
