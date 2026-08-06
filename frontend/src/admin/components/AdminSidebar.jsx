@@ -70,9 +70,9 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-            className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer shrink-0"
+            className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
           >
-            <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
+            <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
           </button>
           {!isCollapsed && (
             <div className="truncate">

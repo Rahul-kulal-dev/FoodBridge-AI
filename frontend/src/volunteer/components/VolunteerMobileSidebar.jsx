@@ -39,6 +39,7 @@ const VolunteerMobileSidebar = ({ navItems }) => {
             <Menu className="w-6 h-6 text-emerald-600" />
           </button>
 
+          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-8 h-8 object-contain rounded-lg shadow-xs shrink-0" />
           <div>
             <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
               FoodBridge <span className="text-emerald-600 font-black">AI</span>

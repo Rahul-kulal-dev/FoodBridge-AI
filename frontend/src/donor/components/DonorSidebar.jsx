@@ -92,9 +92,9 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
             <button
               onClick={() => setIsCollapsed(false)}
               title="Expand Sidebar"
-              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer"
+              className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
             >
-              <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
+              <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
             </button>
           </div>
         ) : (
@@ -103,9 +103,9 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
               <button
                 onClick={() => setIsCollapsed(true)}
                 title="Collapse Sidebar"
-                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer shrink-0"
+                className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
               >
-                <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
+                <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
               </button>
 
               <div className="flex flex-col min-w-0 transition-opacity duration-200">

@@ -136,9 +136,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
             <div>
               {/* Header */}
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                  <Leaf className="w-4 h-4" />
-                </div>
+                <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
                   {initialType === 'login' ? 'FoodBridge Account' : 'Join FoodBridge Network'}
                 </span>

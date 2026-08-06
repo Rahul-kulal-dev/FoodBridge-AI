@@ -11,10 +11,8 @@ export default function Footer() {
           
           {/* Column 1: Brand & Bio */}
           <div className="lg:col-span-1 space-y-4">
-            <a href="#" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
-                <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
-              </div>
+            <a href="#" className="flex items-center gap-2.5">
+              <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-9 h-9 object-contain rounded-xl shadow-xs" />
               <span className="text-lg font-extrabold text-[#0F172A] tracking-tight">
                 FoodBridge <span className="text-emerald-600">AI</span>
               </span>

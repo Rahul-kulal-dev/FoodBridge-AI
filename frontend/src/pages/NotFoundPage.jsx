@@ -30,11 +30,9 @@ export default function NotFoundPage() {
       <div className="w-full max-w-7xl mx-auto flex items-center justify-between pt-2">
         <div 
           onClick={() => navigate('/')}
-          className="flex items-center gap-2.5 cursor-pointer group"
+          className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 transition-transform group-hover:scale-105">
-            <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
-          </div>
+          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
           <div>
             <span className="text-xl font-extrabold text-[#0F172A] tracking-tight leading-tight block">
               FoodBridge <span className="text-emerald-600 font-black">AI</span>
