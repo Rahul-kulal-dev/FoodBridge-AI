@@ -166,15 +166,49 @@ const deleteDonation = async (req, res, next) => {
   }
 };
 
+const resolveDonationImages = (d) => {
+  const obj = typeof d.toObject === 'function' ? d.toObject() : { ...d };
+  const titleLower = (obj.title || '').toLowerCase();
+
+  let validImgs = Array.isArray(obj.images)
+    ? obj.images.filter((img) => img && typeof img === 'string' && img.trim() !== '' && !img.startsWith('blob:'))
+    : [];
+
+  if (obj.image && typeof obj.image === 'string' && obj.image.trim() !== '' && !obj.image.startsWith('blob:')) {
+    if (!validImgs.includes(obj.image)) validImgs.unshift(obj.image);
+  }
+
+  if (validImgs.length === 0) {
+    if (titleLower.includes('pizza') && titleLower.includes('sandwich')) {
+      validImgs = [
+        'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80',
+      ];
+    } else if (titleLower.includes('pizza')) {
+      validImgs = ['https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80'];
+    } else if (titleLower.includes('sandwich')) {
+      validImgs = ['https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80'];
+    } else {
+      validImgs = ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'];
+    }
+  }
+
+  obj.image = validImgs[0];
+  obj.images = validImgs;
+  return obj;
+};
+
 // @desc    Get my donations
 // @route   GET /api/donations/my
 // @access  Private (Donor / Admin)
 const getMyDonations = async (req, res, next) => {
   try {
-    const donations = await Donation.find({ donorId: req.user._id })
+    const rawDonations = await Donation.find({ donorId: req.user._id })
       .populate('ngoId', 'name organizationName phone')
       .populate('volunteerId', 'name phone')
       .sort({ createdAt: -1 });
+
+    const donations = rawDonations.map(resolveDonationImages);
 
     res.json({
       success: true,

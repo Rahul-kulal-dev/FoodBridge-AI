@@ -2,14 +2,49 @@ const Donation = require('../models/Donation');
 const NgoRequest = require('../models/NgoRequest');
 const VolunteerTask = require('../models/VolunteerTask');
 
+const resolveDonationImages = (d) => {
+  if (!d) return d;
+  const obj = typeof d.toObject === 'function' ? d.toObject() : { ...d };
+  const titleLower = (obj.title || '').toLowerCase();
+
+  let validImgs = Array.isArray(obj.images)
+    ? obj.images.filter((img) => img && typeof img === 'string' && img.trim() !== '' && !img.startsWith('blob:'))
+    : [];
+
+  if (obj.image && typeof obj.image === 'string' && obj.image.trim() !== '' && !obj.image.startsWith('blob:')) {
+    if (!validImgs.includes(obj.image)) validImgs.unshift(obj.image);
+  }
+
+  if (validImgs.length === 0) {
+    if (titleLower.includes('pizza') && titleLower.includes('sandwich')) {
+      validImgs = [
+        'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+        'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80',
+      ];
+    } else if (titleLower.includes('pizza')) {
+      validImgs = ['https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80'];
+    } else if (titleLower.includes('sandwich')) {
+      validImgs = ['https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80'];
+    } else {
+      validImgs = ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'];
+    }
+  }
+
+  obj.image = validImgs[0];
+  obj.images = validImgs;
+  return obj;
+};
+
 // @desc    Get nearby available donations
 // @route   GET /api/ngo/donations/nearby
 // @access  Private (NGO / Admin)
 const getNearbyDonations = async (req, res, next) => {
   try {
-    const donations = await Donation.find({ status: 'available' })
+    const rawDonations = await Donation.find({ status: 'available' })
       .populate('donorId', 'name email phone address organizationName')
       .sort({ createdAt: -1 });
+
+    const donations = rawDonations.map(resolveDonationImages);
 
     res.json({
       success: true,
@@ -70,10 +105,12 @@ const acceptDonation = async (req, res, next) => {
 // @access  Private (NGO)
 const getDonationHistory = async (req, res, next) => {
   try {
-    const donations = await Donation.find({ ngoId: req.user._id })
+    const rawDonations = await Donation.find({ ngoId: req.user._id })
       .populate('donorId', 'name email phone address')
       .populate('volunteerId', 'name email phone')
       .sort({ updatedAt: -1 });
+
+    const donations = rawDonations.map(resolveDonationImages);
 
     res.json({
       success: true,
@@ -134,7 +171,7 @@ const getDonationDetails = async (req, res, next) => {
 
     res.json({
       success: true,
-      donation,
+      donation: resolveDonationImages(donation),
     });
   } catch (error) {
     next(error);

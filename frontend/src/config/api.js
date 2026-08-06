@@ -27,7 +27,7 @@ export const getImageUrl = (url, fallback = 'https://images.unsplash.com/photo-1
     return fallback;
   }
   const targetUrl = url.trim();
-  if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+  if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://') || targetUrl.startsWith('data:image/')) {
     return targetUrl;
   }
   // Handles legacy relative paths gracefully

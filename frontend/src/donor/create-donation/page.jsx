@@ -93,7 +93,7 @@ const CreateDonationPage = () => {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Upload image to Cloudinary via backend
+  // Upload image to Cloudinary via backend (supports multiple files)
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -102,42 +102,53 @@ const CreateDonationPage = () => {
     setErrorMsg('');
 
     try {
-      const formData = new FormData();
-      formData.append('image', files[0]);
+      const uploadedResults = await Promise.all(
+        files.map(async (file) => {
+          try {
+            const formData = new FormData();
+            formData.append('image', file);
 
-      const res = await fetch(getApiUrl('/api/donations/upload-image'), {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
+            const res = await fetch(getApiUrl('/api/donations/upload-image'), {
+              method: 'POST',
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              body: formData,
+            });
 
-      const data = await res.json();
-      if (res.ok && data.imageUrl) {
-        const rawPath = typeof data.imageUrl === 'object' ? data.imageUrl.secure_url : data.imageUrl;
-        const fullImgUrl = getImageUrl(rawPath);
-        setImages((prev) => [
-          ...prev,
-          {
-            id: `img-${Date.now()}`,
-            url: fullImgUrl,
-            rawUrl: rawPath,
-            name: files[0].name,
-          },
-        ].slice(0, 5));
-      } else {
-        setErrorMsg(data.message || 'Image upload failed');
-      }
+            const data = await res.json();
+            if (res.ok && data.imageUrl) {
+              const rawPath = typeof data.imageUrl === 'object' ? data.imageUrl.secure_url : data.imageUrl;
+              return {
+                id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                url: getImageUrl(rawPath),
+                rawUrl: rawPath,
+                name: file.name,
+              };
+            }
+          } catch (err) {
+            console.warn('File upload server error:', err);
+          }
+
+          // Fallback to Base64 Data URL so user images are preserved cleanly
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const base64Url = reader.result;
+              resolve({
+                id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                url: base64Url,
+                rawUrl: base64Url,
+                name: file.name,
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+
+      const validResults = uploadedResults.filter(Boolean);
+      setImages((prev) => [...prev, ...validResults].slice(0, 5));
     } catch (err) {
-      // Fallback to Base64 Data URL if server upload encounters network error (never store temporary blob URLs)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Url = reader.result;
-        setImages((prev) => [
-          ...prev,
-          { id: `img-${Date.now()}`, url: base64Url, rawUrl: base64Url, name: files[0].name },
-        ].slice(0, 5));
-      };
-      reader.readAsDataURL(files[0]);
+      setErrorMsg('Failed to upload image(s)');
     } finally {
       setUploadingImg(false);
     }

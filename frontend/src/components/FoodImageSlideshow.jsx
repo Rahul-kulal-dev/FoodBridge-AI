@@ -18,8 +18,10 @@ export default function FoodImageSlideshow({
     if (Array.isArray(images) && images.length > 0) {
       list = images.map((img) => (typeof img === 'object' ? img.rawUrl || img.url : img)).filter(Boolean);
     }
-    if (list.length === 0 && image && typeof image === 'string' && image.trim() !== '') {
-      list = [image];
+    if (image && typeof image === 'string' && image.trim() !== '') {
+      if (!list.includes(image)) {
+        list.unshift(image);
+      }
     }
     return list.map((url) => getImageUrl(url));
   }, [image, images]);
