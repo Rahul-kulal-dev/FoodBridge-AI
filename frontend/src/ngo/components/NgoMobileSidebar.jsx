@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Building2, Bell } from 'lucide-react';
+import { Menu, X, Bell } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 import SidebarProfile from './SidebarProfile';
 import { useLocation } from 'react-router-dom';
@@ -39,18 +39,13 @@ const NgoMobileSidebar = ({ navItems }) => {
             <Menu className="w-6 h-6 text-emerald-600" />
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1">
-              <img src="/imgs/ngo.png" alt="NGO" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
-                FoodBridge <span className="text-emerald-600 font-black">AI</span>
-              </h1>
-              <p className="text-[10px] text-[#64748B] font-medium">
-                NGO Portal
-              </p>
-            </div>
+          <div>
+            <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
+              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+            </h1>
+            <p className="text-[10px] text-[#64748B] font-medium">
+              NGO Portal
+            </p>
           </div>
         </div>
 
@@ -82,8 +77,8 @@ const NgoMobileSidebar = ({ navItems }) => {
       >
         <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
-              <Building2 className="w-5 h-5 stroke-[2.2]" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1">
+              <img src="/imgs/ngo.png" alt="NGO Portal" className="w-full h-full object-contain" />
             </div>
             <div>
               <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">

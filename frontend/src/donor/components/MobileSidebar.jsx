@@ -43,18 +43,13 @@ const MobileSidebar = ({ navItems }) => {
             <Menu className="w-6 h-6 text-emerald-600" />
           </button>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1">
-              <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
-                FoodBridge <span className="text-emerald-600 font-black">AI</span>
-              </h1>
-              <p className="text-[10px] text-[#64748B] font-medium">
-                Donor Portal
-              </p>
-            </div>
+          <div>
+            <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
+              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+            </h1>
+            <p className="text-[10px] text-[#64748B] font-medium">
+              Donor Portal
+            </p>
           </div>
         </div>
 
@@ -88,8 +83,8 @@ const MobileSidebar = ({ navItems }) => {
         {/* Drawer Header */}
         <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
-              <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1">
+              <img src="/imgs/donor.png" alt="Donor Portal" className="w-full h-full object-contain" />
             </div>
             <div>
               <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">

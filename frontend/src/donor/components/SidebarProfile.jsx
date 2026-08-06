@@ -32,10 +32,18 @@ const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
       {isCollapsed ? (
         /* Collapsed Profile View */
         <div className="flex flex-col items-center gap-3">
+          <button
+            onClick={handleLogoutClick}
+            title="Sign Out"
+            className="w-9 h-9 rounded-xl text-white bg-rose-600 hover:bg-rose-700 flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+
           <div
             className="relative group cursor-pointer"
             onClick={() => navigate('/donor/profile')}
-            title={`${displayName} (${user.email || ''})`}
+            title={`${displayName} - ${isVerified ? 'Verified' : 'Pending'}`}
           >
             <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-black text-xs flex items-center justify-center ring-2 ring-emerald-500/30">
               {initialLetter}
@@ -47,18 +55,19 @@ const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
               }`}
             />
           </div>
-
-          <button
-            onClick={handleLogoutClick}
-            title="Sign Out"
-            className="group relative p-2 rounded-xl text-[#64748B] hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
-          </button>
         </div>
       ) : (
         /* Expanded Profile View */
         <div className="flex flex-col gap-3">
+          {/* Sign Out Button with Red Background at Top */}
+          <button
+            onClick={handleLogoutClick}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 active:scale-[0.98] transition-all duration-200 shadow-sm cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 text-white" />
+            <span>Sign Out</span>
+          </button>
+
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#f7f8fb] border border-[#E7EAF0]">
             {/* User Avatar Initial */}
             <div className="relative shrink-0">
@@ -99,15 +108,6 @@ const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
               </div>
             </div>
           </div>
-
-          {/* Sign Out Button */}
-          <button
-            onClick={handleLogoutClick}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-[#64748B] hover:text-emerald-600 hover:bg-emerald-50 border border-transparent hover:border-emerald-200/60 transition-all duration-200 cursor-pointer"
-          >
-            <LogOut className="w-4 h-4 text-[#64748B] group-hover:text-emerald-600" />
-            <span>Sign Out</span>
-          </button>
         </div>
       )}
     </div>
