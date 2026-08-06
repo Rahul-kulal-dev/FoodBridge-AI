@@ -93,7 +93,7 @@ const CreateDonationPage = () => {
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Upload image to Cloudinary via backend (supports multiple files)
+  // Upload image strictly to Cloudinary via backend
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -104,51 +104,34 @@ const CreateDonationPage = () => {
     try {
       const uploadedResults = await Promise.all(
         files.map(async (file) => {
-          try {
-            const formData = new FormData();
-            formData.append('image', file);
+          const formData = new FormData();
+          formData.append('image', file);
 
-            const res = await fetch(getApiUrl('/api/donations/upload-image'), {
-              method: 'POST',
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
-              body: formData,
-            });
-
-            const data = await res.json();
-            if (res.ok && data.imageUrl) {
-              const rawPath = typeof data.imageUrl === 'object' ? data.imageUrl.secure_url : data.imageUrl;
-              return {
-                id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                url: getImageUrl(rawPath),
-                rawUrl: rawPath,
-                name: file.name,
-              };
-            }
-          } catch (err) {
-            console.warn('File upload server error:', err);
-          }
-
-          // Fallback to Base64 Data URL so user images are preserved cleanly
-          return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64Url = reader.result;
-              resolve({
-                id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                url: base64Url,
-                rawUrl: base64Url,
-                name: file.name,
-              });
-            };
-            reader.readAsDataURL(file);
+          const res = await fetch(getApiUrl('/api/donations/upload-image'), {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
           });
+
+          const data = await res.json();
+          if (res.ok && data.imageUrl) {
+            const cloudinaryUrl = typeof data.imageUrl === 'object' ? data.imageUrl.secure_url : data.imageUrl;
+            return {
+              id: `img-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+              url: cloudinaryUrl,
+              rawUrl: cloudinaryUrl,
+              name: file.name,
+            };
+          } else {
+            throw new Error(data.message || `Failed to upload ${file.name} to Cloudinary`);
+          }
         })
       );
 
       const validResults = uploadedResults.filter(Boolean);
       setImages((prev) => [...prev, ...validResults].slice(0, 5));
     } catch (err) {
-      setErrorMsg('Failed to upload image(s)');
+      setErrorMsg(err.message || 'Cloudinary image upload failed. Please try again.');
     } finally {
       setUploadingImg(false);
     }
