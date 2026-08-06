@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -334,8 +335,8 @@ const AdminVerificationsPage = () => {
       </div>
 
       {/* Rejection Reason Modal */}
-      {rejectModalUser && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+      {rejectModalUser && ReactDOM.createPortal(
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 z-[100] animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-[#E7EAF0] space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2.5">
@@ -387,7 +388,8 @@ const AdminVerificationsPage = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Document View Preview Modal */}
