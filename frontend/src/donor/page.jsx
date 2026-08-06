@@ -105,8 +105,8 @@ const DonorDashboardPage = () => {
       subText: 'Verified food distributions',
     },
     {
-      label: 'VERIFICATION LEVEL',
-      value: isVerified ? 'Tier 1 Verified' : 'Pending Review',
+      label: 'VERIFICATION STATUS',
+      value: isVerified ? 'Verified' : 'Pending Review',
       icon: ShieldCheck,
       subText: isVerified ? 'Full Access Granted' : 'Verification Required',
     },
