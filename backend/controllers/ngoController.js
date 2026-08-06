@@ -1,6 +1,7 @@
 const Donation = require('../models/Donation');
 const NgoRequest = require('../models/NgoRequest');
 const VolunteerTask = require('../models/VolunteerTask');
+const User = require('../models/User');
 
 const resolveDonationImages = (d) => {
   if (!d) return d;
@@ -81,6 +82,9 @@ const acceptDonation = async (req, res, next) => {
 
     donation.status = 'accepted';
     donation.ngoId = req.user._id;
+    if (req.body.volunteerId) {
+      donation.volunteerId = req.body.volunteerId;
+    }
     await donation.save();
 
     const ngoRequest = await NgoRequest.create({
@@ -147,7 +151,6 @@ const getNgoStats = async (req, res, next) => {
         mealsReceived: totalMealsReceived,
         activeDonations: activeDonationsCount,
         nearbyDonations: nearbyCount,
-        volunteerEta: activeDonationsCount > 0 ? '12 mins' : 'N/A',
       },
     });
   } catch (error) {
@@ -178,11 +181,24 @@ const getDonationDetails = async (req, res, next) => {
   }
 };
 
+const getAvailableVolunteers = async (req, res, next) => {
+  try {
+    const volunteers = await User.find({ role: 'volunteer' })
+      .select('name email phone address organizationName verificationStatus')
+      .sort({ name: 1 });
+
+    res.json({ success: true, volunteers });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getNgoStats,
   getNearbyDonations,
   getDonationDetails,
   acceptDonation,
   getDonationHistory,
+  getAvailableVolunteers,
 };
 

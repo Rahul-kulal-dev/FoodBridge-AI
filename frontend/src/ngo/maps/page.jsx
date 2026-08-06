@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   MapPin,
   Navigation,
@@ -9,7 +10,8 @@ import {
   CheckCircle2,
   Layers,
   Crosshair,
-  Loader2
+  Loader2,
+  UserCheck
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -28,6 +30,10 @@ const NgoMapsPage = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState(null);
+  const [volunteerPickerDonationId, setVolunteerPickerDonationId] = useState(null);
+  const [volunteers, setVolunteers] = useState([]);
+  const [selectedVolunteerId, setSelectedVolunteerId] = useState('');
+  const [loadingVolunteers, setLoadingVolunteers] = useState(false);
 
   const fetchMapData = async () => {
     setLoading(true);
@@ -55,19 +61,48 @@ const NgoMapsPage = () => {
     fetchMapData();
   }, [token]);
 
-  const handleAcceptDonation = async (id) => {
-    setAcceptingId(id);
+  const fetchVolunteers = async () => {
+    setLoadingVolunteers(true);
     try {
-      const res = await fetch(getApiUrl(`/api/ngo/donations/${id}/accept`), {
+      const res = await fetch(getApiUrl('/api/ngo/volunteers'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok && data.volunteers) {
+        setVolunteers(data.volunteers);
+      }
+    } catch (err) {
+      console.warn('Error fetching volunteers:', err);
+    } finally {
+      setLoadingVolunteers(false);
+    }
+  };
+
+  const handleAcceptDonation = (id) => {
+    setSelectedMarker(null);
+    setVolunteerPickerDonationId(id);
+    setSelectedVolunteerId('');
+    fetchVolunteers();
+  };
+
+  const confirmAccept = async () => {
+    if (!volunteerPickerDonationId) return;
+    setAcceptingId(volunteerPickerDonationId);
+    try {
+      const body = {};
+      if (selectedVolunteerId) body.volunteerId = selectedVolunteerId;
+
+      const res = await fetch(getApiUrl(`/api/ngo/donations/${volunteerPickerDonationId}/accept`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
-        setSelectedMarker(null);
+        setVolunteerPickerDonationId(null);
         fetchMapData();
         navigate('/ngo/accepted-donations');
       }
@@ -229,6 +264,68 @@ const NgoMapsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Volunteer Selection Modal */}
+      {volunteerPickerDonationId &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-white rounded-3xl border border-[#E7EAF0] shadow-2xl max-w-md w-full p-6 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-[#0F172A]">Assign Volunteer</h3>
+                  <p className="text-xs text-slate-500">Select a volunteer courier for this donation</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-2">Select Volunteer</label>
+                {loadingVolunteers ? (
+                  <div className="flex items-center gap-2 py-3 text-xs text-slate-500">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading volunteers...
+                  </div>
+                ) : volunteers.length === 0 ? (
+                  <p className="text-xs text-slate-500 py-3">No volunteers registered yet.</p>
+                ) : (
+                  <select
+                    value={selectedVolunteerId}
+                    onChange={(e) => setSelectedVolunteerId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
+                  >
+                    <option value="">-- No volunteer (assign later) --</option>
+                    {volunteers.map((v) => (
+                      <option key={v._id} value={v._id}>
+                        {v.name} {v.phone ? `(${v.phone})` : ''} {v.verificationStatus === 'approved' ? '✓' : ''}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setVolunteerPickerDonationId(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={acceptingId === volunteerPickerDonationId}
+                  onClick={confirmAccept}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-emerald-btn transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {acceptingId === volunteerPickerDonationId ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Accept & Assign'}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

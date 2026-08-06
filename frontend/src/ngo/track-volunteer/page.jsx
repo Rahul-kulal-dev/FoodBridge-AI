@@ -11,17 +11,14 @@ import {
   Navigation,
   ArrowRight,
   Loader2,
-  Utensils
+  Utensils,
+  AlertCircle
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 import OpenStreetMap from '../../components/OpenStreetMap';
 
-/**
- * Track Volunteer Page (/ngo/track-volunteer)
- * Displays live tracking for accepted donations from MongoDB database.
- */
 const TrackVolunteerPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -58,7 +55,7 @@ const TrackVolunteerPage = () => {
         setActiveDonation(null);
       }
     } catch (err) {
-      console.warn('Error fetching tracking data from database:', err);
+      console.warn('Error fetching tracking data:', err);
     } finally {
       setLoading(false);
     }
@@ -97,22 +94,62 @@ const TrackVolunteerPage = () => {
 
   const docId = `DON-${activeDonation._id.slice(-4).toUpperCase()}`;
   const volunteerObj = activeDonation.volunteerId || {};
-  const volunteerName = volunteerObj.name || 'Express Dispatch Courier';
-  const volunteerPhone = volunteerObj.phone || 'N/A';
-  const donorName = activeDonation.donorId?.organizationName || activeDonation.donorId?.name || 'Food Donor';
-  const ngoName = user?.organizationName || user?.name || 'NGO Partner';
+  const hasVolunteer = Boolean(volunteerObj.name);
+  const volunteerName = volunteerObj.name || null;
+  const volunteerPhone = volunteerObj.phone || null;
+  const volunteerEmail = volunteerObj.email || null;
+  const isVolunteerVerified = volunteerObj.verificationStatus === 'approved';
+  const donorName = activeDonation.donorId?.organizationName || activeDonation.donorId?.name || 'Donor';
+  const ngoName = user?.organizationName || user?.name || 'NGO';
 
+  const acceptedAt = activeDonation.updatedAt ? new Date(activeDonation.updatedAt) : null;
+  const createdAt = activeDonation.createdAt ? new Date(activeDonation.createdAt) : null;
+  const fmtTime = (d) => d ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
+
+  const status = activeDonation.status;
   const timelineSteps = [
-    { label: 'Assigned', time: '2:30 PM', completed: true },
-    { label: 'Accepted', time: '2:35 PM', completed: true },
-    { label: 'Picked Up', time: activeDonation.status === 'picked_up' || activeDonation.status === 'delivered', completed: activeDonation.status === 'picked_up' || activeDonation.status === 'delivered' },
-    { label: 'In Transit', time: activeDonation.status === 'picked_up' ? 'Active' : 'Pending', completed: activeDonation.status === 'picked_up', active: activeDonation.status === 'picked_up' },
-    { label: 'Delivered', time: activeDonation.status === 'delivered' ? 'Completed' : 'Estimated', completed: activeDonation.status === 'delivered' },
+    { label: 'Accepted', time: fmtTime(acceptedAt || createdAt), completed: true },
+    { label: 'Picked Up', time: status === 'picked_up' || status === 'delivered' ? fmtTime(acceptedAt) : '—', completed: status === 'picked_up' || status === 'delivered' },
+    { label: 'In Transit', time: status === 'picked_up' ? 'Active' : '—', completed: false, active: status === 'picked_up' },
+    { label: 'Delivered', time: status === 'delivered' ? 'Completed' : '—', completed: status === 'delivered' },
   ];
+
+  const donorLat = activeDonation.location?.lat || activeDonation.donorId?.location?.lat || 0;
+  const donorLng = activeDonation.location?.lng || activeDonation.donorId?.location?.lng || 0;
+  const ngoLat = user?.location?.lat || 0;
+  const ngoLng = user?.location?.lng || 0;
+
+  const markers = [];
+  if (donorLat && donorLng) {
+    markers.push({
+      lat: donorLat,
+      lng: donorLng,
+      title: `Donor: ${donorName}`,
+      description: activeDonation.location?.address || activeDonation.donorId?.address || 'Pickup Location',
+      iconType: 'donor',
+    });
+  }
+  if (ngoLat && ngoLng) {
+    markers.push({
+      lat: ngoLat,
+      lng: ngoLng,
+      title: `NGO: ${ngoName}`,
+      description: user?.address || 'NGO Dropoff',
+      iconType: 'ngo',
+    });
+  }
+  if (hasVolunteer && donorLat && donorLng) {
+    markers.push({
+      lat: donorLat + 0.002,
+      lng: donorLng + 0.003,
+      title: `Courier: ${volunteerName}`,
+      description: `Status: ${status.toUpperCase()}`,
+      iconType: 'courier',
+    });
+  }
 
   return (
     <div className="w-full space-y-6 animate-fade-in pb-12">
-      {/* Header Banner */}
       <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
@@ -125,60 +162,76 @@ const TrackVolunteerPage = () => {
 
         <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-700">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-          Live Database Connection
+          Live Tracking
         </div>
       </div>
 
-      {/* Main Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Volunteer Card & Timeline */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Volunteer Profile Card */}
           <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-5">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 font-extrabold text-xl flex items-center justify-center ring-4 ring-emerald-500/20 shadow-md">
-                {volunteerName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-base font-extrabold text-[#0F172A]">{volunteerName}</h3>
-                <p className="text-xs text-[#64748B]">Eco Courier Partner</p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1">
-                  <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Courier
-                </span>
-              </div>
-            </div>
+            {hasVolunteer ? (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 font-extrabold text-xl flex items-center justify-center ring-4 ring-emerald-500/20 shadow-md">
+                    {volunteerName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-[#0F172A]">{volunteerName}</h3>
+                    {volunteerEmail && <p className="text-xs text-[#64748B]">{volunteerEmail}</p>}
+                    {isVolunteerVerified && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1">
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Volunteer
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
-              <div>
-                <span className="text-[10px] font-bold text-[#64748B] uppercase block">Delivery Status</span>
-                <span className="font-bold text-emerald-700 uppercase">{activeDonation.status}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-[#64748B] uppercase block">Estimated ETA</span>
-                <span className="font-bold text-emerald-600">12 Mins</span>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-3 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
+                  <div>
+                    <span className="text-[10px] font-bold text-[#64748B] uppercase block">Delivery Status</span>
+                    <span className="font-bold text-emerald-700 uppercase">{status}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-[#64748B] uppercase block">Phone</span>
+                    <span className="font-bold text-slate-800">{volunteerPhone || 'N/A'}</span>
+                  </div>
+                </div>
 
-            <div className="flex items-center gap-3 pt-2">
-              {volunteerPhone !== 'N/A' && (
-                <a
-                  href={`tel:${volunteerPhone}`}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer"
+                <div className="flex items-center gap-3 pt-2">
+                  {volunteerPhone && (
+                    <a
+                      href={`tel:${volunteerPhone}`}
+                      className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Phone className="w-4 h-4" />
+                      <span>Call Volunteer</span>
+                    </a>
+                  )}
+                  <button
+                    onClick={() => navigate('/ngo/notifications')}
+                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6 space-y-3">
+                <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
+                <h3 className="text-sm font-extrabold text-[#0F172A]">No Volunteer Assigned</h3>
+                <p className="text-xs text-slate-500 max-w-xs mx-auto">
+                  This donation does not have a volunteer courier assigned yet. You can assign one from the Accepted Donations page.
+                </p>
+                <button
+                  onClick={() => navigate('/ngo/accepted-donations')}
+                  className="mt-1 px-5 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold shadow-emerald-btn cursor-pointer"
                 >
-                  <Phone className="w-4 h-4" />
-                  <span>Call Courier</span>
-                </a>
-              )}
-              <button
-                onClick={() => navigate('/ngo/notifications')}
-                className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all cursor-pointer"
-              >
-                <MessageSquare className="w-4 h-4" />
-              </button>
-            </div>
+                  Manage Donations
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Timeline Progress Card */}
           <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
             <h3 className="text-sm font-extrabold text-[#0F172A]">Pickup & Delivery Progress Timeline</h3>
 
@@ -187,8 +240,7 @@ const TrackVolunteerPage = () => {
                 <div key={idx} className="flex items-start gap-3 relative">
                   {idx !== timelineSteps.length - 1 && (
                     <div
-                      className={`absolute left-3.5 top-7 bottom-0 w-0.5 ${step.completed ? 'bg-emerald-500' : 'bg-slate-200'
-                        }`}
+                      className={`absolute left-3.5 top-7 bottom-0 w-0.5 ${step.completed ? 'bg-emerald-500' : 'bg-slate-200'}`}
                     />
                   )}
 
@@ -206,8 +258,7 @@ const TrackVolunteerPage = () => {
                   <div className="flex-1 pt-0.5">
                     <div className="flex items-center justify-between">
                       <h4
-                        className={`text-xs font-extrabold ${step.completed || step.active ? 'text-[#0F172A]' : 'text-slate-400'
-                          }`}
+                        className={`text-xs font-extrabold ${step.completed || step.active ? 'text-[#0F172A]' : 'text-slate-400'}`}
                       >
                         {step.label}
                       </h4>
@@ -220,37 +271,22 @@ const TrackVolunteerPage = () => {
           </div>
         </div>
 
-        {/* Right Column: Live GPS Route Map Container */}
         <div className="lg:col-span-7 bg-slate-900 rounded-2xl border border-[#E7EAF0] shadow-xl overflow-hidden min-h-[480px] relative">
-          <OpenStreetMap
-            markers={[
-              {
-                lat: 12.9680,
-                lng: 77.5890,
-                title: `Courier: ${volunteerName}`,
-                description: `Status: ${activeDonation.status.toUpperCase()}`,
-                iconType: 'courier',
-              },
-              {
-                lat: 12.9750,
-                lng: 77.6000,
-                title: `Donor: ${donorName}`,
-                description: activeDonation.donorId?.address || activeDonation.pickupAddress || 'Pickup Location',
-                iconType: 'donor',
-              },
-              {
-                lat: 12.9850,
-                lng: 77.6150,
-                title: `NGO: ${ngoName}`,
-                description: user?.address || 'NGO Dropoff Hub',
-                iconType: 'ngo',
-              },
-            ]}
-            drawRoute={true}
-            className="w-full h-full min-h-[480px]"
-          />
+          {markers.length >= 2 ? (
+            <OpenStreetMap
+              markers={markers}
+              drawRoute={true}
+              className="w-full h-full min-h-[480px]"
+            />
+          ) : (
+            <div className="w-full h-full min-h-[480px] flex flex-col items-center justify-center text-slate-400 gap-3">
+              <MapPin className="w-10 h-10" />
+              <p className="text-xs font-bold text-center max-w-xs">
+                Location data not available. Ensure donor and NGO profiles have location coordinates set.
+              </p>
+            </div>
+          )}
 
-          {/* Map Live Floating Indicators */}
           <div className="absolute top-4 left-4 right-4 z-[400] flex items-center justify-between pointer-events-none">
             <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-700 text-white text-xs space-y-1 pointer-events-auto shadow-xl">
               <span className="text-[10px] uppercase font-bold text-emerald-400">Destination</span>
@@ -258,7 +294,7 @@ const TrackVolunteerPage = () => {
             </div>
             <div className="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs font-bold flex items-center gap-2 pointer-events-auto shadow-xl">
               <Navigation className="w-4 h-4 text-emerald-400 animate-spin" />
-              <span>Status: {activeDonation.status.toUpperCase()}</span>
+              <span>Status: {status.toUpperCase()}</span>
             </div>
           </div>
         </div>
