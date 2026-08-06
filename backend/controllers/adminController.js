@@ -90,8 +90,11 @@ const rejectUser = async (req, res, next) => {
 const getAllUsers = async (req, res, next) => {
   try {
     const { role, status } = req.query;
-    const filter = {};
-    if (role) filter.role = role;
+    const filter = {
+      role: { $ne: 'admin' },
+      user_role: { $ne: 'admin' },
+    };
+    if (role && role !== 'all') filter.role = role;
     if (status) filter.verificationStatus = status;
 
     const users = await User.find(filter).sort({ createdAt: -1 });

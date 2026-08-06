@@ -132,6 +132,8 @@ const AdminVerificationsPage = () => {
   };
 
   const filteredUsers = users.filter((u) => {
+    const userRole = u.user_role || u.role;
+    if (userRole === 'admin' || u.role === 'admin') return false;
     const matchesTab = (u.verificationStatus || 'pending') === activeTab;
     const matchesSearch =
       (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||

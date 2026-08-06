@@ -51,6 +51,7 @@ const AdminUsersPage = () => {
 
   const filteredUsers = users.filter((u) => {
     const assignedRole = u.user_role || u.role;
+    if (assignedRole === 'admin') return false;
     const matchesRole = roleFilter === 'all' || assignedRole === roleFilter;
     const matchesSearch =
       (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -72,7 +73,7 @@ const AdminUsersPage = () => {
               Manage System Users
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Filter and manage all registered Donors, NGOs, Volunteers, and Admins.
+              Filter and manage all registered Donors, NGOs, and Volunteers.
             </p>
           </div>
         </div>
