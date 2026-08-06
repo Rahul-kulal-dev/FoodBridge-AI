@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  Sparkles,
   ArrowRight,
   Play,
   ShieldCheck,
@@ -49,7 +48,7 @@ export default function Hero({ onOpenDonateModal }) {
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/5 border border-[#E7EAF0] shadow-soft-card text-xs sm:text-sm font-semibold text-[#0F172A]"
             >
               <span className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white">
-                <Sparkles className="w-3 h-3 text-white" />
+                <ShieldCheck className="w-3 h-3 text-white" />
               </span>
               <span>AI-Powered Smart Food Redistribution</span>
               <ChevronRight className="w-3.5 h-3.5 text-[#64748B]" />

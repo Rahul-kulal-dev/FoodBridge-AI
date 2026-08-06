@@ -11,8 +11,7 @@ import {
   PackageCheck,
   ShieldCheck,
   Lock,
-  Clock,
-  Sparkles
+  Clock
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Leaf, Sparkles, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Leaf, ShieldCheck } from 'lucide-react';
 
 export default function FinalCTA({ onOpenDonateModal }) {
   return (

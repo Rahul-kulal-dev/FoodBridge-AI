@@ -3,7 +3,6 @@ import {
   Package,
   MapPin,
   Clock,
-  Sparkles,
   Navigation,
   Building2,
   ChevronRight,
@@ -139,7 +138,7 @@ const AssignedPickupsPage = () => {
                   {item.id}
                 </div>
                 <div className="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center gap-1.5 border border-white/10">
-                  <Sparkles className="w-3.5 h-3.5 fill-white" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                   {item.priorityScore}% AI Priority
                 </div>
               </div>

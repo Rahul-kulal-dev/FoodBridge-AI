@@ -7,7 +7,6 @@ import {
   MapPin, 
   Send, 
   ShieldCheck, 
-  Sparkles, 
   CheckCircle2,
   Heart,
   Globe2

@@ -8,7 +8,6 @@ import {
   History,
   Utensils,
   TrendingDown,
-  Sparkles,
   ArrowRight,
   Zap,
   CheckCircle2
@@ -172,7 +171,7 @@ export default function AIPredictionSection({ onOpenDonateModal }) {
             className="lg:col-span-6 order-1 lg:order-2 space-y-6"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-              <Sparkles className="w-3.5 h-3.5" />
+              <BrainCircuit className="w-3.5 h-3.5 text-emerald-600" />
               <span>PREDICTIVE ML ALGORITHM</span>
             </div>
 

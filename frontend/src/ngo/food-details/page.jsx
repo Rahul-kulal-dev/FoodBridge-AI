@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   Clock,
   MapPin,
-  Sparkles,
   Phone,
   ShieldCheck,
   CheckCircle2,
@@ -185,7 +184,7 @@ const FoodDetailsPage = () => {
                 </div>
               )}
               <div className="absolute top-3 right-3 bg-emerald-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md flex items-center gap-1">
-                <Sparkles className="w-3.5 h-3.5 fill-white" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                 AI Freshness Verified
               </div>
             </div>

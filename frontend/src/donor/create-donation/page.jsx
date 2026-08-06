@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   PlusCircle,
-  Sparkles,
+  CheckCircle2,
   Upload,
   X,
   Plus,
@@ -367,7 +367,7 @@ const CreateDonationPage = () => {
       {submitted ? (
         <div className="bg-white p-8 rounded-2xl border border-emerald-200 text-center space-y-5 shadow-soft-card">
           <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-            <Sparkles className="w-9 h-9" />
+            <CheckCircle2 className="w-9 h-9" />
           </div>
           <div className="space-y-1">
             <h2 className="text-2xl font-extrabold text-[#0F172A] tracking-[-0.03em]">

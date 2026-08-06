@@ -4,7 +4,6 @@ import {
   Filter,
   MapPin,
   Clock,
-  Sparkles,
   ShoppingBag,
   CheckCircle2,
   SlidersHorizontal,
@@ -131,7 +130,7 @@ const BrowseFoodPage = () => {
 
         <div className="flex items-center gap-3 shrink-0">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 font-extrabold text-xs border border-emerald-200/80">
-            <Sparkles className="w-4 h-4 text-[#16A34A] fill-[#16A34A] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0" />
             AI Verified Freshness Engine
           </span>
         </div>
@@ -256,7 +255,7 @@ const BrowseFoodPage = () => {
                   </div>
                   <div className="absolute top-3 right-3 z-10">
                     <span className="px-2.5 py-1 rounded-full bg-[#16A34A] text-white text-[10px] font-black shadow-sm flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 fill-white" />
+                      <CheckCircle2 className="w-3 h-3 text-white" />
                       Freshness Verified
                     </span>
                   </div>

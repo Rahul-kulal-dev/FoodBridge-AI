@@ -3,7 +3,6 @@ import {
   Package,
   Navigation,
   BadgeCheck,
-  Sparkles,
   CheckCircle2,
   Clock,
   MapPin,
@@ -179,7 +178,7 @@ const VolunteerDashboardPage = () => {
       <div className="bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-200/70 shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3">
           <div className="p-2 sm:p-2.5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
-            <Sparkles className="w-4 h-4 fill-emerald-600" />
+            <Package className="w-4 h-4 text-emerald-600" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-[#0F172A]">
             <span className="text-emerald-700 font-extrabold">Today's Assignments:</span> {assignments.length} food pickups active in MongoDB database.

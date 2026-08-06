@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Star, Building2, CheckCircle2, ShieldCheck, Loader2, Sparkles } from 'lucide-react';
+import { MessageSquare, Star, Building2, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 

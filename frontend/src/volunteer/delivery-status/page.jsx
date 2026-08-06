@@ -9,7 +9,6 @@ import {
   Building2,
   ShieldCheck,
   ChevronRight,
-  Sparkles,
   Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

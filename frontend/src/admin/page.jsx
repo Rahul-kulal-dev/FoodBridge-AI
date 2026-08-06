@@ -6,7 +6,6 @@ import {
   Heart,
   TrendingUp,
   ArrowRight,
-  Sparkles,
   CheckCircle2,
   XCircle,
   Clock,
