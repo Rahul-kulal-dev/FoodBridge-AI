@@ -121,7 +121,7 @@ const NgoProfilePage = () => {
               </span>
             </div>
             <p className="text-xs text-[#64748B] mt-1 font-medium">
-              Connected MongoDB User ID: <span className="font-mono font-bold text-[#0F172A]">{user?._id || 'N/A'}</span>
+              Account User ID: <span className="font-mono font-bold text-[#0F172A]">{user?._id || 'N/A'}</span>
             </p>
           </div>
         </div>
@@ -129,7 +129,7 @@ const NgoProfilePage = () => {
         {savedSuccess && (
           <div className="bg-emerald-50 text-emerald-700 font-extrabold text-xs px-4 py-2 rounded-xl border border-emerald-200 flex items-center gap-2 animate-scale-up shrink-0">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Profile Saved to MongoDB!</span>
+            <span>Profile Saved Successfully!</span>
           </div>
         )}
         {errorMessage && (
@@ -144,7 +144,7 @@ const NgoProfilePage = () => {
         <div className="pb-4 border-b border-[#E7EAF0]">
           <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Organization Profile & Operations</h2>
           <p className="text-xs text-[#64748B] mt-0.5">
-            Update your organization details. Changes persist directly into MongoDB Atlas.
+            Update your organization details and operational preferences.
           </p>
         </div>
 

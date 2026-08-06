@@ -90,7 +90,7 @@ const AIPredictionsPage = () => {
       {loading ? (
         <div className="bg-white p-16 rounded-[20px] border border-slate-200/80 text-center space-y-3 shadow-xs">
           <Loader2 className="w-8 h-8 text-[#16A34A] animate-spin mx-auto" />
-          <p className="text-xs text-slate-500 font-bold">Running live surplus prediction algorithms on MongoDB data...</p>
+          <p className="text-xs text-slate-500 font-bold">Running live surplus prediction algorithms...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

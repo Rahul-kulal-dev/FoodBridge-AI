@@ -71,7 +71,7 @@ const AdminFeedbackPage = () => {
               Trust & Safety Feedback Logs
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Monitor read-only feedback submitted by NGOs for Donors and Volunteers in MongoDB
+              Monitor read-only feedback submitted by NGOs for Donors and Volunteers
             </p>
           </div>
         </div>
@@ -192,7 +192,7 @@ const AdminFeedbackPage = () => {
                         Log ID: {item._id.substring(item._id.length - 8)}
                       </span>
                       <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Read-Only MongoDB Log
+                        <Lock className="w-3 h-3" /> Read-Only System Log
                       </span>
                     </div>
                     <h4 className="font-extrabold text-[#0F172A] text-sm sm:text-base mt-1">

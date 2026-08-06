@@ -313,7 +313,7 @@ const CreateDonationPage = () => {
                 Create Surplus Food Listing
               </h1>
               <p className="text-xs text-slate-500 font-medium">
-                Directly stored in MongoDB database with live AI match matching.
+                Instantly listed with live AI dispatch matching.
               </p>
             </div>
           </div>

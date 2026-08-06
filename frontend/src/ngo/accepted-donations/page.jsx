@@ -90,7 +90,7 @@ const AcceptedDonationsPage = () => {
             Accepted Surplus Food Donations
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-medium max-w-2xl">
-            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking directly from MongoDB database
+            Manage accepted food donations, volunteer dispatch status, and live delivery timeline tracking
           </p>
         </div>
 

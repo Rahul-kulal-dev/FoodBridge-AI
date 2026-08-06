@@ -117,7 +117,7 @@ const MyDonationsPage = () => {
                 My Food Donations History
               </h1>
               <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-                Live donations database fetched directly from MongoDB Atlas.
+                Live surplus food donations.
               </p>
             </div>
           </div>

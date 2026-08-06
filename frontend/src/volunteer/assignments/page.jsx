@@ -95,7 +95,7 @@ const AssignedPickupsPage = () => {
             Assigned Pickup Orders
           </h1>
           <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            Active surplus food pickup orders fetched from MongoDB database
+            Active surplus food pickup orders assigned to your route
           </p>
         </div>
 
@@ -108,7 +108,7 @@ const AssignedPickupsPage = () => {
       {loading ? (
         <div className="p-12 text-center space-y-2 bg-white rounded-2xl border border-[#E7EAF0]">
           <Loader2 className="w-6 h-6 text-emerald-600 animate-spin mx-auto" />
-          <p className="text-xs text-slate-500 font-medium">Loading assigned pickup orders from MongoDB...</p>
+          <p className="text-xs text-slate-500 font-medium">Loading assigned pickup orders...</p>
         </div>
       ) : assignments.length === 0 ? (
         <div className="p-12 text-center space-y-2 bg-white rounded-2xl border border-[#E7EAF0]">

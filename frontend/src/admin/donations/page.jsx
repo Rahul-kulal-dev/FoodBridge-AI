@@ -80,7 +80,7 @@ const AdminDonationsPage = () => {
               Monitor Platform Donations
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Real-time monitoring of food surplus listings from MongoDB Atlas database.
+              Real-time monitoring of food surplus listings.
             </p>
           </div>
         </div>

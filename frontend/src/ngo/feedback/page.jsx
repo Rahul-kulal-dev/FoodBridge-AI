@@ -427,7 +427,7 @@ const NgoFeedbackPage = () => {
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Read-Only • Saved to MongoDB
+                        Read-Only • Verified System Record
                       </span>
                       <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A]">
                         {fb.donationId?.title || 'Delivered Donation'}

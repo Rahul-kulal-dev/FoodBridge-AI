@@ -153,7 +153,7 @@ const AdminVerificationsPage = () => {
               Admin Verification Approvals
             </h1>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Real-time verification queue connected to MongoDB Atlas database.
+              Real-time verification approval queue.
             </p>
           </div>
         </div>

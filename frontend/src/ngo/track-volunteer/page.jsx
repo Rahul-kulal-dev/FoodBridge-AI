@@ -72,7 +72,7 @@ const TrackVolunteerPage = () => {
     return (
       <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
         <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
-        <p className="text-xs text-slate-500 font-bold">Loading live tracking from database...</p>
+        <p className="text-xs text-slate-500 font-bold">Loading live tracking...</p>
       </div>
     );
   }

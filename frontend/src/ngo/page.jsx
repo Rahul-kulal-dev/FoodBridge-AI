@@ -242,7 +242,7 @@ const NgoDashboardPage = () => {
               Nearby Surplus Food
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5 font-medium">
-              Real-time available surplus food from live MongoDB database
+              Real-time available surplus food listings
             </p>
           </div>
           <Link

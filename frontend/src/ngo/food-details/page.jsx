@@ -110,7 +110,7 @@ const FoodDetailsPage = () => {
     return (
       <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] text-center space-y-3 shadow-soft-card">
         <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
-        <p className="text-xs text-slate-500 font-bold">Loading donation details from database...</p>
+        <p className="text-xs text-slate-500 font-bold">Loading donation details...</p>
       </div>
     );
   }
@@ -121,7 +121,7 @@ const FoodDetailsPage = () => {
         <Utensils className="w-10 h-10 text-slate-300 mx-auto" />
         <h3 className="text-sm font-bold text-[#0F172A]">Donation Not Found</h3>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
-          The requested donation listing does not exist in the database or has already been completed.
+          The requested donation listing is unavailable or has already been completed.
         </p>
         <button
           onClick={() => navigate('/ngo/browse-food')}

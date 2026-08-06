@@ -187,7 +187,7 @@ const VolunteerDashboardPage = () => {
             <Package className="w-4 h-4 text-emerald-600" />
           </div>
           <p className="text-xs sm:text-sm font-bold text-[#0F172A]">
-            <span className="text-emerald-700 font-extrabold">Today's Assignments:</span> {assignments.length} food pickups active in MongoDB database.
+            <span className="text-emerald-700 font-extrabold">Today's Assignments:</span> {assignments.length} food pickups active in system queue.
           </p>
         </div>
 
@@ -212,7 +212,7 @@ const VolunteerDashboardPage = () => {
         <div className="p-4 sm:p-6 border-b border-[#E7EAF0] flex items-center justify-between gap-2">
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Assigned Pickup Schedule</h2>
-            <p className="text-[11px] sm:text-xs text-[#64748B] mt-0.5">Real-time assigned surplus food pickups & destinations fetched from MongoDB</p>
+            <p className="text-[11px] sm:text-xs text-[#64748B] mt-0.5">Real-time assigned surplus food pickups & destinations</p>
           </div>
           <Link
             to="/volunteer/assignments"
@@ -226,12 +226,12 @@ const VolunteerDashboardPage = () => {
         {loading ? (
           <div className="p-8 text-center space-y-2">
             <Loader2 className="w-6 h-6 text-emerald-600 animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 font-medium">Fetching assigned pickups from MongoDB...</p>
+            <p className="text-xs text-slate-500 font-medium">Fetching assigned pickups...</p>
           </div>
         ) : assignments.length === 0 ? (
           <div className="p-8 text-center space-y-2 bg-slate-50">
             <Package className="w-8 h-8 text-slate-400 mx-auto" />
-            <p className="text-xs font-bold text-slate-700">No active pickup assignments found in MongoDB database.</p>
+            <p className="text-xs font-bold text-slate-700">No active pickup assignments found.</p>
           </div>
         ) : (
           <>

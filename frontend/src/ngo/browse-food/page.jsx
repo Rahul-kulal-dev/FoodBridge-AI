@@ -124,7 +124,7 @@ const BrowseFoodPage = () => {
             Browse Nearby Surplus Food
           </h1>
           <p className="text-xs text-[#64748B] mt-1 font-medium max-w-xl">
-            Explore active surplus food donations fetched directly from MongoDB database
+            Explore active surplus food donations available for immediate pickup
           </p>
         </div>
 

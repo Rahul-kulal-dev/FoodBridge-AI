@@ -148,7 +148,7 @@ const NgoMapsPage = () => {
             NGO OpenStreetMap Radar & Surplus Heatmap
           </h1>
           <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            Live OpenStreetMap tile layer mapping active MongoDB surplus donations and volunteer couriers
+            Live map layer tracking active surplus donations and volunteer couriers
           </p>
         </div>
 

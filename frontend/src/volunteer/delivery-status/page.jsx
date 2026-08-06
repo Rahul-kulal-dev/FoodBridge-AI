@@ -272,7 +272,7 @@ const UpdateDeliveryStatusPage = () => {
             </div>
 
             <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold">
-              Status updated in MongoDB Atlas Database
+              Status updated successfully
             </div>
 
             <button

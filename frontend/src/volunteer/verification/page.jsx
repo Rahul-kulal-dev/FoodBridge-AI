@@ -136,7 +136,7 @@ const PickupVerificationPage = () => {
     return (
       <div className="w-full py-16 flex flex-col items-center justify-center space-y-3">
         <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
-        <p className="text-xs font-bold text-slate-500">Loading pickup verification details from MongoDB...</p>
+        <p className="text-xs font-bold text-slate-500">Loading pickup verification details...</p>
       </div>
     );
   }

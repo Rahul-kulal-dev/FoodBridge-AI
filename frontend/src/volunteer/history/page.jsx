@@ -94,7 +94,7 @@ const DeliveryHistoryPage = () => {
             Completed Delivery History
           </h1>
           <p className="text-xs text-[#64748B] mt-0.5 sm:mt-1 font-medium">
-            Archived log of past completed food pickups & delivery timestamps fetched from MongoDB
+            Archived log of past completed food pickups & delivery timestamps
           </p>
         </div>
 
@@ -140,11 +140,11 @@ const DeliveryHistoryPage = () => {
         {loading ? (
           <div className="p-12 text-center space-y-2">
             <Loader2 className="w-6 h-6 text-emerald-600 animate-spin mx-auto" />
-            <p className="text-xs text-slate-500 font-medium">Loading delivery history from MongoDB...</p>
+            <p className="text-xs text-slate-500 font-medium">Loading delivery history...</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-xs font-medium">
-            No matching completed delivery records found in MongoDB.
+            No matching completed delivery records found.
           </div>
         ) : (
           <>

@@ -54,7 +54,7 @@ const DonorProfilePage = () => {
 
       if (res.ok && data.user) {
         updateUser(data.user);
-        setMsg({ type: 'success', text: 'Profile updated successfully in MongoDB Atlas!' });
+        setMsg({ type: 'success', text: 'Profile updated successfully!' });
       } else {
         setMsg({ type: 'error', text: data.message || 'Failed to update profile.' });
       }
