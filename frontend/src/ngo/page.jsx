@@ -539,7 +539,7 @@ const NgoDashboardPage = () => {
                     <option value="">-- Select a volunteer courier --</option>
                     {volunteers.map((v) => (
                       <option key={v._id} value={v._id}>
-                        {v.name} {v.phone ? `(${v.phone})` : ''} {v.verificationStatus === 'approved' ? '✓' : ''}
+                        {v.name} {v.phone ? `(${v.phone})` : ''} {v.activeTaskCount > 0 ? `[${v.activeTaskCount} active deliveries]` : '[Available]'}
                       </option>
                     ))}
                   </select>

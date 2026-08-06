@@ -14,8 +14,8 @@ const ngoRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'accepted', 'completed', 'cancelled'],
-      default: 'accepted',
+      enum: ['pending', 'assigned', 'accepted', 'completed', 'cancelled'],
+      default: 'assigned',
     },
     requestedAt: {
       type: Date,

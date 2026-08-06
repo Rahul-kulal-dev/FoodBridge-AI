@@ -195,9 +195,21 @@ const getDonationDetails = async (req, res, next) => {
 
 const getAvailableVolunteers = async (req, res, next) => {
   try {
-    const volunteers = await User.find({ role: 'volunteer' })
+    const rawVolunteers = await User.find({ role: 'volunteer' })
       .select('name email phone address organizationName verificationStatus')
       .sort({ name: 1 });
+
+    const volunteers = await Promise.all(
+      rawVolunteers.map(async (v) => {
+        const activeTaskCount = await Donation.countDocuments({
+          volunteerId: v._id,
+          status: { $in: ['assigned', 'accepted', 'picked_up'] },
+        });
+        const obj = v.toObject();
+        obj.activeTaskCount = activeTaskCount;
+        return obj;
+      })
+    );
 
     res.json({ success: true, volunteers });
   } catch (error) {
