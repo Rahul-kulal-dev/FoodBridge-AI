@@ -4,6 +4,7 @@ import {
   Package,
   Navigation,
   Camera,
+  ShieldCheck,
   Truck,
   Bell,
   History,
@@ -40,6 +41,11 @@ const VolunteerSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: ex
       label: 'Navigation',
       icon: Navigation,
       route: '/volunteer/navigation',
+    },
+    {
+      label: 'Doc Verification',
+      icon: ShieldCheck,
+      route: '/volunteer/doc-verification',
     },
     {
       label: 'Pickup Verification',

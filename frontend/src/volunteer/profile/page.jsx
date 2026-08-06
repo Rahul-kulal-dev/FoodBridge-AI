@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   AlertCircle
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 
@@ -208,14 +209,22 @@ const VolunteerProfilePage = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center gap-3.5">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-extrabold shrink-0">
-            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex items-center justify-between gap-3.5">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-extrabold shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-[#64748B] uppercase">Compliance Status</span>
+              <p className="text-xs font-black text-emerald-700">{profile.verificationStatus}</p>
+            </div>
           </div>
-          <div>
-            <span className="text-[10px] font-bold text-[#64748B] uppercase">Compliance Status</span>
-            <p className="text-xs font-black text-emerald-700">Verified Volunteer Courier</p>
-          </div>
+          <Link
+            to="/volunteer/doc-verification"
+            className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs border border-emerald-200 transition-all shrink-0"
+          >
+            Upload Docs
+          </Link>
         </div>
       </div>
 

@@ -85,6 +85,7 @@ const DonorVerificationPage = () => {
     try {
       const formData = new FormData();
       formData.append('document', filesArray[0]);
+      formData.append('docType', docTypeLabel);
 
       const res = await fetch(getApiUrl('/api/users/upload-verification'), {
         method: 'POST',
@@ -96,6 +97,7 @@ const DonorVerificationPage = () => {
 
       if (res.ok && data.user) {
         updateUser(data.user);
+        await fetchProfile();
         setUploadSuccessMsg(`${docTypeLabel} uploaded successfully! Sent for Admin review (Status: Pending Review).`);
       } else {
         setErrorMsg(data.message || 'Failed to upload verification document.');

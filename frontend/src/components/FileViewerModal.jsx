@@ -86,7 +86,7 @@ export default function FileViewerModal({
     });
   }, [doc, docs]);
 
-  if (!isOpen || normalizedDocs.length === 0) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
@@ -118,7 +118,18 @@ export default function FileViewerModal({
 
         {/* Documents List Body */}
         <div className="p-6 overflow-y-auto space-y-3.5 flex-1 bg-slate-50/40">
-          {normalizedDocs.map((item, idx) => {
+          {normalizedDocs.length === 0 ? (
+            <div className="py-12 text-center space-y-3 bg-white rounded-2xl border border-slate-200 p-6">
+              <FileText className="w-10 h-10 text-slate-300 mx-auto" />
+              <div>
+                <h4 className="text-sm font-black text-[#0F172A]">No Documents Uploaded Yet</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
+                  This user account was registered or approved prior to document verification requirements. The user can upload their Driving License and ID proof from their portal under <strong>Doc Verification</strong>.
+                </p>
+              </div>
+            </div>
+          ) : (
+            normalizedDocs.map((item, idx) => {
             const itemIsImg =
               item.resourceType === 'image' ||
               ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes((item.format || '').toLowerCase()) ||
@@ -163,7 +174,8 @@ export default function FileViewerModal({
                 </div>
               </div>
             );
-          })}
+          })
+          )}
         </div>
 
         {/* Modal Footer */}

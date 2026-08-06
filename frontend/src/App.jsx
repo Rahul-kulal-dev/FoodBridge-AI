@@ -46,6 +46,7 @@ import VolunteerDashboardPage from './volunteer/page';
 import AssignedPickupsPage from './volunteer/assignments/page';
 import NavigationPage from './volunteer/navigation/page';
 import PickupVerificationPage from './volunteer/verification/page';
+import VolunteerDocVerificationPage from './volunteer/doc-verification/page';
 import UpdateDeliveryStatusPage from './volunteer/delivery-status/page';
 import VolunteerNotificationsPage from './volunteer/notifications/page';
 import DeliveryHistoryPage from './volunteer/history/page';
@@ -170,6 +171,7 @@ function App() {
               <Route path="assignments" element={<AssignedPickupsPage />} />
               <Route path="navigation" element={<NavigationPage />} />
               <Route path="verification" element={<PickupVerificationPage />} />
+              <Route path="doc-verification" element={<VolunteerDocVerificationPage />} />
               <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
               <Route path="notifications" element={<VolunteerNotificationsPage />} />
               <Route path="history" element={<DeliveryHistoryPage />} />

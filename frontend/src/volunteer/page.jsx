@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   CheckCircle2,
   Clock,
+  AlertTriangle,
   MapPin,
   Star,
   ChevronRight,
@@ -122,9 +123,31 @@ const VolunteerDashboardPage = () => {
           <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Welcome back, <span className="text-emerald-600">{user?.name || 'Volunteer'}</span>
           </h1>
-          <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-            <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
-            Verified Volunteer Courier
+          <span
+            className={`inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+              user?.verificationStatus === 'approved'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                : user?.verificationStatus === 'rejected'
+                ? 'bg-rose-50 text-rose-700 border-rose-200/80'
+                : 'bg-amber-50 text-amber-700 border-amber-200/80'
+            }`}
+          >
+            {user?.verificationStatus === 'approved' ? (
+              <>
+                <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
+                Verified Volunteer Courier
+              </>
+            ) : user?.verificationStatus === 'rejected' ? (
+              <>
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                Verification Rejected
+              </>
+            ) : (
+              <>
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                Pending Verification
+              </>
+            )}
           </span>
         </div>
 
