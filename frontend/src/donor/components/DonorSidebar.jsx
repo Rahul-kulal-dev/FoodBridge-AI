@@ -86,9 +86,9 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
             <button
               onClick={() => setIsCollapsed(false)}
               title="Expand Sidebar"
-              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer"
             >
-              <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2] group-hover:fill-white" />
+              <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
             </button>
           </div>
         ) : (
@@ -97,9 +97,9 @@ const DonorSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: extern
               <button
                 onClick={() => setIsCollapsed(true)}
                 title="Collapse Sidebar"
-                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer shrink-0"
+                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer shrink-0"
               >
-                <Leaf className="w-5 h-5 fill-emerald-500/20 stroke-[2.2]" />
+                <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
               </button>
 
               <div className="flex flex-col min-w-0 transition-opacity duration-200">

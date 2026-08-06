@@ -115,9 +115,9 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
             <button
               onClick={() => setIsCollapsed(false)}
               title="Expand Sidebar"
-              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer"
             >
-              <Building2 className="w-5 h-5 stroke-[2.2]" />
+              <img src="/imgs/ngo.png" alt="NGO" className="w-full h-full object-contain" />
             </button>
           </div>
         ) : (
@@ -126,9 +126,9 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
               <button
                 onClick={() => setIsCollapsed(true)}
                 title="Collapse Sidebar"
-                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-xs cursor-pointer shrink-0"
+                className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1.5 hover:bg-emerald-50 transition-all shadow-xs cursor-pointer shrink-0"
               >
-                <Building2 className="w-5 h-5 stroke-[2.2]" />
+                <img src="/imgs/ngo.png" alt="NGO" className="w-full h-full object-contain" />
               </button>
 
               <div className="flex flex-col min-w-0 transition-opacity duration-200">

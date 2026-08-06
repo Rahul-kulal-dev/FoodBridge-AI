@@ -44,8 +44,8 @@ const MobileSidebar = ({ navItems }) => {
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
-              <Leaf className="w-4 h-4 fill-emerald-500/20 stroke-[2.2]" />
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center p-1">
+              <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
