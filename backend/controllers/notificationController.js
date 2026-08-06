@@ -104,10 +104,30 @@ const markAllAsRead = async (req, res, next) => {
     next(error);
   }
 };
+// @desc    Delete notification
+// @route   DELETE /api/notifications/:id
+// @access  Private
+const deleteNotification = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (id && id.match(/^[0-9a-fA-F]{24}$/)) {
+      await Notification.findOneAndDelete({ _id: id, userId: req.user._id });
+    }
+
+    res.json({
+      success: true,
+      message: 'Notification deleted',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   sendNotification,
   getNotifications,
   markAsRead,
   markAllAsRead,
+  deleteNotification,
 };

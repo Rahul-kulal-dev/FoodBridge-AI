@@ -34,34 +34,21 @@ const VolunteerNotificationsPage = () => {
         if (res.ok && data.notifications && data.notifications.length > 0) {
           setNotifications(
             data.notifications.map((n, idx) => ({
+              ...n,
               id: n._id || `NOT-${idx + 1}`,
               title: n.title || 'System Notification',
               message: n.message || n.text || 'No details provided.',
               time: n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently',
               category: n.type || 'Assignments',
-              read: n.read || false,
+              read: n.isRead !== undefined ? n.isRead : n.read || false,
+              isRead: n.isRead !== undefined ? n.isRead : n.read || false,
             }))
           );
         } else {
-          setNotifications([{
-            id: 'welcome-volunteer',
-            title: 'Welcome to FoodBridge AI!',
-            message: 'Welcome to FoodBridge AI! Your Volunteer Courier account is active. Check assigned food pickups and navigate live delivery routes.',
-            time: 'Just now',
-            category: 'Assignments',
-            read: false,
-          }]);
+          setNotifications([]);
         }
       } catch (err) {
         console.warn('Error fetching volunteer notifications:', err);
-        setNotifications([{
-          id: 'welcome-volunteer',
-          title: 'Welcome to FoodBridge AI!',
-          message: 'Welcome to FoodBridge AI! Your Volunteer Courier account is active. Check assigned food pickups and navigate live delivery routes.',
-          time: 'Just now',
-          category: 'Assignments',
-          read: false,
-        }]);
       }
     };
     fetchNotifications();
@@ -72,10 +59,11 @@ const VolunteerNotificationsPage = () => {
       prev.map((n) => (n.id === id || n._id === id ? { ...n, read: true, isRead: true } : n))
     );
     try {
-      if (token && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
         await fetch(getApiUrl(`/api/notifications/${id}/read`), {
           method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
       }
     } catch (err) {
@@ -86,10 +74,11 @@ const VolunteerNotificationsPage = () => {
   const handleMarkAllAsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true, isRead: true })));
     try {
-      if (token) {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken) {
         await fetch(getApiUrl('/api/notifications/read-all'), {
           method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
       }
     } catch (err) {
@@ -97,8 +86,19 @@ const VolunteerNotificationsPage = () => {
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id && n._id !== id));
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
+        await fetch(getApiUrl(`/api/notifications/${id}`), {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+      }
+    } catch (err) {
+      console.warn('Delete notification API notice:', err);
+    }
   };
 
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;

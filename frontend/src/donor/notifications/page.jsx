@@ -20,23 +20,17 @@ const DonorNotificationsPage = () => {
         });
         const data = await res.json();
         if (res.ok && data.notifications && data.notifications.length > 0) {
-          setNotifications(data.notifications);
+          setNotifications(
+            data.notifications.map((n) => ({
+              ...n,
+              read: n.isRead !== undefined ? n.isRead : n.read || false,
+            }))
+          );
         } else {
-          setNotifications([{
-            _id: 'welcome-donor',
-            title: 'Welcome to FoodBridge AI!',
-            message: 'Welcome to FoodBridge AI! Your Food Donor account is active. Start creating surplus food listings to connect with nearby verified NGOs and volunteers.',
-            createdAt: new Date().toISOString(),
-          }]);
+          setNotifications([]);
         }
       } catch (err) {
         console.warn('Error fetching donor notifications:', err);
-        setNotifications([{
-          _id: 'welcome-donor',
-          title: 'Welcome to FoodBridge AI!',
-          message: 'Welcome to FoodBridge AI! Your Food Donor account is active. Start creating surplus food listings to connect with nearby verified NGOs and volunteers.',
-          createdAt: new Date().toISOString(),
-        }]);
       } finally {
         setLoading(false);
       }
@@ -49,10 +43,11 @@ const DonorNotificationsPage = () => {
       prev.map((n) => (n._id === id || n.id === id ? { ...n, read: true, isRead: true } : n))
     );
     try {
-      if (token && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
         await fetch(getApiUrl(`/api/notifications/${id}/read`), {
           method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
       }
     } catch (err) {
@@ -63,10 +58,11 @@ const DonorNotificationsPage = () => {
   const handleMarkAllAsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true, isRead: true })));
     try {
-      if (token) {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken) {
         await fetch(getApiUrl('/api/notifications/read-all'), {
           method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         });
       }
     } catch (err) {
@@ -74,8 +70,19 @@ const DonorNotificationsPage = () => {
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     setNotifications((prev) => prev.filter((n) => n._id !== id && n.id !== id));
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (authToken && typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
+        await fetch(getApiUrl(`/api/notifications/${id}`), {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+      }
+    } catch (err) {
+      console.warn('Delete notification API notice:', err);
+    }
   };
 
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
