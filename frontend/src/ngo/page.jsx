@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ShoppingBag,
   Map,
@@ -384,84 +385,86 @@ const NgoDashboardPage = () => {
       </div>
 
       {/* Details Modal */}
-      {selectedDonation && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl max-w-lg w-full p-6 animate-scale-up">
-            <div className="flex items-center justify-between pb-4 border-b border-[#E7EAF0]">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
-                  DON-{selectedDonation._id.slice(-4).toUpperCase()}
-                </span>
-                <span className="text-xs font-semibold text-[#64748B]">{selectedDonation.location?.address || 'Nearby'}</span>
-              </div>
-              <button
-                onClick={() => setSelectedDonation(null)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="py-5 space-y-4">
-              <div>
-                <h3 className="text-lg font-black text-[#0F172A]">{selectedDonation.title}</h3>
-                <p className="text-xs text-[#64748B] mt-0.5">
-                  Offered by {selectedDonation.donorId?.organizationName || selectedDonation.donorId?.name || 'Donor'}
-                </p>
-                {selectedDonation.description && (
-                  <p className="text-xs text-slate-600 mt-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    {selectedDonation.description}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
-                <div>
-                  <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Quantity</span>
-                  <span className="font-bold text-[#0F172A] text-sm">{selectedDonation.quantity} {selectedDonation.unit || 'kg'}</span>
-                </div>
-                <div>
-                  <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Food Category</span>
-                  <span className="font-bold text-emerald-700 text-sm capitalize">{selectedDonation.foodType || 'Cooked'}</span>
-                </div>
-                <div>
-                  <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Expiry Time</span>
-                  <span className="font-bold text-amber-600 text-sm">
-                    {new Date(selectedDonation.expiryTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+      {selectedDonation &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl border border-[#E7EAF0] shadow-2xl max-w-lg w-full p-6 animate-scale-up">
+              <div className="flex items-center justify-between pb-4 border-b border-[#E7EAF0]">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono">
+                    DON-{selectedDonation._id.slice(-4).toUpperCase()}
                   </span>
+                  <span className="text-xs font-semibold text-[#64748B]">{selectedDonation.location?.address || 'Nearby'}</span>
                 </div>
+                <button
+                  onClick={() => setSelectedDonation(null)}
+                  className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="py-5 space-y-4">
                 <div>
-                  <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Status</span>
-                  <span className="font-bold text-emerald-700 text-sm uppercase">{selectedDonation.status}</span>
+                  <h3 className="text-lg font-black text-[#0F172A]">{selectedDonation.title}</h3>
+                  <p className="text-xs text-[#64748B] mt-0.5">
+                    Offered by {selectedDonation.donorId?.organizationName || selectedDonation.donorId?.name || 'Donor'}
+                  </p>
+                  {selectedDonation.description && (
+                    <p className="text-xs text-slate-600 mt-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      {selectedDonation.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
+                  <div>
+                    <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Quantity</span>
+                    <span className="font-bold text-[#0F172A] text-sm">{selectedDonation.quantity} {selectedDonation.unit || 'kg'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Food Category</span>
+                    <span className="font-bold text-emerald-700 text-sm capitalize">{selectedDonation.foodType || 'Cooked'}</span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Expiry Time</span>
+                    <span className="font-bold text-amber-600 text-sm">
+                      {new Date(selectedDonation.expiryTime).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[#64748B] block font-semibold text-[10px] uppercase">Status</span>
+                    <span className="font-bold text-emerald-700 text-sm uppercase">{selectedDonation.status}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end gap-3">
-              <button
-                onClick={() => setSelectedDonation(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                disabled={acceptingId === selectedDonation._id}
-                onClick={() => handleAccept(selectedDonation)}
-                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
-              >
-                {acceptingId === selectedDonation._id ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Accepting...</span>
-                  </>
-                ) : (
-                  <span>Accept Donation</span>
-                )}
-              </button>
+              <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setSelectedDonation(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  disabled={acceptingId === selectedDonation._id}
+                  onClick={() => handleAccept(selectedDonation)}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {acceptingId === selectedDonation._id ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Accepting...</span>
+                    </>
+                  ) : (
+                    <span>Accept Donation</span>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
