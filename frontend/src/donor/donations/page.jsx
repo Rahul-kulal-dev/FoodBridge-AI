@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Package, Search, Filter, Loader2, Utensils } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Package, Search, Filter, Loader2, Utensils, Trash2, Pencil, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
 import FoodImageSlideshow from '../../components/FoodImageSlideshow';
@@ -15,6 +16,96 @@ const MyDonationsPage = () => {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [failedImages, setFailedImages] = useState({});
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
+
+  // Edit Donation Modal State
+  const [editingItem, setEditingItem] = useState(null);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    quantity: '',
+    unit: 'meals',
+    foodType: 'cooked',
+    address: '',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setEditForm({
+      title: item.title || '',
+      quantity: item.quantity || '',
+      unit: item.unit || 'meals',
+      foodType: item.foodType || 'cooked',
+      address: item.location?.address || item.address || '',
+    });
+    setEditError('');
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editingItem) return;
+    if (!editForm.title.trim() || !editForm.quantity) {
+      setEditError('Food title and quantity are required.');
+      return;
+    }
+
+    setSavingEdit(true);
+    setEditError('');
+
+    try {
+      const payload = {
+        title: editForm.title.trim(),
+        quantity: Number(editForm.quantity),
+        unit: editForm.unit,
+        foodType: editForm.foodType,
+        location: { address: editForm.address.trim() },
+      };
+
+      const res = await fetch(getApiUrl(`/api/donations/${editingItem._id}`), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.donation) {
+        setDonations((prev) =>
+          prev.map((d) => (d._id === editingItem._id ? { ...d, ...data.donation } : d))
+        );
+        setEditingItem(null);
+      } else {
+        setEditError(data.message || 'Failed to update donation');
+      }
+    } catch (err) {
+      setEditError('Network error updating donation');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDeleteDonation = async (donationId) => {
+    setDeletingId(donationId);
+    try {
+      const res = await fetch(getApiUrl(`/api/donations/${donationId}`), {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      if (res.ok) {
+        setDonations((prev) => prev.filter((d) => d._id !== donationId));
+        setDeleteConfirmItem(null);
+      }
+    } catch (err) {
+      console.warn('Error deleting donation:', err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const fetchMyDonations = async () => {
     setLoading(true);
@@ -209,9 +300,27 @@ const MyDonationsPage = () => {
                     <span className="text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       {docId}
                     </span>
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getStatusBadgeStyle(item.status)} uppercase`}>
-                      {statusLabel}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${getStatusBadgeStyle(item.status)} uppercase`}>
+                        {statusLabel}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(item)}
+                        title="Edit Listing"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirmItem(item)}
+                        title="Delete Listing"
+                        className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -247,6 +356,7 @@ const MyDonationsPage = () => {
                     <th className="px-6 py-4">LISTED DATE</th>
                     <th className="px-6 py-4">ASSIGNED RECIPIENT</th>
                     <th className="px-6 py-4">STATUS</th>
+                    <th className="px-6 py-4 text-right">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E7EAF0]">
@@ -254,8 +364,6 @@ const MyDonationsPage = () => {
                     const docId = `DON-${item._id.slice(-4).toUpperCase()}`;
                     const statusLabel = getStatusLabel(item.status);
                     const recipientName = item.ngoId?.organizationName || item.ngoId?.name || 'Awaiting NGO Request';
-                    const imgSrc = formatImageUrl(item.image);
-                    const hasImageFailed = failedImages[item._id];
 
                     return (
                       <tr key={item._id} className="hover:bg-[#f8fafc]/60 transition-colors">
@@ -296,6 +404,27 @@ const MyDonationsPage = () => {
                             {statusLabel}
                           </span>
                         </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(item)}
+                              title="Edit Listing"
+                              className="p-2 rounded-xl text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmItem(item)}
+                              title="Delete Listing"
+                              className="p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     );
                   })}
@@ -305,6 +434,155 @@ const MyDonationsPage = () => {
           </div>
         </>
       )}
+
+      {/* Edit Food Listing Modal */}
+      {editingItem &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-slate-200 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 font-bold">
+                    <Pencil className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-[#0F172A]">Edit Surplus Food Listing</h3>
+                    <p className="text-xs text-slate-400 font-medium">Update item quantity, type, or pickup details</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {editError && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
+                  {editError}
+                </div>
+              )}
+
+              <form onSubmit={handleSaveEdit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">FOOD ITEM NAME *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">QUANTITY *</label>
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={editForm.quantity}
+                      onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">UNIT</label>
+                    <select
+                      value={editForm.unit}
+                      onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
+                    >
+                      <option value="meals">meals (Servings)</option>
+                      <option value="kg">kg</option>
+                      <option value="boxes">boxes</option>
+                      <option value="plates">plates</option>
+                      <option value="units">units</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">FOOD CATEGORY</label>
+                  <select
+                    value={editForm.foodType}
+                    onChange={(e) => setEditForm({ ...editForm, foodType: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
+                  >
+                    <option value="cooked">Cooked Meal / Catering</option>
+                    <option value="packaged">Packaged / Grocery</option>
+                    <option value="raw">Raw Produce / Bakery</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">PICKUP LOCATION</label>
+                  <input
+                    type="text"
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                    placeholder="Enter pickup address"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem(null)}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEdit}
+                    className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-emerald-btn transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    {savingEdit ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmItem &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-200 space-y-4">
+              <div>
+                <h3 className="text-lg font-black text-[#0F172A]">Delete Food Listing?</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Are you sure you want to delete <strong>"{deleteConfirmItem.title}"</strong>? This will permanently remove this surplus listing.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmItem(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={deletingId === deleteConfirmItem._id}
+                  onClick={() => handleDeleteDonation(deleteConfirmItem._id)}
+                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold shadow-rose-btn transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {deletingId === deleteConfirmItem._id ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Delete Listing'}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
