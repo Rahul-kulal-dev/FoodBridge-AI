@@ -15,7 +15,7 @@ export default function FeaturesSection({ onOpenDonateModal }) {
       title: 'Smart Food Donation',
       description: 'Upload surplus food effortlessly with photo scanning, instant expiry calculation, GPS location tag, and AI quality evaluation.',
       icon: Utensils,
-      bgColor: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
+      bgColor: 'bg-green-500/10 text-green-600 border-green-200',
       highlights: [
         'AI Photo Quality Assessment (99.2% Accuracy)',
         'Automatic Shelf-Life & Temperature Estimation',
@@ -41,7 +41,7 @@ export default function FeaturesSection({ onOpenDonateModal }) {
       title: 'AI Surplus Prediction',
       description: 'Forecast future food surplus using foot-traffic forecasts, local weather events, calendar schedules, and historical waste data.',
       icon: BrainCircuit,
-      bgColor: 'bg-emerald-500/10 text-emerald-600 border-emerald-200',
+      bgColor: 'bg-green-500/10 text-green-600 border-green-200',
       highlights: [
         'Weather & Traffic Impact Modeling',
         'Prep Volume Optimization Suggestions',
@@ -81,7 +81,7 @@ export default function FeaturesSection({ onOpenDonateModal }) {
                 <div>
                   {/* Large Icon & Badge */}
                   <div className="flex items-center justify-between mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-xs border border-slate-100 text-emerald-600">
+                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-xs border border-slate-100 text-green-600">
                       <IconComponent className="w-6 h-6" />
                     </div>
                     <span className={`text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full border ${feature.bgColor}`}>
@@ -103,7 +103,7 @@ export default function FeaturesSection({ onOpenDonateModal }) {
                   <ul className="space-y-2.5">
                     {feature.highlights.map((item, i) => (
                       <li key={i} className="flex items-center gap-2 text-xs font-semibold text-[#0F172A]">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
                         <span>{item}</span>
                       </li>
                     ))}

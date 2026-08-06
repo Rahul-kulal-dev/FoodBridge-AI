@@ -51,7 +51,7 @@ export default function AboutContactSection() {
 
             <div className="space-y-4 pt-2">
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#F7F8FB] border border-[#E7EAF0]">
-                <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+                <ShieldCheck className="w-6 h-6 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-base font-extrabold text-[#0F172A]">Strict Food Safety Standards</h4>
                   <p className="text-xs text-[#64748B] mt-0.5">Compliant with Good Samaritan Food Donation Acts & FDA temperature guidelines.</p>
@@ -59,7 +59,7 @@ export default function AboutContactSection() {
               </div>
 
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-[#F7F8FB] border border-[#E7EAF0]">
-                <Globe2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+                <Globe2 className="w-6 h-6 text-green-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-base font-extrabold text-[#0F172A]">Zero-Friction Logistics</h4>
                   <p className="text-xs text-[#64748B] mt-0.5">Automated dispatch connects volunteers with nearby pickup points in real-time.</p>
@@ -69,7 +69,7 @@ export default function AboutContactSection() {
 
             <div className="pt-2 flex flex-wrap gap-6 text-xs font-semibold text-[#64748B]">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-emerald-600" />
+                <MapPin className="w-4 h-4 text-green-600" />
                 <span>Operating in 35+ Metropolitan Areas</span>
               </div>
               <div className="flex items-center gap-2">
@@ -98,10 +98,10 @@ export default function AboutContactSection() {
             </div>
 
             {formSubmitted ? (
-              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-2xl text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+              <div className="bg-green-50 border border-green-200 text-green-800 p-6 rounded-2xl text-center space-y-2">
+                <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto" />
                 <h4 className="font-extrabold text-base">Message Sent Successfully!</h4>
-                <p className="text-xs text-emerald-700">Thank you for reaching out. Our redistribution team will contact you within 2 business hours.</p>
+                <p className="text-xs text-green-700">Thank you for reaching out. Our redistribution team will contact you within 2 business hours.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -113,7 +113,7 @@ export default function AboutContactSection() {
                     placeholder="Enter your name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-green-500 transition-colors"
                   />
                 </div>
 
@@ -126,7 +126,7 @@ export default function AboutContactSection() {
                       placeholder="Enter your email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-green-500 transition-colors"
                     />
                   </div>
                   <div>
@@ -134,7 +134,7 @@ export default function AboutContactSection() {
                     <select
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"
+                      className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-green-500 transition-colors"
                     >
                       <option value="Restaurant / Business">Restaurant / Bakery</option>
                       <option value="NGO / Shelter">NGO / Shelter Hub</option>
@@ -152,13 +152,13 @@ export default function AboutContactSection() {
                     placeholder="Tell us about your donation goals or partnership inquiry..."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-[#E7EAF0] text-sm text-[#0F172A] focus:outline-none focus:border-green-500 transition-colors"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3.5 rounded-xl shadow-emerald-btn transition-all duration-200 flex items-center justify-center gap-2 text-base cursor-pointer active:scale-95"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3.5 rounded-xl shadow-green-btn transition-all duration-200 flex items-center justify-center gap-2 text-base cursor-pointer active:scale-95"
                 >
                   <span>Submit Inquiry</span>
                   <Send className="w-4 h-4" />
