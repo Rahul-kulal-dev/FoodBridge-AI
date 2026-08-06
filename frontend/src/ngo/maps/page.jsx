@@ -169,13 +169,18 @@ const NgoMapsPage = () => {
           <div className="absolute bottom-5 left-5 right-5 sm:left-auto sm:right-5 sm:w-96 bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-2xl z-30 animate-slide-up">
             <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
               <span
-                className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase ${
+                className={`inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase ${
                   selectedMarker.type === 'NGO'
                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
                     : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 }`}
               >
-                {selectedMarker.type}
+                <img
+                  src={selectedMarker.type === 'NGO' ? '/imgs/ngo.png' : '/imgs/donor.png'}
+                  alt={selectedMarker.type}
+                  className="w-3.5 h-3.5 object-contain"
+                />
+                <span>{selectedMarker.type}</span>
               </span>
               <button
                 onClick={() => setSelectedMarker(null)}

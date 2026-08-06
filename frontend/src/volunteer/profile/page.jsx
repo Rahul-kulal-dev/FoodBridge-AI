@@ -153,8 +153,8 @@ const VolunteerProfilePage = () => {
       {/* Header Banner */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold shrink-0">
-            <Truck className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.2]" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center font-bold shrink-0 p-2">
+            <img src="/imgs/volunteer.png" alt="Volunteer" className="w-full h-full object-contain" />
           </div>
 
           <div>

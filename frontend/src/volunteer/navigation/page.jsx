@@ -354,15 +354,15 @@ const NavigationPage = () => {
         </div>
 
         {/* 6. Bottom-Right Compact Map Legend (Req 7) */}
-        <div className="absolute bottom-24 sm:bottom-24 right-4 z-[400] bg-white/95 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-200 shadow-md text-[11px] font-bold text-slate-700 hidden sm:flex items-center gap-3">
+        <div className="absolute bottom-24 sm:bottom-24 right-4 z-[400] bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-200 shadow-md text-[11px] font-bold text-slate-700 hidden sm:flex items-center gap-3.5">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse" /> Volunteer
+            <img src="/imgs/volunteer.png" alt="Volunteer" className="w-4 h-4 object-contain" /> Volunteer
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A]" /> Donor
+            <img src="/imgs/donor.png" alt="Donor" className="w-4 h-4 object-contain" /> Donor
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> NGO
+            <img src="/imgs/ngo.png" alt="NGO" className="w-4 h-4 object-contain" /> NGO
           </span>
         </div>
 

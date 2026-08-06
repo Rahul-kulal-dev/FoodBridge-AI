@@ -163,25 +163,25 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
                   <button
                     type="button"
                     onClick={() => setRole('donor')}
-                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'donor' ? 'bg-white text-emerald-700 shadow-xs' : 'text-[#64748B]'}`}
+                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'donor' ? 'bg-white text-emerald-700 shadow-xs border border-emerald-200' : 'text-[#64748B]'}`}
                   >
-                    <Utensils className="w-3.5 h-3.5 text-emerald-600" />
+                    <img src="/imgs/donor.png" alt="Donor" className="w-4 h-4 object-contain" />
                     <span>Food Donor</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('ngo')}
-                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'ngo' ? 'bg-white text-emerald-700 shadow-xs' : 'text-[#64748B]'}`}
+                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'ngo' ? 'bg-white text-emerald-700 shadow-xs border border-amber-200' : 'text-[#64748B]'}`}
                   >
-                    <HeartHandshake className="w-3.5 h-3.5 text-amber-600" />
+                    <img src="/imgs/ngo.png" alt="NGO" className="w-4 h-4 object-contain" />
                     <span>NGO / Hub</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setRole('volunteer')}
-                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'volunteer' ? 'bg-white text-emerald-700 shadow-xs' : 'text-[#64748B]'}`}
+                    className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${role === 'volunteer' ? 'bg-white text-emerald-700 shadow-xs border border-blue-200' : 'text-[#64748B]'}`}
                   >
-                    <Truck className="w-3.5 h-3.5 text-blue-600" />
+                    <img src="/imgs/volunteer.png" alt="Volunteer" className="w-4 h-4 object-contain" />
                     <span>Volunteer</span>
                   </button>
                 </div>

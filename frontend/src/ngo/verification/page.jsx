@@ -92,8 +92,8 @@ const NgoVerificationPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20 shrink-0">
-            <ShieldCheck className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20 shrink-0 p-1.5">
+            <img src="/imgs/ngo.png" alt="NGO" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight">

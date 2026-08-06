@@ -227,9 +227,16 @@ const AdminVerificationsPage = () => {
               >
                 {/* User Info */}
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-2xl shrink-0 ${role === 'ngo' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                    }`}>
-                    {role === 'ngo' ? <Building2 className="w-6 h-6" /> : <Utensils className="w-6 h-6" />}
+                  <div className={`p-2.5 rounded-2xl shrink-0 ${
+                    role === 'ngo' ? 'bg-amber-50 border border-amber-100' :
+                    role === 'volunteer' ? 'bg-blue-50 border border-blue-100' :
+                    'bg-emerald-50 border border-emerald-100'
+                  }`}>
+                    <img
+                      src={role === 'ngo' ? '/imgs/ngo.png' : role === 'volunteer' ? '/imgs/volunteer.png' : '/imgs/donor.png'}
+                      alt={role}
+                      className="w-7 h-7 object-contain"
+                    />
                   </div>
 
                   <div className="space-y-1">
@@ -237,9 +244,17 @@ const AdminVerificationsPage = () => {
                       <h3 className="font-extrabold text-[#0F172A] text-base sm:text-lg">
                         {item.organizationName || item.name}
                       </h3>
-                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                        }`}>
-                        {role === 'ngo' ? 'NGO Hub' : 'Food Donor'}
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
+                        role === 'ngo' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                        role === 'volunteer' ? 'bg-blue-50 text-blue-800 border-blue-200' :
+                        'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      }`}>
+                        <img
+                          src={role === 'ngo' ? '/imgs/ngo.png' : role === 'volunteer' ? '/imgs/volunteer.png' : '/imgs/donor.png'}
+                          alt={role}
+                          className="w-3.5 h-3.5 object-contain"
+                        />
+                        <span>{role === 'ngo' ? 'NGO Hub' : role === 'volunteer' ? 'Volunteer' : 'Food Donor'}</span>
                       </span>
                     </div>
 

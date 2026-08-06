@@ -136,16 +136,16 @@ const AdminUsersPage = () => {
                 {filteredUsers.map((u) => {
                   const assignedRole = u.user_role || u.role;
                   let roleBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                  let RoleIcon = Utensils;
+                  let roleImg = '/imgs/donor.png';
                   if (assignedRole === 'ngo') {
                     roleBadge = 'bg-amber-50 text-amber-700 border-amber-200';
-                    RoleIcon = Building2;
+                    roleImg = '/imgs/ngo.png';
                   } else if (assignedRole === 'volunteer') {
                     roleBadge = 'bg-blue-50 text-blue-700 border-blue-200';
-                    RoleIcon = Truck;
+                    roleImg = '/imgs/volunteer.png';
                   } else if (assignedRole === 'admin') {
                     roleBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                    RoleIcon = ShieldAlert;
+                    roleImg = null;
                   }
 
                   return (
@@ -159,7 +159,11 @@ const AdminUsersPage = () => {
 
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${roleBadge} capitalize`}>
-                          <RoleIcon className="w-3.5 h-3.5" />
+                          {roleImg ? (
+                            <img src={roleImg} alt={assignedRole} className="w-4 h-4 object-contain" />
+                          ) : (
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                          )}
                           <span>{assignedRole}</span>
                         </span>
                       </td>

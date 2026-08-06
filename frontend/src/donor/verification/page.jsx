@@ -112,8 +112,8 @@ const DonorVerificationPage = () => {
       {/* Page Header */}
       <div className="bg-white p-5 sm:p-6 rounded-[20px] border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#16A34A] flex items-center justify-center border border-emerald-100 shrink-0">
-            <ShieldCheck className="w-6 h-6 stroke-[2]" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#16A34A] flex items-center justify-center border border-emerald-100 shrink-0 p-2">
+            <img src="/imgs/donor.png" alt="Donor" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-[-0.03em]">
