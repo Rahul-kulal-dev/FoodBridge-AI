@@ -9,32 +9,30 @@ const seedAdmin = async () => {
     await mongoose.connect(connStr);
     console.log('Connected to MongoDB Atlas.');
 
-    const adminEmails = ['admin@gmail.com', 'admin@gmail.com'];
-    const password = 'admin@gmail';
+    const adminEmail = 'admin@gmail.com';
+    const password = 'admin@gmail.com';
 
-    for (const email of adminEmails) {
-      let user = await User.findOne({ email });
-      if (user) {
-        user.password = password;
-        user.role = 'admin';
-        user.user_role = 'admin';
-        user.verificationStatus = 'approved';
-        await user.save();
-        console.log(`Updated admin account for ${email}`);
-      } else {
-        user = await User.create({
-          name: 'System Admin',
-          email,
-          password,
-          role: 'admin',
-          user_role: 'admin',
-          verificationStatus: 'approved',
-          phone: '1234567890',
-          address: 'Headquarters',
-          organizationName: 'FoodBridge AI',
-        });
-        console.log(`Created admin account for ${email}`);
-      }
+    let user = await User.findOne({ email: adminEmail });
+    if (user) {
+      user.password = password;
+      user.role = 'admin';
+      user.user_role = 'admin';
+      user.verificationStatus = 'approved';
+      await user.save();
+      console.log(`Updated admin account for ${adminEmail}`);
+    } else {
+      user = await User.create({
+        name: 'System Admin',
+        email: adminEmail,
+        password,
+        role: 'admin',
+        user_role: 'admin',
+        verificationStatus: 'approved',
+        phone: '1234567890',
+        address: 'Headquarters',
+        organizationName: 'FoodBridge AI',
+      });
+      console.log(`Created admin account for ${adminEmail}`);
     }
 
     console.log('Admin seeding complete.');

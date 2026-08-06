@@ -59,6 +59,7 @@ import AdminUsersPage from './admin/users/page';
 import AdminDonationsPage from './admin/donations/page';
 import AdminFeedbackPage from './admin/feedback/page';
 import AdminLoginPage from './admin/login/page';
+import AdminProfilePage from './admin/profile/page';
 
 /**
  * Landing Page Component
@@ -127,6 +128,7 @@ function App() {
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="donations" element={<AdminDonationsPage />} />
               <Route path="feedback" element={<AdminFeedbackPage />} />
+              <Route path="profile" element={<AdminProfilePage />} />
             </Route>
           </Route>
 

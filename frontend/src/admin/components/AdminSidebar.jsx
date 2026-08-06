@@ -6,6 +6,7 @@ import {
   Users,
   Package,
   MessageSquare,
+  User,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -49,6 +50,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       name: 'Feedback Logs',
       path: '/admin/feedback',
       icon: MessageSquare,
+    },
+    {
+      name: 'Admin Profile',
+      path: '/admin/profile',
+      icon: User,
     },
   ];
 
@@ -120,17 +126,22 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       <div className="p-4 border-t border-[#E7EAF0] space-y-3">
         {!isCollapsed && (() => {
           const userEmail = user?.email || 'admin@gmail.com';
+          const userName = user?.name || user?.organizationName || 'System Administrator';
+          const initial = userName.charAt(0).toUpperCase();
 
           return (
-            <div className="p-3 bg-slate-50 rounded-2xl border border-[#E7EAF0] flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs">
-                AD
+            <Link
+              to="/admin/profile"
+              className="p-3 bg-slate-50 hover:bg-emerald-50/70 rounded-2xl border border-[#E7EAF0] hover:border-emerald-200 flex items-center gap-3 transition-all group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-full bg-emerald-600 group-hover:bg-emerald-700 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-xs transition-colors">
+                {initial}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-[#0F172A] truncate">System Administrator</p>
+                <p className="text-xs font-bold text-[#0F172A] group-hover:text-emerald-700 truncate transition-colors">{userName}</p>
                 <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
               </div>
-            </div>
+            </Link>
           );
         })()}
 
