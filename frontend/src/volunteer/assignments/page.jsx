@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Package,
   MapPin,
@@ -14,6 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
+import FoodImageSlideshow from '../../components/FoodImageSlideshow';
 
 /**
  * Assigned Pickups Page (/volunteer/assignments)
@@ -44,7 +46,8 @@ const AssignedPickupsPage = () => {
               id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : `TSK-00${idx + 1}`,
               foodName: t.donationId?.title || 'Surplus Food Package',
               quantity: t.donationId?.quantity ? `${t.donationId.quantity} ${t.donationId.unit || 'units'}` : 'Bulk Package',
-              image: t.donationId?.imageUrl ? getImageUrl(t.donationId.imageUrl) : 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
+              image: t.donationId?.image,
+              images: t.donationId?.images,
               donorName: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Donor',
               pickupAddress: t.donationId?.donorId?.address || 'Donor Pickup Address',
               ngoName: t.ngoId?.organizationName || t.ngoId?.name || 'Partner NGO',
@@ -61,7 +64,8 @@ const AssignedPickupsPage = () => {
               id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : `DON-00${idx + 1}`,
               foodName: d.title || `${d.foodType} Package`,
               quantity: `${d.quantity} ${d.unit || 'kg'}`,
-              image: d.imageUrl ? getImageUrl(d.imageUrl) : 'https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=800&q=80',
+              image: d.image,
+              images: d.images,
               donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Donor',
               pickupAddress: d.donorId?.address || d.pickupAddress || 'City Food Hub',
               ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Partner NGO',
@@ -101,7 +105,7 @@ const AssignedPickupsPage = () => {
 
         <div className="flex items-center gap-2 bg-emerald-50 px-3.5 py-2 rounded-xl border border-emerald-200 text-xs font-bold text-emerald-700 w-fit">
           <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>Vehicle: Delivery Van (Verified)</span>
+          <span>{assignments.length} Active Pickups</span>
         </div>
       </div>
 
@@ -128,81 +132,54 @@ const AssignedPickupsPage = () => {
             >
               {/* Full-bleed Image Header */}
               <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                <img
-                  src={item.image}
+                <FoodImageSlideshow
+                  image={item.image}
+                  images={item.images}
                   alt={item.foodName}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
-                <div className="absolute top-3 left-3 bg-[#0F172A]/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-extrabold shadow-md border border-white/10">
+                <div className="absolute top-3 left-3 bg-[#0F172A]/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-extrabold shadow-md border border-white/10 z-10">
                   {item.id}
-                </div>
-                <div className="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center gap-1.5 border border-white/10">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                  {item.priorityScore}% AI Priority
                 </div>
               </div>
 
-              {/* Card Body */}
-              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+              {/* Card Body - Minimal Data */}
+              <div className="p-4 sm:p-5 space-y-3.5 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-black text-[#0F172A] line-clamp-1 group-hover:text-emerald-600 transition-colors">
+                    <h3 className="text-base sm:text-lg font-black text-[#0F172A] line-clamp-1 group-hover:text-emerald-600 transition-colors">
                       {item.foodName}
                     </h3>
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-extrabold text-xs border border-emerald-200/80 shrink-0">
                       {item.quantity}
                     </span>
                   </div>
-                </div>
 
-                {/* Structured Pickup Origin & Destination Box */}
-                <div className="space-y-3 bg-slate-50/80 p-3.5 rounded-xl border border-[#E7EAF0] text-xs">
-                  <div className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20 mt-0.5">
-                      <MapPin className="w-4 h-4" />
+                  {/* Minimal Pickup Origin & Dropoff Summary */}
+                  <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-[#E7EAF0] text-xs space-y-2">
+                    <div className="flex items-center justify-between text-[#64748B]">
+                      <span className="font-medium text-[11px] uppercase tracking-wider text-[#64748B]">Pickup</span>
+                      <span className="font-extrabold text-[#0F172A] truncate max-w-[180px] text-right">{item.donorName}</span>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-[#64748B] uppercase font-extrabold tracking-wider block">Pickup Origin</span>
-                      <p className="font-extrabold text-[#0F172A] text-xs truncate">{item.donorName}</p>
-                      <p className="text-[11px] text-[#64748B] truncate font-medium mt-0.5">{item.pickupAddress}</p>
+                    <div className="flex items-center justify-between text-[#64748B] pt-2 border-t border-[#E7EAF0]">
+                      <span className="font-medium text-[11px] uppercase tracking-wider text-[#64748B]">Dropoff</span>
+                      <span className="font-extrabold text-[#0F172A] truncate max-w-[180px] text-right">{item.ngoName}</span>
                     </div>
-                  </div>
-
-                  <div className="flex items-start gap-2.5 pt-2.5 border-t border-[#E7EAF0]">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0 border border-blue-500/20 mt-0.5">
-                      <Building2 className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-[#64748B] uppercase font-extrabold tracking-wider block">Destination NGO</span>
-                      <p className="font-extrabold text-[#0F172A] text-xs truncate">{item.ngoName}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Distance & Deadline Metrics */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-[#E7EAF0]">
-                    <span className="text-[10px] text-[#64748B] uppercase font-bold tracking-wider block">Distance & ETA</span>
-                    <span className="font-extrabold text-emerald-600 text-xs">{item.distance} ({item.estimatedTime})</span>
-                  </div>
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-[#E7EAF0]">
-                    <span className="text-[10px] text-[#64748B] uppercase font-bold tracking-wider block">Deadline</span>
-                    <span className="font-extrabold text-amber-600 text-xs">{item.pickupDeadline}</span>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="pt-1 flex items-center gap-2.5">
+                <div className="pt-1 flex items-center gap-2">
                   <button
                     onClick={() => setSelectedAssignment(item)}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all text-center cursor-pointer active:scale-95 border border-slate-200/60"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold transition-all text-center cursor-pointer active:scale-95 border border-slate-200/60"
                   >
                     View Details
                   </button>
                   <button
                     onClick={() => navigate('/volunteer/navigation')}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                   >
                     <Navigation className="w-3.5 h-3.5 shrink-0" />
                     <span className="whitespace-nowrap">Start Nav</span>
@@ -215,57 +192,75 @@ const AssignedPickupsPage = () => {
       )}
 
       {/* Assignment Details Modal */}
-      {selectedAssignment && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 animate-scale-up space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {selectedAssignment.id}
-              </span>
-              <button
-                onClick={() => setSelectedAssignment(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer p-1"
-              >
-                ✕
-              </button>
-            </div>
+      {selectedAssignment &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
+            <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 animate-scale-up space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {selectedAssignment.id}
+                  </span>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                    {selectedAssignment.quantity}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSelectedAssignment(null)}
+                  className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer p-1"
+                >
+                  ✕
+                </button>
+              </div>
 
-            <div>
-              <h3 className="text-base font-extrabold text-[#0F172A]">{selectedAssignment.foodName}</h3>
-              <p className="text-xs text-[#64748B] mt-0.5">Assigned Courier: {user?.name || 'Verified Courier'}</p>
-            </div>
-
-            <div className="space-y-2.5 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
               <div>
-                <span className="text-[10px] text-[#64748B] uppercase font-bold block">Donor Pickup Address</span>
-                <p className="font-bold text-[#0F172A]">{selectedAssignment.donorName}</p>
-                <p className="text-[#64748B]">{selectedAssignment.pickupAddress}</p>
+                <h3 className="text-base font-extrabold text-[#0F172A]">{selectedAssignment.foodName}</h3>
+                <p className="text-xs text-[#64748B] mt-0.5">Assigned Courier: {user?.name || 'Verified Courier'}</p>
               </div>
-              <div className="pt-2 border-t border-[#E7EAF0]">
-                <span className="text-[10px] text-[#64748B] uppercase font-bold block">Destination NGO Dropoff</span>
-                <p className="font-bold text-[#0F172A]">{selectedAssignment.ngoName}</p>
-                <p className="text-[#64748B]">{selectedAssignment.ngoAddress}</p>
-              </div>
-            </div>
 
-            <div className="pt-3 border-t border-[#E7EAF0] flex flex-wrap sm:flex-nowrap items-center justify-end gap-2.5">
-              <button
-                onClick={() => setSelectedAssignment(null)}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => navigate('/volunteer/navigation')}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Navigation className="w-3.5 h-3.5" />
-                <span>Launch GPS Navigation</span>
-              </button>
+              <div className="space-y-3 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
+                <div>
+                  <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">Donor Pickup Address</span>
+                  <p className="font-bold text-[#0F172A]">{selectedAssignment.donorName}</p>
+                  <p className="text-[#64748B] text-[11px] font-medium mt-0.5">{selectedAssignment.pickupAddress}</p>
+                </div>
+                <div className="pt-2.5 border-t border-[#E7EAF0]">
+                  <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">Destination NGO Dropoff</span>
+                  <p className="font-bold text-[#0F172A]">{selectedAssignment.ngoName}</p>
+                  <p className="text-[#64748B] text-[11px] font-medium mt-0.5">{selectedAssignment.ngoAddress}</p>
+                </div>
+
+                <div className="pt-2.5 border-t border-[#E7EAF0] grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-[10px] text-[#64748B] uppercase font-bold block">Distance & ETA</span>
+                    <span className="font-extrabold text-emerald-600 text-xs">{selectedAssignment.distance} ({selectedAssignment.estimatedTime})</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-[#64748B] uppercase font-bold block">Deadline</span>
+                    <span className="font-extrabold text-amber-600 text-xs">{selectedAssignment.pickupDeadline}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[#E7EAF0] flex flex-wrap sm:flex-nowrap items-center justify-end gap-2.5">
+                <button
+                  onClick={() => setSelectedAssignment(null)}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => navigate('/volunteer/navigation')}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>Launch GPS Navigation</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

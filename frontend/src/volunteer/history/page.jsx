@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   History,
   Search,
@@ -246,49 +247,51 @@ const DeliveryHistoryPage = () => {
       </div>
 
       {/* Item Modal */}
-      {selectedItem && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 animate-scale-up space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {selectedItem.id}
-              </span>
+      {selectedItem &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
+            <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 animate-scale-up space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E7EAF0]">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  {selectedItem.id}
+                </span>
+                <button
+                  onClick={() => setSelectedItem(null)}
+                  className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer p-1"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div>
+                <h3 className="text-base font-extrabold text-[#0F172A]">{selectedItem.food}</h3>
+                <p className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  Rated {selectedItem.rating} / 5 by {selectedItem.ngo}
+                </p>
+              </div>
+
+              <div className="space-y-2.5 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
+                <div>
+                  <span className="text-[10px] text-[#64748B] font-bold uppercase block">Donor Pickup</span>
+                  <p className="font-bold text-[#0F172A]">{selectedItem.donor}</p>
+                </div>
+                <div className="pt-2 border-t border-[#E7EAF0]">
+                  <span className="text-[10px] text-[#64748B] font-bold uppercase block">Recipient NGO</span>
+                  <p className="font-bold text-[#0F172A]">{selectedItem.ngo}</p>
+                </div>
+              </div>
+
               <button
                 onClick={() => setSelectedItem(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold text-xs cursor-pointer p-1"
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold cursor-pointer"
               >
-                ✕
+                Close
               </button>
             </div>
-
-            <div>
-              <h3 className="text-base font-extrabold text-[#0F172A]">{selectedItem.food}</h3>
-              <p className="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                Rated {selectedItem.rating} / 5 by {selectedItem.ngo}
-              </p>
-            </div>
-
-            <div className="space-y-2.5 text-xs bg-[#f7f8fb] p-3.5 rounded-xl border border-[#E7EAF0]">
-              <div>
-                <span className="text-[10px] text-[#64748B] font-bold uppercase block">Donor Pickup</span>
-                <p className="font-bold text-[#0F172A]">{selectedItem.donor}</p>
-              </div>
-              <div className="pt-2 border-t border-[#E7EAF0]">
-                <span className="text-[10px] text-[#64748B] font-bold uppercase block">Recipient NGO</span>
-                <p className="font-bold text-[#0F172A]">{selectedItem.ngo}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedItem(null)}
-              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#0F172A] text-xs font-bold cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

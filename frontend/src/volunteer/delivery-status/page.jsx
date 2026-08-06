@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Truck,
   CheckCircle2,
@@ -257,36 +258,38 @@ const UpdateDeliveryStatusPage = () => {
       </div>
 
       {/* Success Confirmation Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
-          <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-6 animate-scale-up text-center space-y-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
-            </div>
+      {showSuccessModal &&
+        createPortal(
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-3.5 sm:p-4">
+            <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-2xl w-[92vw] max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-6 animate-scale-up text-center space-y-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10" />
+              </div>
 
-            <div>
-              <h3 className="text-lg sm:text-xl font-black text-[#0F172A]">Delivery Complete!</h3>
-              <p className="text-xs text-[#64748B] mt-1">
-                Order <span className="font-bold text-[#0F172A]">{orderCode}</span> has been successfully handed over to {ngoName}.
-              </p>
-            </div>
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-[#0F172A]">Delivery Complete!</h3>
+                <p className="text-xs text-[#64748B] mt-1">
+                  Order <span className="font-bold text-[#0F172A]">{orderCode}</span> has been successfully handed over to {ngoName}.
+                </p>
+              </div>
 
-            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold">
-              Status updated successfully
-            </div>
+              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 font-bold">
+                Status updated successfully
+              </div>
 
-            <button
-              onClick={() => {
-                setShowSuccessModal(false);
-                navigate('/volunteer/assignments');
-              }}
-              className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold shadow-emerald-btn transition-all cursor-pointer"
-            >
-              Done & Return to Assignments
-            </button>
-          </div>
-        </div>
-      )}
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  navigate('/volunteer/assignments');
+                }}
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-extrabold shadow-emerald-btn transition-all cursor-pointer"
+              >
+                Done & Return to Assignments
+              </button>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
