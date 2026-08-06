@@ -15,6 +15,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import FoodImageSlideshow from '../../components/FoodImageSlideshow';
 
 /**
  * Accepted Donations Page (/ngo/accepted-donations)
@@ -235,7 +236,18 @@ const AcceptedDonationsPage = () => {
                           </span>
                         </td>
                         <td className="py-4 px-6 font-bold text-slate-900 whitespace-nowrap">
-                          {item.title} <span className="font-normal text-slate-500">({item.quantity} {item.unit || 'kg'})</span>
+                          <div className="flex items-center gap-3">
+                            <FoodImageSlideshow
+                              image={item.image}
+                              images={item.images}
+                              alt={item.title}
+                              className="w-10 h-10 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-50 shadow-xs"
+                            />
+                            <div>
+                              <div className="font-extrabold text-slate-900">{item.title}</div>
+                              <div className="font-normal text-[#64748B] text-[11px] mt-0.5">{item.quantity} {item.unit || 'kg'}</div>
+                            </div>
+                          </div>
                         </td>
                         <td className="py-4 px-6 font-semibold text-slate-800 whitespace-nowrap">{donorName}</td>
                         <td className="py-4 px-6 whitespace-nowrap">
