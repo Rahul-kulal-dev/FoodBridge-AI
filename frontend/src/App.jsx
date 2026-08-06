@@ -60,6 +60,7 @@ import AdminDonationsPage from './admin/donations/page';
 import AdminFeedbackPage from './admin/feedback/page';
 import AdminLoginPage from './admin/login/page';
 import AdminProfilePage from './admin/profile/page';
+import NotFoundPage from './pages/NotFoundPage';
 
 /**
  * Landing Page Component
@@ -175,6 +176,9 @@ function App() {
               <Route path="profile" element={<VolunteerProfilePage />} />
             </Route>
           </Route>
+
+          {/* Catch-all 404 Error Page Route */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
