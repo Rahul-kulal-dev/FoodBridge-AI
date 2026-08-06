@@ -28,6 +28,7 @@ const VolunteerProfilePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [profile, setProfile] = useState({
     name: user?.name || '',
+    organizationName: user?.organizationName || '',
     email: user?.email || '',
     phone: user?.phone || '',
     vehicleType: user?.vehicleType || '',
@@ -53,6 +54,7 @@ const VolunteerProfilePage = () => {
       setProfile((prev) => ({
         ...prev,
         name: user.name || '',
+        organizationName: user.organizationName || '',
         email: user.email || '',
         phone: user.phone || '',
         vehicleType: user.vehicleType || '',
@@ -125,6 +127,7 @@ const VolunteerProfilePage = () => {
         },
         body: JSON.stringify({
           name: profile.name,
+          organizationName: profile.organizationName,
           phone: profile.phone,
           vehicleType: profile.vehicleType,
           vehicleNumber: profile.vehicleNumber,
@@ -246,6 +249,18 @@ const VolunteerProfilePage = () => {
               type="text"
               name="name"
               value={profile.name}
+              onChange={handleChange}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-[#0F172A] block mb-1">Organization / Team Name</label>
+            <input
+              type="text"
+              name="organizationName"
+              placeholder="e.g. Rapid Dispatch Group"
+              value={profile.organizationName}
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
             />
