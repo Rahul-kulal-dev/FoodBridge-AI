@@ -49,7 +49,7 @@ const donationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['available', 'accepted', 'picked_up', 'delivered', 'cancelled'],
+      enum: ['available', 'assigned', 'accepted', 'picked_up', 'delivered', 'cancelled'],
       default: 'available',
     },
     ngoId: {

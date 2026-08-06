@@ -107,8 +107,11 @@ const TrackVolunteerPage = () => {
   const fmtTime = (d) => d ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—';
 
   const status = activeDonation.status;
+  const isVolunteerAccepted = status === 'accepted' || status === 'picked_up' || status === 'delivered';
+
   const timelineSteps = [
-    { label: 'Accepted', time: fmtTime(acceptedAt || createdAt), completed: true },
+    { label: 'Assigned', time: fmtTime(createdAt || acceptedAt), completed: true },
+    { label: 'Accepted', time: isVolunteerAccepted ? fmtTime(acceptedAt) : 'Pending Acceptance', completed: isVolunteerAccepted },
     { label: 'Picked Up', time: status === 'picked_up' || status === 'delivered' ? fmtTime(acceptedAt) : '—', completed: status === 'picked_up' || status === 'delivered' },
     { label: 'In Transit', time: status === 'picked_up' ? 'Active' : '—', completed: false, active: status === 'picked_up' },
     { label: 'Delivered', time: status === 'delivered' ? 'Completed' : '—', completed: status === 'delivered' },

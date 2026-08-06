@@ -87,7 +87,7 @@ const acceptDonation = async (req, res, next) => {
       });
     }
 
-    donation.status = 'accepted';
+    donation.status = 'assigned';
     donation.ngoId = req.user._id;
     donation.volunteerId = req.body.volunteerId;
     await donation.save();
@@ -95,12 +95,19 @@ const acceptDonation = async (req, res, next) => {
     const ngoRequest = await NgoRequest.create({
       donationId: donation._id,
       ngoId: req.user._id,
-      status: 'accepted',
+      status: 'assigned',
+    });
+
+    await VolunteerTask.create({
+      donationId: donation._id,
+      volunteerId: req.body.volunteerId,
+      ngoId: req.user._id,
+      status: 'assigned',
     });
 
     res.json({
       success: true,
-      message: 'Donation accepted successfully',
+      message: 'Donation assigned to volunteer successfully',
       donation,
       ngoRequest,
     });
@@ -141,7 +148,7 @@ const getNgoStats = async (req, res, next) => {
     const nearbyCount = await Donation.countDocuments({ status: 'available' });
     const activeDonationsCount = await Donation.countDocuments({
       ngoId,
-      status: { $in: ['accepted', 'picked_up'] },
+      status: { $in: ['assigned', 'accepted', 'picked_up'] },
     });
     const acceptedDonations = await Donation.find({
       ngoId,
@@ -212,6 +219,7 @@ const revertDonationAcceptance = async (req, res, next) => {
     await donation.save();
 
     await NgoRequest.deleteMany({ donationId: donation._id });
+    await VolunteerTask.deleteMany({ donationId: donation._id });
 
     res.json({
       success: true,

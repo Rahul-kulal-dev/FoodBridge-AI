@@ -99,13 +99,15 @@ const AcceptedDonationsPage = () => {
 
   const getStatusBadgeStyle = (status) => {
     switch (status) {
+      case 'assigned':
+        return 'bg-amber-50 text-amber-800 border border-amber-200/80';
       case 'accepted':
         return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
       case 'picked_up':
       case 'in_transit':
-        return 'bg-amber-50 text-amber-800 border border-amber-200/80';
-      case 'delivered':
         return 'bg-blue-50 text-blue-800 border border-blue-200/80';
+      case 'delivered':
+        return 'bg-emerald-50 text-emerald-800 border border-emerald-200/80';
       default:
         return 'bg-slate-100 text-slate-700 border border-slate-200';
     }
@@ -113,15 +115,17 @@ const AcceptedDonationsPage = () => {
 
   const getStatusLabel = (status) => {
     switch (status) {
+      case 'assigned':
+        return 'Assigned to Courier';
       case 'accepted':
-        return 'Queued for Courier';
+        return 'Accepted by Courier';
       case 'picked_up':
       case 'in_transit':
         return 'In Transit';
       case 'delivered':
         return 'Delivered';
       default:
-        return status ? status.replace('_', ' ') : 'Accepted';
+        return status ? status.replace('_', ' ') : 'Assigned';
     }
   };
 
