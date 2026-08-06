@@ -144,7 +144,7 @@ const UpdateDeliveryStatusPage = () => {
           </div>
         </div>
 
-        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 max-w-lg mx-auto">
+        <div className="bg-white p-12 rounded-2xl border border-[#E7EAF0] shadow-soft-card text-center space-y-4 w-full">
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center border border-emerald-100">
             <PackageCheck className="w-8 h-8 stroke-[1.5]" />
           </div>

@@ -138,7 +138,7 @@ const NavigationPage = () => {
           </div>
         </div>
 
-        <div className="bg-white p-12 rounded-[20px] border border-slate-200/80 shadow-xs text-center space-y-4 max-w-lg mx-auto">
+        <div className="bg-white p-12 rounded-[20px] border border-slate-200/80 shadow-xs text-center space-y-4 w-full">
           <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-[#16A34A] mx-auto flex items-center justify-center border border-emerald-100">
             <Navigation className="w-8 h-8 stroke-[1.5]" />
           </div>

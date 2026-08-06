@@ -376,7 +376,7 @@ const CreateDonationPage = () => {
 
           </div>
 
-          <div className="p-4 bg-[#f8fafc] rounded-xl border border-[#E7EAF0] max-w-lg mx-auto text-left text-xs space-y-2">
+          <div className="p-4 bg-[#f8fafc] rounded-xl border border-[#E7EAF0] w-full text-left text-xs space-y-2">
             <div className="flex justify-between border-b border-gray-100 pb-2">
               <span className="text-gray-500">Listing Title:</span>
               <span className="font-semibold text-slate-800">{foodName}</span>
