@@ -1,43 +1,42 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Utensils, Globe, HeartHandshake, Truck } from 'lucide-react';
 
 export default function StatsBar() {
   const stats = [
     {
-      icon: Utensils,
+      image: '/imgs/Cutlery.png',
       value: '25,000+',
       label: 'Meals Saved',
       subtext: 'Provided to families in need',
       accentColor: 'text-emerald-600',
-      iconBg: 'bg-emerald-100 text-emerald-600',
+      iconBg: 'bg-emerald-100',
       bgColor: 'bg-emerald-50/60 border-emerald-100',
     },
     {
-      icon: Globe,
+      image: '/imgs/web.png',
       value: '15 Tons',
       label: 'Food Waste Reduced',
       subtext: 'Kept away from landfills',
       accentColor: 'text-emerald-600',
-      iconBg: 'bg-emerald-100 text-emerald-600',
+      iconBg: 'bg-emerald-100',
       bgColor: 'bg-emerald-50/60 border-emerald-100',
     },
     {
-      icon: HeartHandshake,
+      image: '/imgs/heart.png',
       value: '500+',
       label: 'Partner NGOs',
       subtext: 'Shelters & community kitchens',
       accentColor: 'text-amber-600',
-      iconBg: 'bg-amber-100 text-amber-600',
+      iconBg: 'bg-amber-100',
       bgColor: 'bg-amber-50/60 border-amber-100',
     },
     {
-      icon: Truck,
+      image: '/imgs/truck.png',
       value: '1,200+',
       label: 'Successful Deliveries',
       subtext: 'Zero food spoilage rate',
       accentColor: 'text-blue-600',
-      iconBg: 'bg-blue-100 text-blue-600',
+      iconBg: 'bg-blue-100',
       bgColor: 'bg-blue-50/60 border-blue-100',
     },
   ];
@@ -47,7 +46,6 @@ export default function StatsBar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => {
-            const IconComp = stat.icon;
             return (
               <motion.div
                 key={stat.label}
@@ -59,9 +57,7 @@ export default function StatsBar() {
                 className={`p-6 rounded-2xl border ${stat.bgColor} shadow-soft-card transition-all duration-300 relative overflow-hidden`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.iconBg}`}>
-                    <IconComp className="w-6 h-6" />
-                  </div>
+                  <img src={stat.image} alt={stat.label} className="w-10 h-10 object-contain" />
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] bg-white/80 px-2.5 py-1 rounded-full border border-slate-200">
                     Verified Impact
                   </span>
