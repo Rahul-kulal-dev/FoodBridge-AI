@@ -1,4 +1,4 @@
-const CACHE_NAME = 'foodbridge-pwa-v2';
+const CACHE_NAME = 'foodbridge-pwa-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -18,7 +18,16 @@ const STATIC_ASSETS = [
   '/donor/donations',
   '/donor/ai-predictions',
   '/donor/notifications',
-  '/donor/profile'
+  '/donor/profile',
+  '/volunteer',
+  '/volunteer/assignments',
+  '/volunteer/navigation',
+  '/volunteer/verification',
+  '/volunteer/doc-verification',
+  '/volunteer/delivery-status',
+  '/volunteer/history',
+  '/volunteer/notifications',
+  '/volunteer/profile'
 ];
 
 // Install Event

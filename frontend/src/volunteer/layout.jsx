@@ -5,6 +5,9 @@ import VolunteerTrackingBanner from './components/VolunteerTrackingBanner';
 import { useAuth } from '../context/AuthContext';
 import { getApiUrl } from '../config/api';
 import volunteerLocationTracker from '../services/volunteerLocationTracker';
+import usePwaStatus from '../ngo/hooks/usePwaStatus';
+import OfflineIndicator from '../ngo/components/OfflineIndicator';
+import PwaInstallBanner from '../ngo/components/PwaInstallBanner';
 
 /**
  * VolunteerLayout Component
@@ -13,9 +16,24 @@ import volunteerLocationTracker from '../services/volunteerLocationTracker';
 const VolunteerLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { token, user } = useAuth();
+  const { isOnline, isInstallable, isInstalled, triggerInstallPrompt } = usePwaStatus();
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.log('[SW] Volunteer Service worker registered successfully:', registration.scope);
+          })
+          .catch((err) => {
+            console.warn('[SW] Volunteer Service worker registration failed:', err);
+          });
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -90,6 +108,16 @@ const VolunteerLayout = () => {
         }`}
       >
         <main className="flex-1 p-3.5 sm:p-5 md:p-6 lg:p-8 w-full mx-auto overflow-x-hidden space-y-4">
+          {/* Global Offline Status Alert */}
+          <OfflineIndicator isOnline={isOnline} />
+
+          {/* PWA App Install Banner Prompt */}
+          <PwaInstallBanner
+            isInstallable={isInstallable}
+            isInstalled={isInstalled}
+            triggerInstallPrompt={triggerInstallPrompt}
+          />
+
           <VolunteerTrackingBanner />
           <Outlet />
         </main>

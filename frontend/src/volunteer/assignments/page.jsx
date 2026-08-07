@@ -30,7 +30,11 @@ const AssignedPickupsPage = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!token) return;
+      if (!token) {
+        const cached = localStorage.getItem('cached_volunteer_assignments');
+        if (cached) setAssignments(JSON.parse(cached));
+        return;
+      }
       setLoading(true);
       try {
         const res = await fetch(getApiUrl('/api/volunteer/tasks'), {
@@ -41,8 +45,9 @@ const AssignedPickupsPage = () => {
           const rawTasks = data.tasks || [];
           const rawDonations = data.donations || [];
 
+          let formatted = [];
           if (rawTasks.length > 0) {
-            const formatted = rawTasks.map((t, idx) => ({
+            formatted = rawTasks.map((t, idx) => ({
               id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : `TSK-00${idx + 1}`,
               foodName: t.donationId?.title || 'Surplus Food Package',
               quantity: t.donationId?.quantity ? `${t.donationId.quantity} ${t.donationId.unit || 'units'}` : 'Bulk Package',
@@ -58,9 +63,8 @@ const AssignedPickupsPage = () => {
               priorityScore: 94,
               status: t.status || 'Assigned',
             }));
-            setAssignments(formatted);
           } else if (rawDonations.length > 0) {
-            const formatted = rawDonations.map((d, idx) => ({
+            formatted = rawDonations.map((d, idx) => ({
               id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : `DON-00${idx + 1}`,
               foodName: d.title || `${d.foodType} Package`,
               quantity: `${d.quantity} ${d.unit || 'kg'}`,
@@ -76,13 +80,24 @@ const AssignedPickupsPage = () => {
               priorityScore: 92,
               status: d.status || 'Assigned',
             }));
-            setAssignments(formatted);
-          } else {
-            setAssignments([]);
+          }
+          setAssignments(formatted);
+          try {
+            localStorage.setItem('cached_volunteer_assignments', JSON.stringify(formatted));
+          } catch (e) {
+            console.warn('LocalStorage save error:', e);
           }
         }
       } catch (err) {
         console.warn('Error fetching volunteer tasks from MongoDB:', err);
+        const cached = localStorage.getItem('cached_volunteer_assignments');
+        if (cached) {
+          try {
+            setAssignments(JSON.parse(cached));
+          } catch (e) {
+            console.warn('LocalStorage parse error:', e);
+          }
+        }
       } finally {
         setLoading(false);
       }

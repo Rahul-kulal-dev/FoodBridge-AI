@@ -28,7 +28,11 @@ const DeliveryHistoryPage = () => {
 
   useEffect(() => {
     const fetchHistory = async () => {
-      if (!token) return;
+      if (!token) {
+        const cached = localStorage.getItem('cached_volunteer_history');
+        if (cached) setHistoryItems(JSON.parse(cached));
+        return;
+      }
       setLoading(true);
       try {
         const res = await fetch(getApiUrl('/api/volunteer/history'), {
@@ -39,8 +43,9 @@ const DeliveryHistoryPage = () => {
           const rawTasks = data.tasks || [];
           const rawDonations = data.donations || [];
 
+          let formatted = [];
           if (rawTasks.length > 0) {
-            const formatted = rawTasks.map((t, idx) => ({
+            formatted = rawTasks.map((t, idx) => ({
               id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : `DEL-00${idx + 1}`,
               food: t.donationId?.title || 'Surplus Food Package',
               donor: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Food Donor',
@@ -50,9 +55,8 @@ const DeliveryHistoryPage = () => {
               status: t.status === 'delivered' ? 'Delivered' : 'Completed',
               rating: '5.0',
             }));
-            setHistoryItems(formatted);
           } else if (rawDonations.length > 0) {
-            const formatted = rawDonations.map((d, idx) => ({
+            formatted = rawDonations.map((d, idx) => ({
               id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : `DEL-00${idx + 1}`,
               food: d.title || `${d.foodType} Package`,
               donor: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
@@ -62,13 +66,24 @@ const DeliveryHistoryPage = () => {
               status: 'Delivered',
               rating: '5.0',
             }));
-            setHistoryItems(formatted);
-          } else {
-            setHistoryItems([]);
+          }
+          setHistoryItems(formatted);
+          try {
+            localStorage.setItem('cached_volunteer_history', JSON.stringify(formatted));
+          } catch (e) {
+            console.warn('LocalStorage save error:', e);
           }
         }
       } catch (err) {
         console.warn('Error fetching volunteer delivery history from MongoDB:', err);
+        const cached = localStorage.getItem('cached_volunteer_history');
+        if (cached) {
+          try {
+            setHistoryItems(JSON.parse(cached));
+          } catch (e) {
+            console.warn('LocalStorage parse error:', e);
+          }
+        }
       } finally {
         setLoading(false);
       }
