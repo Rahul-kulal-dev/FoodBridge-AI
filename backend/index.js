@@ -9,9 +9,6 @@ const errorHandler = require('./middleware/errorHandler');
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB Atlas
-connectDB();
-
 const app = express();
 
 // Body parsers & CORS (credentials: true enables cookie sending from frontend)
@@ -22,6 +19,20 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Database connection middleware - guarantees DB connection is ready before handling API requests
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error('[Database Middleware Error]:', error.message);
+    return res.status(500).json({
+      success: false,
+      message: 'Database connection failed. Please try again later.',
+    });
+  }
+});
 
 // API Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -48,8 +59,16 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`[FoodBridge-AI Server] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
+// Start server locally when executed directly
+if (require.main === module) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`[FoodBridge-AI Server] Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    });
+  }).catch((err) => {
+    console.error('[FoodBridge-AI Server] Startup database connection error:', err.message);
+    process.exit(1);
+  });
+}
 
-module.exports = app;
+module.exports = app;

@@ -1,28 +1,57 @@
 const mongoose = require('mongoose');
 
+/**
+ * Global connection cache across serverless function invocations & hot reloads.
+ */
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  // Disable query buffering so server responds immediately when DB is offline
-  mongoose.set('bufferCommands', false);
+  // Return existing connection if readyState is connected (1)
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
+  }
+
+  // Await existing connection promise if currently connecting (2)
+  if (cached.promise && (mongoose.connection.readyState === 2 || mongoose.connection.readyState === 1)) {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  }
 
   const connStr = process.env.MONGODB_URI;
   if (!connStr) {
-    console.error('[MongoDB Error] MONGODB_URI is not set in backend/.env');
-    process.exit(1);
+    const errorMsg = '[MongoDB Error] MONGODB_URI is not set in environment variables';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
+  const opts = {
+    bufferCommands: false,
+    serverSelectionTimeoutMS: 10000,
+  };
+
+  cached.promise = mongoose.connect(connStr, opts).then((mongooseInstance) => {
+    console.log(`[MongoDB Atlas] Connected successfully: ${mongooseInstance.connection.host}`);
+    return mongooseInstance;
+  }).catch((err) => {
+    cached.promise = null;
+    console.error(`[MongoDB Atlas] Connection failed: ${err.message}`);
+    throw err;
+  });
+
   try {
-    const conn = await mongoose.connect(connStr, {
-      serverSelectionTimeoutMS: 10000,
-    });
-    console.log(`[MongoDB Atlas] Connected successfully: ${conn.connection.host}`);
+    cached.conn = await cached.promise;
   } catch (error) {
-    console.error(`[MongoDB Atlas] Connection failed: ${error.message}`);
-    console.error('Please ensure:');
-    console.error('  1. Your MONGODB_URI in backend/.env is correct');
-    console.error('  2. Your current IP is whitelisted in MongoDB Atlas → Network Access');
-    console.error('  3. Your Atlas cluster is running');
-    process.exit(1);
+    cached.promise = null;
+    cached.conn = null;
+    throw error;
   }
+
+  return cached.conn;
 };
 
 module.exports = connectDB;
+

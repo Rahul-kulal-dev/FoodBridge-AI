@@ -1,13 +1,11 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const connectDB = require('./config/db');
 const User = require('./models/User');
 
 const seedAdmin = async () => {
   try {
-    const connStr = process.env.MONGODB_URI;
     console.log('Connecting to MongoDB Atlas...');
-    await mongoose.connect(connStr);
-    console.log('Connected to MongoDB Atlas.');
+    await connectDB();
 
     const adminEmail = 'admin@gmail.com';
     const password = 'admin@gmail.com';
