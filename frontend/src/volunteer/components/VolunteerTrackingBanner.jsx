@@ -41,44 +41,22 @@ const VolunteerTrackingBanner = () => {
     return null;
   }
 
-  if (trackerState.status === 'permission_denied') {
+  if (trackerState.status === 'permission_denied' || trackerState.status === 'error') {
     return (
-      <div className="bg-rose-50 border border-rose-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-soft-card animate-scale-up">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="font-extrabold text-[#0F172A]">GPS Location Permission Required</h4>
-            <p className="text-[#64748B] text-[11px] font-medium mt-0.5">
-              {trackerState.errorMessage || 'Please allow GPS access in your browser to enable live delivery dispatch.'}
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => volunteerLocationTracker.retryTracking()}
-          className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Retry GPS Access</span>
-        </button>
-      </div>
-    );
-  }
-
-  if (trackerState.status === 'error') {
-    return (
-      <div className="bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-soft-card">
+      <div className="bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-soft-card animate-scale-up">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
             <Radio className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h4 className="font-extrabold text-[#0F172A]">GPS Signal Search</h4>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className="font-extrabold text-[#0F172A]">Live GPS Signal Searching</h4>
+              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                Profile Location Fallback Mode Active
+              </span>
+            </div>
             <p className="text-[#64748B] text-[11px] font-medium mt-0.5">
-              {trackerState.errorMessage || 'Acquiring GPS location signal...'}
+              Live GPS unavailable. Routing is actively using your saved volunteer operating location coordinates.
             </p>
           </div>
         </div>
@@ -86,9 +64,10 @@ const VolunteerTrackingBanner = () => {
         <button
           type="button"
           onClick={() => volunteerLocationTracker.retryTracking()}
-          className="px-3.5 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-xs hover:bg-amber-700 transition-all cursor-pointer shrink-0"
+          className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
         >
-          Retry
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>Retry GPS Access</span>
         </button>
       </div>
     );

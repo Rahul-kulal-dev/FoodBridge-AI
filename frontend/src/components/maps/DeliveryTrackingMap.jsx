@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Navigation, Clock, MapPin, AlertCircle, ShieldCheck, CheckCircle2, Truck } from 'lucide-react';
 import RoutingMachine from './RoutingMachine';
 import { createCustomIcon } from './CustomMarker';
-import { determineActiveRoute } from '../../services/routingService';
+import { determineActiveRoute, validateCoordinates } from '../../services/routingService';
 
 /**
  * Modular Leaflet Delivery Tracking Map Component
@@ -58,10 +58,12 @@ const DeliveryTrackingMap = ({
     if (!leafletLoaded || !mapContainerRef.current || mapInstanceRef.current) return;
     const L = window.L;
 
-    const initialCenter = [
-      volunteerLocation?.lat || donorLocation?.lat || ngoLocation?.lat || 12.9716,
-      volunteerLocation?.lng || donorLocation?.lng || ngoLocation?.lng || 77.5946,
-    ];
+    const validCenterLoc = [volunteerLocation, donorLocation, ngoLocation]
+      .find((loc) => loc && validateCoordinates(loc.lat, loc.lng));
+
+    const initialCenter = validCenterLoc
+      ? [Number(validCenterLoc.lat), Number(validCenterLoc.lng)]
+      : [12.9546, 74.8847];
 
     const map = L.map(mapContainerRef.current, {
       zoomControl: false,
@@ -274,26 +276,28 @@ const DeliveryTrackingMap = ({
         </div>
       </div>
 
-      {/* Routing Error Warning Fallback (Requirement 9) */}
+      {/* Routing Error / GPS Fallback Warning (Task 6 & 10) */}
       {routeError && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xl z-[400] border border-slate-700 flex items-center gap-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-2xl z-[400] border border-amber-500/40 flex items-center gap-2 max-w-[90%] text-center">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>Routing service offline. Direct marker location enabled.</span>
+          <span>{typeof routeError === 'string' ? routeError : 'Routing error. Direct location view active.'}</span>
         </div>
       )}
 
-      {/* Leaflet OSRM Route Layer (Requirement 6) */}
+      {/* Leaflet OSRM Route Layer (Task 12) */}
       {leafletLoaded && mapInstanceRef.current && activeRouteConfig.from && activeRouteConfig.to && (
         <RoutingMachine
           map={mapInstanceRef.current}
           from={activeRouteConfig.from}
           to={activeRouteConfig.to}
+          donor={donorLocation}
+          ngo={ngoLocation}
           onRouteFound={({ distance, duration }) => {
             setRouteError(false);
             setRouteMetrics({ distance, duration });
           }}
-          onError={() => {
-            setRouteError(true);
+          onError={(errMsg) => {
+            setRouteError(errMsg || 'Unable to calculate driving route');
           }}
         />
       )}

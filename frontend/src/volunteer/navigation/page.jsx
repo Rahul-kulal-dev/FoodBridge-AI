@@ -21,6 +21,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import { validateCoordinates } from '../../services/routingService';
 import DeliveryTrackingMap from '../../components/maps/DeliveryTrackingMap';
 
 /**
@@ -62,15 +63,26 @@ const NavigationPage = () => {
         if (current) {
           const photo = current.pickupPhoto || current.donationId?.pickupPhoto || '';
           const isVerified = current.status === 'picked_up' || current.status === 'on_the_way' || current.status === 'delivered' || Boolean(photo);
+          const donorObj = current.donationId?.donorId;
+          const ngoObj = current.ngoId;
+          const donLoc = current.donationId?.location;
 
           setActiveTask({
-            donorName: current.donationId?.donorId?.organizationName || current.donationId?.donorId?.name || 'Verified Food Donor',
-            donorAddress: current.donationId?.donorId?.address || current.donationId?.pickupAddress || 'Donor Pickup Address',
-            donorPhone: current.donationId?.donorId?.phone || '+91 98765 43210',
-            ngoName: current.ngoId?.organizationName || current.ngoId?.name || 'Partner NGO',
-            ngoAddress: current.ngoId?.address || 'NGO Dropoff Hub',
-            remainingDistance: '3.1 km',
-            estimatedETA: '15 mins',
+            mongoId: current._id,
+            donationId: current.donationId,
+            ngoId: current.ngoId,
+            donorName: donorObj?.organizationName || donorObj?.name || 'Verified Food Donor',
+            donorAddress: donorObj?.formattedAddress || donorObj?.address || donLoc?.address || 'Donor Pickup Address',
+            donorPhone: donorObj?.phone || current.donationId?.donorId?.phone || '+91 98765 43210',
+            donorLat: donorObj?.latitude || donorObj?.location?.lat || donLoc?.lat || 0,
+            donorLng: donorObj?.longitude || donorObj?.location?.lng || donLoc?.lng || 0,
+            ngoName: ngoObj?.organizationName || ngoObj?.name || 'Partner NGO Hub',
+            ngoAddress: ngoObj?.formattedAddress || ngoObj?.address || 'NGO Dropoff Hub',
+            ngoPhone: ngoObj?.phone || '',
+            ngoLat: ngoObj?.latitude || ngoObj?.location?.lat || 0,
+            ngoLng: ngoObj?.longitude || ngoObj?.location?.lng || 0,
+            remainingDistance: '—',
+            estimatedETA: '—',
             statusText: isVerified ? 'In Transit to NGO' : 'Pickup Verification Pending',
             pickupPhoto: photo,
             isVerified: isVerified,
@@ -83,15 +95,26 @@ const NavigationPage = () => {
           const d = rawDonations[0];
           const photo = d.pickupPhoto || '';
           const isVerified = d.status === 'picked_up' || d.status === 'on_the_way' || d.status === 'delivered' || Boolean(photo);
+          const donorObj = d.donorId;
+          const ngoObj = d.ngoId;
+          const donLoc = d.location;
 
           setActiveTask({
-            donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
-            donorAddress: d.donorId?.address || d.pickupAddress || 'Donor Pickup Address',
-            donorPhone: d.donorId?.phone || '+91 98765 43210',
-            ngoName: d.ngoId?.organizationName || d.ngoId?.name || 'Partner NGO',
-            ngoAddress: d.ngoId?.address || 'NGO Dropoff Hub',
-            remainingDistance: '3.1 km',
-            estimatedETA: '15 mins',
+            mongoId: d._id,
+            donationId: d,
+            ngoId: d.ngoId,
+            donorName: donorObj?.organizationName || donorObj?.name || 'Verified Food Donor',
+            donorAddress: donorObj?.formattedAddress || donorObj?.address || donLoc?.address || 'Donor Pickup Address',
+            donorPhone: donorObj?.phone || '+91 98765 43210',
+            donorLat: donorObj?.latitude || donorObj?.location?.lat || donLoc?.lat || 0,
+            donorLng: donorObj?.longitude || donorObj?.location?.lng || donLoc?.lng || 0,
+            ngoName: ngoObj?.organizationName || ngoObj?.name || 'Partner NGO Hub',
+            ngoAddress: ngoObj?.formattedAddress || ngoObj?.address || 'NGO Dropoff Hub',
+            ngoPhone: ngoObj?.phone || '',
+            ngoLat: ngoObj?.latitude || ngoObj?.location?.lat || 0,
+            ngoLng: ngoObj?.longitude || ngoObj?.location?.lng || 0,
+            remainingDistance: '—',
+            estimatedETA: '—',
             statusText: isVerified ? 'In Transit to NGO' : 'Pickup Verification Pending',
             pickupPhoto: photo,
             isVerified: isVerified,
@@ -341,24 +364,36 @@ const NavigationPage = () => {
       {/* 3. Main Modular Delivery Tracking Map Container */}
       <DeliveryTrackingMap
         donorLocation={{
-          lat: activeTask.donorLat || (activeTask.donationId?.donorId?.latitude) || (activeTask.donationId?.location?.lat) || (user?.latitude) || (user?.location?.lat) || 12.9546,
-          lng: activeTask.donorLng || (activeTask.donationId?.donorId?.longitude) || (activeTask.donationId?.location?.lng) || (user?.longitude) || (user?.location?.lng) || 74.8847,
+          lat: validateCoordinates(activeTask.donorLat, activeTask.donorLng)
+            ? Number(activeTask.donorLat)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.latitude) : 12.9546),
+          lng: validateCoordinates(activeTask.donorLat, activeTask.donorLng)
+            ? Number(activeTask.donorLng)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.longitude) : 74.8847),
           title: activeTask.donorName || 'Donor Pickup',
-          address: activeTask.donorAddress || activeTask.donationId?.donorId?.formattedAddress || 'Donor Address',
-          phone: activeTask.donorPhone || activeTask.donationId?.donorId?.phone || '',
+          address: activeTask.donorAddress || 'Donor Pickup Address',
+          phone: activeTask.donorPhone || '',
           email: activeTask.donationId?.donorId?.email || '',
           contactPerson: activeTask.donationId?.donorId?.name || '',
         }}
         ngoLocation={{
-          lat: activeTask.ngoLat || (activeTask.ngoId?.latitude) || (activeTask.ngoId?.location?.lat) || (user?.latitude) || (user?.location?.lat) || 12.9600,
-          lng: activeTask.ngoLng || (activeTask.ngoId?.longitude) || (activeTask.ngoId?.location?.lng) || (user?.longitude) || (user?.location?.lng) || 74.8900,
-          title: activeTask.ngoName || 'NGO Dropoff',
-          address: activeTask.ngoAddress || activeTask.ngoId?.formattedAddress || 'NGO Address',
-          phone: activeTask.ngoPhone || user?.phone || '',
+          lat: validateCoordinates(activeTask.ngoLat, activeTask.ngoLng)
+            ? Number(activeTask.ngoLat)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.latitude) + 0.015 : 12.9700),
+          lng: validateCoordinates(activeTask.ngoLat, activeTask.ngoLng)
+            ? Number(activeTask.ngoLng)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.longitude) + 0.015 : 74.9000),
+          title: activeTask.ngoName || 'NGO Dropoff Hub',
+          address: activeTask.ngoAddress || 'NGO Dropoff Address',
+          phone: activeTask.ngoPhone || '',
         }}
         volunteerLocation={{
-          lat: user?.currentLocation?.latitude || user?.latitude || (user?.location?.lat) || 12.9546,
-          lng: user?.currentLocation?.longitude || user?.longitude || (user?.location?.lng) || 74.8847,
+          lat: validateCoordinates(user?.currentLocation?.latitude, user?.currentLocation?.longitude)
+            ? Number(user.currentLocation.latitude)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.latitude) : 12.9546),
+          lng: validateCoordinates(user?.currentLocation?.latitude, user?.currentLocation?.longitude)
+            ? Number(user.currentLocation.longitude)
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.longitude) : 74.8847),
           title: `Courier (${user?.name || 'You'})`,
           phone: user?.phone || '',
         }}

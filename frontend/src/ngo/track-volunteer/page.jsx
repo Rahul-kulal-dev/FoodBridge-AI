@@ -372,10 +372,10 @@ const TrackVolunteerPage = () => {
                 contactPerson: activeDonation.donorId?.name || '',
               }}
               ngoLocation={{
-                lat: ngoLat || 12.9850,
-                lng: ngoLng || 77.6150,
+                lat: ngoLat || Number(user?.latitude || user?.location?.lat || 0),
+                lng: ngoLng || Number(user?.longitude || user?.location?.lng || 0),
                 title: ngoName,
-                address: user?.address || 'NGO Dropoff',
+                address: user?.formattedAddress || user?.address || 'NGO Dropoff',
                 phone: user?.phone || '',
               }}
               volunteerLocation={{

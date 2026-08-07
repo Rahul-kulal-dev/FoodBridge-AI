@@ -6,7 +6,7 @@ import RoutingMachine from './maps/RoutingMachine';
  */
 const OpenStreetMap = ({
   markers = [],
-  center = [12.9716, 77.5946],
+  center = [12.9546, 74.8847],
   zoom = 13,
   drawRoute = true,
   onRouteCalculated,
@@ -53,7 +53,7 @@ const OpenStreetMap = ({
     setRouteError(false);
 
     const validMarkers = markers.filter((m) => typeof m.lat === 'number' && typeof m.lng === 'number');
-    const initialCenter = validMarkers.length > 0 ? [validMarkers[0].lat, validMarkers[0].lng] : (Array.isArray(center) ? center : [12.9716, 77.5946]);
+    const initialCenter = validMarkers.length > 0 ? [validMarkers[0].lat, validMarkers[0].lng] : (Array.isArray(center) ? center : [12.9546, 74.8847]);
 
     const map = L.map(mapContainerRef.current, {
       zoomControl: false,

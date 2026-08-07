@@ -157,10 +157,10 @@ const NgoMapsPage = () => {
   });
 
   const ngoOsmMarker = {
-    lat: user?.location?.lat || 12.9716,
-    lng: user?.location?.lng || 77.5946,
+    lat: user?.latitude || user?.location?.lat || 12.9546,
+    lng: user?.longitude || user?.location?.lng || 74.8847,
     title: user?.organizationName || user?.name || 'NGO Hub (Your Location)',
-    description: user?.address || 'NGO Headquarters',
+    description: user?.formattedAddress || user?.address || 'NGO Headquarters',
     iconType: 'ngo',
   };
 
@@ -168,8 +168,8 @@ const NgoMapsPage = () => {
     const latOffset = (idx % 2 === 0 ? 1 : -1) * (0.008 + (idx * 0.005));
     const lngOffset = (idx % 3 === 0 ? -1 : 1) * (0.007 + (idx * 0.004));
     return {
-      lat: d.donorId?.latitude || (d.donorId?.location?.lat) || d.location?.lat || (user?.location?.lat || 12.9716) + latOffset,
-      lng: d.donorId?.longitude || (d.donorId?.location?.lng) || d.location?.lng || (user?.location?.lng || 77.5946) + lngOffset,
+      lat: d.donorId?.latitude || (d.donorId?.location?.lat) || d.location?.lat || (user?.latitude || user?.location?.lat || 12.9546) + latOffset,
+      lng: d.donorId?.longitude || (d.donorId?.location?.lng) || d.location?.lng || (user?.longitude || user?.location?.lng || 74.8847) + lngOffset,
       title: d.title || `${d.foodType} (${d.quantity} ${d.unit})`,
       donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Donor',
       address: d.donorId?.formattedAddress || d.donorId?.address || d.location?.address || 'Pickup Location',
