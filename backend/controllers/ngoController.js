@@ -126,7 +126,20 @@ const getDonationHistory = async (req, res, next) => {
       .populate('volunteerId', 'name email phone')
       .sort({ updatedAt: -1 });
 
-    const donations = rawDonations.map(resolveDonationImages);
+    const donations = await Promise.all(
+      rawDonations.map(async (d) => {
+        const obj = resolveDonationImages(d);
+        if (!obj.pickupPhoto || obj.pickupPhoto === '[object Object]') {
+          const task = await VolunteerTask.findOne({ donationId: d._id });
+          if (task && task.pickupPhoto && task.pickupPhoto !== '[object Object]') {
+            obj.pickupPhoto = task.pickupPhoto;
+          } else if (obj.status === 'picked_up' || obj.status === 'delivered') {
+            obj.pickupPhoto = obj.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+          }
+        }
+        return obj;
+      })
+    );
 
     res.json({
       success: true,
@@ -184,9 +197,19 @@ const getDonationDetails = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Donation not found' });
     }
 
+    const obj = resolveDonationImages(donation);
+    if (!obj.pickupPhoto || obj.pickupPhoto === '[object Object]') {
+      const task = await VolunteerTask.findOne({ donationId: donation._id });
+      if (task && task.pickupPhoto && task.pickupPhoto !== '[object Object]') {
+        obj.pickupPhoto = task.pickupPhoto;
+      } else if (obj.status === 'picked_up' || obj.status === 'delivered') {
+        obj.pickupPhoto = obj.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
+      }
+    }
+
     res.json({
       success: true,
-      donation: resolveDonationImages(donation),
+      donation: obj,
     });
   } catch (error) {
     next(error);

@@ -178,7 +178,13 @@ const AssignedPickupsPage = () => {
                     View Details
                   </button>
                   <button
-                    onClick={() => navigate('/volunteer/navigation')}
+                    onClick={() => {
+                      if (item.status === 'picked_up' || item.status === 'on_the_way' || item.status === 'delivered') {
+                        navigate('/volunteer/navigation');
+                      } else {
+                        navigate('/volunteer/verification');
+                      }
+                    }}
                     className="flex-1 px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                   >
                     <Navigation className="w-3.5 h-3.5 shrink-0" />

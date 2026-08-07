@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Loader2,
   Utensils,
-  UserCheck
+  UserCheck,
+  Camera
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -229,6 +230,31 @@ const FoodDetailsPage = () => {
               <p className="text-xs text-emerald-800 font-bold mt-0.5">HIGH PRIORITY - Recommended for immediate NGO dispatch</p>
             </div>
           </div>
+
+          {/* Pickup Verification Photo if uploaded */}
+          {foodItem.pickupPhoto && (
+            <div className="bg-white p-4 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-extrabold text-[#0F172A] flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-emerald-600" />
+                  <span>Courier Pickup Verification Photo</span>
+                </h4>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Verified at Pickup
+                </span>
+              </div>
+              <div className="relative h-60 w-full rounded-xl overflow-hidden border-2 border-emerald-500 bg-slate-900 shadow-md">
+                <img
+                  src={foodItem.pickupPhoto}
+                  alt="Volunteer Pickup Verification"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-2 left-2 bg-slate-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-slate-700">
+                  Uploaded by Volunteer Courier
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Detailed Info & Donor Profile */}

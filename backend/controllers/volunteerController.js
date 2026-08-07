@@ -118,24 +118,44 @@ const uploadPickupVerification = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please upload a pickup photo' });
     }
 
-    const task = await VolunteerTask.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
+    let task = await VolunteerTask.findById(req.params.id);
+    let donationId = task ? task.donationId : req.params.id;
+
+    const uploadedObj = await uploadToCloudinary(req.file.path, 'foodbridge_pickups');
+    const pickupPhoto = typeof uploadedObj === 'string'
+      ? uploadedObj
+      : (uploadedObj.secure_url || uploadedObj.toString());
+
+    if (task) {
+      task.pickupPhoto = pickupPhoto;
+      task.status = 'picked_up';
+      task.pickedUpAt = new Date();
+      await task.save();
+    } else {
+      const donationObj = await Donation.findById(req.params.id);
+      if (donationObj) {
+        task = await VolunteerTask.findOne({ donationId: donationObj._id });
+        if (task) {
+          task.pickupPhoto = pickupPhoto;
+          task.status = 'picked_up';
+          task.pickedUpAt = new Date();
+          await task.save();
+        }
+      }
     }
 
-    const pickupPhoto = await uploadToCloudinary(req.file.path, 'foodbridge_pickups');
-    task.pickupPhoto = pickupPhoto;
-    task.status = 'picked_up';
-    task.pickedUpAt = new Date();
-    await task.save();
-
-    await Donation.findByIdAndUpdate(task.donationId, { status: 'picked_up' });
+    const updatedDonation = await Donation.findByIdAndUpdate(
+      donationId,
+      { status: 'picked_up', pickupPhoto: pickupPhoto },
+      { new: true }
+    );
 
     res.json({
       success: true,
       message: 'Pickup verification uploaded successfully',
       pickupPhoto,
       task,
+      donation: updatedDonation,
     });
   } catch (error) {
     next(error);
@@ -148,7 +168,14 @@ const uploadPickupVerification = async (req, res, next) => {
 const updateTaskStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const task = await VolunteerTask.findById(req.params.id);
+    let task = await VolunteerTask.findById(req.params.id);
+
+    if (!task) {
+      const donation = await Donation.findById(req.params.id);
+      if (donation) {
+        task = await VolunteerTask.findOne({ donationId: donation._id });
+      }
+    }
 
     if (!task) {
       return res.status(404).json({ success: false, message: 'Task not found' });
@@ -163,7 +190,12 @@ const updateTaskStatus = async (req, res, next) => {
     }
 
     await task.save();
-    await Donation.findByIdAndUpdate(task.donationId, { status, volunteerId: req.user._id });
+    
+    const donationUpdate = { status, volunteerId: req.user._id };
+    if (task.pickupPhoto) {
+      donationUpdate.pickupPhoto = task.pickupPhoto;
+    }
+    await Donation.findByIdAndUpdate(task.donationId, donationUpdate);
 
     res.json({
       success: true,

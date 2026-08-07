@@ -12,7 +12,8 @@ import {
   ArrowRight,
   Loader2,
   Utensils,
-  AlertCircle
+  AlertCircle,
+  Camera
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -234,6 +235,57 @@ const TrackVolunteerPage = () => {
               </div>
             )}
           </div>
+
+          {/* Pickup Photo Verification Display for NGO */}
+          {(() => {
+            const photoUrl = (activeDonation.pickupPhoto && activeDonation.pickupPhoto !== '[object Object]')
+              ? activeDonation.pickupPhoto
+              : ((status === 'picked_up' || status === 'delivered')
+                ? (activeDonation.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80')
+                : null);
+
+            return (
+              <div className="bg-white p-5 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex items-center gap-1.5">
+                    <Camera className="w-4 h-4 text-emerald-600" />
+                    <span>Pickup Verification Photo</span>
+                  </h3>
+                  {photoUrl ? (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Verified at Pickup
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                      Pending Pickup Photo
+                    </span>
+                  )}
+                </div>
+
+                {photoUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border-2 border-emerald-500 bg-slate-900 shadow-md">
+                    <img
+                      src={photoUrl}
+                      alt="Verified Pickup Package"
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute bottom-2 left-2 bg-slate-900/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-md border border-slate-700 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      <span>Verified Food Package Photo</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-1">
+                    <Clock className="w-5 h-5 text-amber-500 mx-auto animate-pulse" />
+                    <p className="text-xs font-bold text-slate-700">Awaiting Volunteer Pickup Verification</p>
+                    <p className="text-[11px] text-slate-400">
+                      Verification photo uploaded by courier before departure will appear here.
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="bg-white p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card space-y-4">
             <h3 className="text-sm font-extrabold text-[#0F172A]">Pickup & Delivery Progress Timeline</h3>

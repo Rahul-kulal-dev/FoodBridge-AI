@@ -10,7 +10,8 @@ import {
   User,
   ExternalLink,
   Loader2,
-  Utensils
+  Utensils,
+  Camera
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -339,10 +340,17 @@ const AcceptedDonationsPage = () => {
                                 </div>
                               )}
                             </div>
-                            <div>
-                              <div className="font-extrabold text-slate-900">{item.title}</div>
-                              <div className="font-normal text-[#64748B] text-[11px] mt-0.5">{item.quantity} {item.unit || 'kg'}</div>
-                            </div>
+                              <div>
+                                <div className="font-extrabold text-slate-900 flex items-center gap-1.5">
+                                  <span>{item.title}</span>
+                                  {item.pickupPhoto && (
+                                    <span className="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200" title="Pickup Verification Photo Uploaded">
+                                      <Camera className="w-2.5 h-2.5" /> Photo Verified
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="font-normal text-[#64748B] text-[11px] mt-0.5">{item.quantity} {item.unit || 'kg'}</div>
+                              </div>
                           </div>
                         </td>
                         <td className="py-4 px-6 font-semibold text-slate-800 whitespace-nowrap">{donorName}</td>

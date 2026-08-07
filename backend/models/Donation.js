@@ -42,6 +42,10 @@ const donationSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    pickupPhoto: {
+      type: String,
+      default: '',
+    },
     location: {
       address: { type: String, default: '' },
       lat: { type: Number, default: 0 },

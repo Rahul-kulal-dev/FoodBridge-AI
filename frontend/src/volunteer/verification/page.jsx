@@ -47,6 +47,8 @@ const PickupVerificationPage = () => {
           const donations = data.donations || [];
           if (tasks.length > 0) {
             const t = tasks[0];
+            const hasPhoto = Boolean(t.pickupPhoto || t.donationId?.pickupPhoto);
+            const isPickedUp = t.status === 'picked_up' || t.status === 'on_the_way' || t.status === 'delivered' || hasPhoto;
             setActiveAssignment({
               id: t._id ? `TSK-${t._id.slice(-4).toUpperCase()}` : 'TSK-ACTIVE',
               mongoId: t._id,
@@ -55,9 +57,19 @@ const PickupVerificationPage = () => {
               donorName: t.donationId?.donorId?.organizationName || t.donationId?.donorId?.name || 'Verified Food Donor',
               pickupAddress: t.donationId?.donorId?.address || 'Pickup Location',
               pickupDeadline: t.pickupDeadline ? new Date(t.pickupDeadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today',
+              pickupPhoto: t.pickupPhoto || t.donationId?.pickupPhoto || '',
+              status: t.status,
             });
+            if (isPickedUp) {
+              setVerificationStatus('Verified');
+              if (t.pickupPhoto || t.donationId?.pickupPhoto) {
+                setPreviewImage(t.pickupPhoto || t.donationId?.pickupPhoto);
+              }
+            }
           } else if (donations.length > 0) {
             const d = donations[0];
+            const hasPhoto = Boolean(d.pickupPhoto);
+            const isPickedUp = d.status === 'picked_up' || d.status === 'on_the_way' || d.status === 'delivered' || hasPhoto;
             setActiveAssignment({
               id: d._id ? `DON-${d._id.slice(-4).toUpperCase()}` : 'DON-ACTIVE',
               mongoId: d._id,
@@ -66,7 +78,15 @@ const PickupVerificationPage = () => {
               donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Food Donor',
               pickupAddress: d.donorId?.address || d.pickupAddress || 'Pickup Location',
               pickupDeadline: d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today',
+              pickupPhoto: d.pickupPhoto || '',
+              status: d.status,
             });
+            if (isPickedUp) {
+              setVerificationStatus('Verified');
+              if (d.pickupPhoto) {
+                setPreviewImage(d.pickupPhoto);
+              }
+            }
           } else {
             setActiveAssignment(null);
           }
@@ -119,8 +139,12 @@ const PickupVerificationPage = () => {
         body: formData,
       });
 
+      const data = await res.json();
       if (res.ok) {
         setVerificationStatus('Verified');
+        if (data.pickupPhoto) {
+          setPreviewImage(data.pickupPhoto);
+        }
       } else {
         setVerificationStatus('Verified');
       }
@@ -226,21 +250,30 @@ const PickupVerificationPage = () => {
 
       {/* Verification Status Overview Banner */}
       {verificationStatus === 'Verified' && (
-        <div className="bg-emerald-50/70 border border-emerald-200 p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 shadow-soft-card">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
-            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="bg-emerald-50/70 border border-emerald-200 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shadow-soft-card">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-emerald-btn">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex flex-wrap items-center gap-1.5 sm:gap-2">
+                Pickup Photo Verified
+                <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
+                  Passed
+                </span>
+              </h3>
+              <p className="text-[11px] sm:text-xs text-[#334155] mt-0.5 font-medium">
+                Photo verification approved for order {activeAssignment?.id || 'TSK-001'}. You may proceed to destination NGO dropoff.
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] flex flex-wrap items-center gap-1.5 sm:gap-2">
-              Pickup Photo Verified
-              <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
-                Passed
-              </span>
-            </h3>
-            <p className="text-[11px] sm:text-xs text-[#334155] mt-0.5 font-medium">
-              Photo verification approved for order {activeAssignment?.id || 'TSK-001'}. You may proceed to destination NGO dropoff.
-            </p>
-          </div>
+
+          <button
+            onClick={() => navigate('/volunteer/navigation')}
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-emerald-btn transition-all shrink-0 cursor-pointer text-center"
+          >
+            Proceed to Navigation ➔
+          </button>
         </div>
       )}
 
