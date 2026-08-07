@@ -361,128 +361,69 @@ const NavigationPage = () => {
         className="w-full h-[520px] rounded-[20px] border border-slate-200 overflow-hidden shadow-xl"
       />
 
-        {/* 4. Top-Left Floating Controls (Req 7) */}
-        <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2 pointer-events-auto">
-          <div className="bg-white/95 backdrop-blur-md p-1.5 rounded-xl border border-slate-200 shadow-lg flex flex-col gap-1 text-slate-700">
-            <button
-              onClick={handleRefresh}
-              title="Locate Me / Center Map"
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-[#16A34A]"
-            >
-              <Crosshair className="w-4 h-4" />
-            </button>
-            <div className="h-px bg-slate-200 my-0.5" />
-            <button
-              title="Zoom In"
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-slate-700"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-            <button
-              title="Zoom Out"
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer text-slate-700"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* 5. Top-Right Floating Navigation Card (Req 5) */}
-        <div className="absolute top-4 right-4 z-[400] bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 text-white shadow-2xl space-y-2 min-w-[210px] pointer-events-auto">
-          <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 border-b border-slate-800 pb-2">
-            <Compass className="w-4 h-4 animate-spin text-[#16A34A]" />
-            <span>{activeTask.statusText}</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Distance</span>
-              <span className="text-base font-black text-white">{activeTask.remainingDistance}</span>
+      {/* 4. Bottom Action Panel / Delivery Details Sheet */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-soft-card flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs">
+        {/* Left: Origin ➔ Dropoff stack + Pickup Photo Thumbnail */}
+        <div className="flex items-center gap-3 min-w-0">
+          {activeTask.pickupPhoto ? (
+            <div className="relative group shrink-0" title="Verified Pickup Photo">
+              <img
+                src={activeTask.pickupPhoto}
+                alt="Verified Pickup"
+                className="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-md"
+              />
+              <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5">
+                <CheckCircle2 className="w-3 h-3" />
+              </span>
             </div>
-            <div>
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">ETA</span>
-              <span className="text-base font-black text-[#16A34A]">{activeTask.estimatedETA}</span>
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#16A34A] flex items-center justify-center shrink-0 border border-emerald-100">
+              <MapPin className="w-4 h-4" />
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-1 text-[11px]">
+              <span className="text-slate-400 font-medium">Pickup:</span>
+              <span className="font-extrabold text-slate-900 truncate">{activeTask.donorName}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] mt-0.5">
+              <span className="text-slate-400 font-medium">Dropoff:</span>
+              <span className="font-extrabold text-slate-900 truncate">{activeTask.ngoName}</span>
             </div>
           </div>
         </div>
 
-        {/* 6. Bottom-Right Compact Map Legend (Req 7) */}
-        <div className="absolute bottom-24 sm:bottom-24 right-4 z-[400] bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-200 shadow-md text-[11px] font-bold text-slate-700 hidden sm:flex items-center gap-3.5">
-          <span className="flex items-center gap-1.5">
-            <img src="/imgs/volunteer.png" alt="Volunteer" className="w-4 h-4 object-contain" /> Volunteer
-          </span>
-          <span className="flex items-center gap-1.5">
-            <img src="/imgs/donor.png" alt="Donor" className="w-4 h-4 object-contain" /> Donor
-          </span>
-          <span className="flex items-center gap-1.5">
-            <img src="/imgs/ngo.png" alt="NGO" className="w-4 h-4 object-contain" /> NGO
-          </span>
-        </div>
-
-        {/* 7. Bottom Floating Action Panel / Mobile Bottom Sheet (Req 6 & 9) */}
-        <div className="absolute bottom-4 left-4 right-4 z-[400] bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/90 shadow-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs pointer-events-auto">
-          {/* Left: Origin ➔ Dropoff stack + Pickup Photo Thumbnail */}
-          <div className="flex items-center gap-3 min-w-0">
-            {activeTask.pickupPhoto ? (
-              <div className="relative group shrink-0" title="Verified Pickup Photo">
-                <img
-                  src={activeTask.pickupPhoto}
-                  alt="Verified Pickup"
-                  className="w-10 h-10 rounded-xl object-cover border-2 border-emerald-500 shadow-md"
-                />
-                <span className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5">
-                  <CheckCircle2 className="w-3 h-3" />
-                </span>
-              </div>
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#16A34A] flex items-center justify-center shrink-0 border border-emerald-100">
-                <MapPin className="w-4 h-4" />
-              </div>
-            )}
-
-            <div className="min-w-0">
-              <div className="flex items-center gap-1 text-[11px]">
-                <span className="text-slate-400 font-medium">Pickup:</span>
-                <span className="font-extrabold text-slate-900 truncate">{activeTask.donorName}</span>
-              </div>
-              <div className="flex items-center gap-1 text-[11px] mt-0.5">
-                <span className="text-slate-400 font-medium">Dropoff:</span>
-                <span className="font-extrabold text-slate-900 truncate">{activeTask.ngoName}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
-            {activeTask.donorPhone && (
-              <a
-                href={`tel:${activeTask.donorPhone}`}
-                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition-all cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Call Donor</span>
-              </a>
-            )}
-            {!activeTask.isVerified ? (
-              <button
-                onClick={() => navigate('/volunteer/verification')}
-                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold shadow-amber-btn transition-all cursor-pointer"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>Verify Pickup Photo First</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  window.open('https://www.openstreetmap.org', '_blank');
-                }}
-                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white font-extrabold shadow-md transition-all cursor-pointer"
-              >
-                <Navigation className="w-3.5 h-3.5" />
-                <span>Start Navigation</span>
-              </button>
-            )}
-          </div>
+        {/* Right Action Buttons */}
+        <div className="flex items-center gap-2 shrink-0">
+          {activeTask.donorPhone && (
+            <a
+              href={`tel:${activeTask.donorPhone}`}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition-all cursor-pointer"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Call Donor</span>
+            </a>
+          )}
+          {!activeTask.isVerified ? (
+            <button
+              onClick={() => navigate('/volunteer/verification')}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold shadow-amber-btn transition-all cursor-pointer"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Verify Pickup Photo First</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                window.open('https://www.openstreetmap.org', '_blank');
+              }}
+              className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white font-extrabold shadow-md transition-all cursor-pointer"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Start Navigation</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
