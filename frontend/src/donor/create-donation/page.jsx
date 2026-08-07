@@ -80,6 +80,38 @@ const CreateDonationPage = () => {
 
   const user = authUser || { verificationStatus: 'pending' };
 
+  // Restore draft from localStorage on mount if available
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem('foodbridge_donor_donation_draft');
+      if (savedDraft) {
+        const draft = JSON.parse(savedDraft);
+        if (draft.foodName) setFoodName(draft.foodName);
+        if (draft.quantity) setQuantity(draft.quantity);
+        if (draft.unit) setUnit(draft.unit);
+        if (draft.category) setCategory(draft.category);
+        if (draft.address) setAddress(draft.address);
+        if (draft.expiryHours) setExpiryHours(draft.expiryHours);
+      }
+    } catch (e) {
+      console.warn('Error reading saved draft:', e);
+    }
+  }, []);
+
+  // Auto-save form draft to localStorage
+  useEffect(() => {
+    if (foodName || quantity || address) {
+      try {
+        localStorage.setItem(
+          'foodbridge_donor_donation_draft',
+          JSON.stringify({ foodName, quantity, unit, category, address, expiryHours })
+        );
+      } catch (e) {
+        console.warn('Error saving draft:', e);
+      }
+    }
+  }, [foodName, quantity, unit, category, address, expiryHours]);
+
   // Sync user profile from backend to get verified status
   useEffect(() => {
     if (token) {
@@ -251,12 +283,14 @@ const CreateDonationPage = () => {
       const data = await res.json();
 
       if (res.ok && data.success) {
+        localStorage.removeItem('foodbridge_donor_donation_draft');
         setSubmitted(true);
       } else {
         setErrorMsg(data.message || 'Failed to create donation in database.');
       }
     } catch (err) {
       console.warn('Network notice, fallback creation:', err);
+      localStorage.removeItem('foodbridge_donor_donation_draft');
       setSubmitted(true);
     } finally {
       setLoading(false);

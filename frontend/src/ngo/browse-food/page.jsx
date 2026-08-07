@@ -46,7 +46,11 @@ const BrowseFoodPage = () => {
   const fetchAvailableDonations = async () => {
     setLoading(true);
     try {
-      if (!token) return;
+      if (!token) {
+        const cached = localStorage.getItem('cached_ngo_browse_food');
+        if (cached) setDonations(JSON.parse(cached));
+        return;
+      }
 
       const res = await fetch(getApiUrl('/api/ngo/donations/nearby'), {
         headers: { Authorization: `Bearer ${token}` },
@@ -55,11 +59,26 @@ const BrowseFoodPage = () => {
 
       if (res.ok && data.donations) {
         setDonations(data.donations);
+        try {
+          localStorage.setItem('cached_ngo_browse_food', JSON.stringify(data.donations));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
       } else {
-        setDonations([]);
+        const cached = localStorage.getItem('cached_ngo_browse_food');
+        if (cached) setDonations(JSON.parse(cached));
+        else setDonations([]);
       }
     } catch (err) {
       console.warn('Error fetching nearby donations from MongoDB:', err);
+      const cached = localStorage.getItem('cached_ngo_browse_food');
+      if (cached) {
+        try {
+          setDonations(JSON.parse(cached));
+        } catch (e) {
+          console.warn('LocalStorage parse error:', e);
+        }
+      }
     } finally {
       setLoading(false);
     }

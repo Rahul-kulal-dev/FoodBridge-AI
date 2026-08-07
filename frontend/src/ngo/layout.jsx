@@ -3,6 +3,9 @@ import { Outlet, Link } from 'react-router-dom';
 import { ShieldAlert, ArrowRight } from 'lucide-react';
 import NgoSidebar from './components/NgoSidebar';
 import { useAuth } from '../context/AuthContext';
+import usePwaStatus from './hooks/usePwaStatus';
+import OfflineIndicator from './components/OfflineIndicator';
+import PwaInstallBanner from './components/PwaInstallBanner';
 
 /**
  * NgoLayout Component
@@ -12,11 +15,26 @@ import { useAuth } from '../context/AuthContext';
 const NgoLayout = () => {
   const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isOnline, isInstallable, isInstalled, triggerInstallPrompt } = usePwaStatus();
 
   const isVerified = user?.verificationStatus === 'approved';
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.log('[SW] NGO Service worker registered successfully:', registration.scope);
+          })
+          .catch((err) => {
+            console.warn('[SW] NGO Service worker registration failed:', err);
+          });
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -44,8 +62,17 @@ const NgoLayout = () => {
           isCollapsed ? 'md:pl-20' : 'md:pl-20 lg:pl-72'
         }`}
       >
-
         <main className="flex-1 p-4 md:p-6 lg:p-8 w-full mx-auto">
+          {/* Global Offline Status Alert */}
+          <OfflineIndicator isOnline={isOnline} />
+
+          {/* PWA App Install Banner Prompt */}
+          <PwaInstallBanner
+            isInstallable={isInstallable}
+            isInstalled={isInstalled}
+            triggerInstallPrompt={triggerInstallPrompt}
+          />
+
           <Outlet />
         </main>
       </div>
@@ -54,3 +81,4 @@ const NgoLayout = () => {
 };
 
 export default NgoLayout;
+

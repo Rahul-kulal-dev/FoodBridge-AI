@@ -111,7 +111,9 @@ const MyDonationsPage = () => {
     setLoading(true);
     try {
       if (!token) {
-        setDonations([]);
+        const cached = localStorage.getItem('cached_donor_my_donations');
+        if (cached) setDonations(JSON.parse(cached));
+        else setDonations([]);
         return;
       }
 
@@ -122,12 +124,28 @@ const MyDonationsPage = () => {
 
       if (res.ok && data.donations) {
         setDonations(data.donations);
+        try {
+          localStorage.setItem('cached_donor_my_donations', JSON.stringify(data.donations));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
       } else {
-        setDonations([]);
+        const cached = localStorage.getItem('cached_donor_my_donations');
+        if (cached) setDonations(JSON.parse(cached));
+        else setDonations([]);
       }
     } catch (err) {
       console.warn('Error fetching my donations from MongoDB Atlas:', err.message);
-      setDonations([]);
+      const cached = localStorage.getItem('cached_donor_my_donations');
+      if (cached) {
+        try {
+          setDonations(JSON.parse(cached));
+        } catch (e) {
+          console.warn('LocalStorage parse error:', e);
+        }
+      } else {
+        setDonations([]);
+      }
     } finally {
       setLoading(false);
     }

@@ -35,7 +35,11 @@ const AcceptedDonationsPage = () => {
   const fetchAcceptedDonations = async () => {
     setLoading(true);
     try {
-      if (!token) return;
+      if (!token) {
+        const cached = localStorage.getItem('cached_ngo_accepted_donations');
+        if (cached) setDonations(JSON.parse(cached));
+        return;
+      }
 
       const res = await fetch(getApiUrl('/api/ngo/donations/history'), {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,11 +48,26 @@ const AcceptedDonationsPage = () => {
 
       if (res.ok && data.donations) {
         setDonations(data.donations);
+        try {
+          localStorage.setItem('cached_ngo_accepted_donations', JSON.stringify(data.donations));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
       } else {
-        setDonations([]);
+        const cached = localStorage.getItem('cached_ngo_accepted_donations');
+        if (cached) setDonations(JSON.parse(cached));
+        else setDonations([]);
       }
     } catch (err) {
       console.warn('Error fetching accepted donations from database:', err);
+      const cached = localStorage.getItem('cached_ngo_accepted_donations');
+      if (cached) {
+        try {
+          setDonations(JSON.parse(cached));
+        } catch (e) {
+          console.warn('LocalStorage parse error:', e);
+        }
+      }
     } finally {
       setLoading(false);
     }
