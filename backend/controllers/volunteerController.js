@@ -86,16 +86,16 @@ const getAssignedTasks = async (req, res, next) => {
     const tasks = await VolunteerTask.find({ volunteerId: req.user._id })
       .populate({
         path: 'donationId',
-        populate: { path: 'donorId', select: 'name email phone address organizationName' },
+        populate: { path: 'donorId', select: 'name email phone address organizationName formattedAddress locationName location latitude longitude' },
       })
-      .populate('ngoId', 'name email phone address organizationName')
+      .populate('ngoId', 'name email phone address organizationName formattedAddress locationName location latitude longitude')
       .sort({ createdAt: -1 });
 
     const rawActiveDonations = await Donation.find({
       status: { $in: ['accepted', 'picked_up'] },
     })
-      .populate('donorId', 'name email phone address organizationName')
-      .populate('ngoId', 'name email phone address organizationName')
+      .populate('donorId', 'name email phone address organizationName formattedAddress locationName location latitude longitude')
+      .populate('ngoId', 'name email phone address organizationName formattedAddress locationName location latitude longitude')
       .sort({ updatedAt: -1 });
 
     const activeDonations = rawActiveDonations.map(resolveDonationImages);

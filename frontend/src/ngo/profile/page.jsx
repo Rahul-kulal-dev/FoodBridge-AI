@@ -45,21 +45,57 @@ const NgoProfilePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
+    const fetchLatestProfile = async () => {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
+      try {
+        const res = await fetch(getApiUrl('/api/users/profile'), {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          const u = data.user;
+          updateUser(u);
+          setFormData((prev) => ({
+            ...prev,
+            name: u.name || '',
+            organizationName: u.organizationName || u.name || '',
+            email: u.email || '',
+            phone: u.phone || '',
+            address: u.address || u.formattedAddress || '',
+            servingCapacity: u.servingCapacity || '',
+            operatingHours: u.operatingHours || '',
+            foodCategories: u.foodCategories || '',
+            locationName: u.locationName || '',
+            formattedAddress: u.formattedAddress || u.address || '',
+            latitude: u.latitude || (u.location?.lat) || 0,
+            longitude: u.longitude || (u.location?.lng) || 0,
+          }));
+        }
+      } catch (err) {
+        console.warn('Error fetching fresh NGO profile:', err);
+      }
+    };
+    fetchLatestProfile();
+  }, [token]);
+
+  useEffect(() => {
     if (user) {
-      setFormData({
-        name: user.name || '',
-        organizationName: user.organizationName || user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        address: user.address || user.formattedAddress || '',
-        servingCapacity: user.servingCapacity || '',
-        operatingHours: user.operatingHours || '',
-        foodCategories: user.foodCategories || '',
-        locationName: user.locationName || '',
-        formattedAddress: user.formattedAddress || user.address || '',
-        latitude: user.latitude || (user.location?.lat) || 0,
-        longitude: user.longitude || (user.location?.lng) || 0,
-      });
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name || prev.name || '',
+        organizationName: user.organizationName || user.name || prev.organizationName || '',
+        email: user.email || prev.email || '',
+        phone: user.phone || prev.phone || '',
+        address: user.address || user.formattedAddress || prev.address || '',
+        servingCapacity: user.servingCapacity || prev.servingCapacity || '',
+        operatingHours: user.operatingHours || prev.operatingHours || '',
+        foodCategories: user.foodCategories || prev.foodCategories || '',
+        locationName: user.locationName || prev.locationName || '',
+        formattedAddress: user.formattedAddress || user.address || prev.formattedAddress || '',
+        latitude: user.latitude || (user.location?.lat) || prev.latitude || 0,
+        longitude: user.longitude || (user.location?.lng) || prev.longitude || 0,
+      }));
     }
   }, [user]);
 
@@ -82,16 +118,15 @@ const NgoProfilePage = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage('');
     setSavedSuccess(false);
+    setErrorMessage('');
 
     try {
-      const authToken = token || localStorage.getItem('foodbridge_token');
       const res = await fetch(getApiUrl('/api/users/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: formData.name,
@@ -117,7 +152,7 @@ const NgoProfilePage = () => {
       if (res.ok && data.user) {
         updateUser(data.user);
         setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
+        setTimeout(() => setSavedSuccess(false), 4000);
       } else {
         setErrorMessage(data.message || 'Failed to update profile');
       }
@@ -132,6 +167,19 @@ const NgoProfilePage = () => {
 
   return (
     <div className="w-full space-y-5 sm:space-y-6 animate-fade-in pb-12">
+      {/* Sleek Floating Toast Notification */}
+      {savedSuccess && (
+        <div className="fixed top-6 right-6 z-[9999] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 animate-scale-up">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h4 className="font-extrabold text-xs text-white">Profile Updated Successfully!</h4>
+            <p className="text-[11px] text-emerald-300 font-medium">Changes saved to database.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3.5 sm:gap-4">

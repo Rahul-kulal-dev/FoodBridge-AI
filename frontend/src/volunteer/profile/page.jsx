@@ -11,10 +11,12 @@ import {
   CheckCircle2,
   Save,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getApiUrl } from '../../config/api';
 import LocationSearchInput from '../../components/LocationSearchInput';
 
 /**
@@ -55,6 +57,7 @@ const VolunteerProfilePage = () => {
   });
 
   useEffect(() => {
+    // 1. Initialize from AuthContext if available
     if (user) {
       setProfile((prev) => ({
         ...prev,
@@ -76,7 +79,45 @@ const VolunteerProfilePage = () => {
         joinedDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '',
       }));
     }
-  }, [user]);
+
+    // 2. Retrieve fresh MongoDB user profile data directly from API
+    const fetchLatestProfile = async () => {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      if (!authToken) return;
+      try {
+        const res = await fetch(getApiUrl('/api/users/profile'), {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          const u = data.user;
+          updateUser(u);
+          setProfile((prev) => ({
+            ...prev,
+            name: u.name || '',
+            organizationName: u.organizationName || '',
+            email: u.email || '',
+            phone: u.phone || '',
+            address: u.address || u.formattedAddress || '',
+            locationName: u.locationName || '',
+            formattedAddress: u.formattedAddress || u.address || '',
+            latitude: u.latitude || (u.location?.lat) || 0,
+            longitude: u.longitude || (u.location?.lng) || 0,
+            vehicleType: u.vehicleType || '',
+            vehicleNumber: u.vehicleNumber || '',
+            emergencyContact: u.emergencyContact || '',
+            deliveryRadius: u.deliveryRadius || '',
+            availability: u.availability || '',
+            verificationStatus: u.verificationStatus === 'approved' ? 'Verified Volunteer Courier' : 'Verification Pending',
+            joinedDate: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '',
+          }));
+        }
+      } catch (err) {
+        console.warn('Error fetching fresh volunteer profile:', err);
+      }
+    };
+    fetchLatestProfile();
+  }, []);
 
   useEffect(() => {
     const fetchVolunteerFeedback = async () => {
@@ -133,7 +174,7 @@ const VolunteerProfilePage = () => {
   };
 
   const handleSave = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     setSaving(true);
     setSavedSuccess(false);
     setErrorMessage('');
@@ -172,12 +213,13 @@ const VolunteerProfilePage = () => {
       if (res.ok && data.user) {
         updateUser(data.user);
         setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
+        setTimeout(() => setSavedSuccess(false), 4000);
       } else {
         setErrorMessage(data.message || 'Failed to update profile');
       }
     } catch (err) {
-      setErrorMessage('Server connection error. Please try again.');
+      console.error('Error saving volunteer profile:', err);
+      setErrorMessage(err.message || 'Server connection error. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -185,6 +227,19 @@ const VolunteerProfilePage = () => {
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
+      {/* Sleek Floating Toast Notification */}
+      {savedSuccess && (
+        <div className="fixed top-6 right-6 z-[9999] bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 animate-scale-up">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h4 className="font-extrabold text-xs text-white">Profile Updated Successfully!</h4>
+            <p className="text-[11px] text-emerald-300 font-medium">Changes saved to MongoDB database.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Banner */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
@@ -215,6 +270,12 @@ const VolunteerProfilePage = () => {
           </div>
         )}
       </div>
+
+      {errorMessage && (
+        <div className="bg-red-50 text-red-700 font-extrabold text-xs p-4 rounded-xl border border-red-200 flex items-center gap-2">
+          <span>❌ {errorMessage}</span>
+        </div>
+      )}
 
       {/* Metrics Summary Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5">
@@ -326,6 +387,7 @@ const VolunteerProfilePage = () => {
               name="emergencyContact"
               value={profile.emergencyContact}
               onChange={handleChange}
+              placeholder="e.g. +91 91234 56789"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
             />
           </div>
@@ -412,10 +474,21 @@ const VolunteerProfilePage = () => {
         <div className="pt-4 border-t border-[#E7EAF0] flex items-center justify-end">
           <button
             type="submit"
-            className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer"
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold shadow-emerald-btn transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Save className="w-4 h-4 shrink-0" />
-            <span>Save Profile Changes</span>
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                <span>Saving Profile...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 shrink-0" />
+                <span>Save Profile Changes</span>
+              </>
+            )}
           </button>
         </div>
       </form>

@@ -194,6 +194,24 @@ const DeliveryTrackingMap = ({
         volunteerMarkerRef.current.setPopupContent(volPopupHtml);
       }
     }
+
+    // Auto-fit map bounds dynamically around active markers (centering Mangalore/current location)
+    const validPoints = [donorLocation, ngoLocation, volunteerLocation]
+      .filter((loc) => loc && typeof loc.lat === 'number' && typeof loc.lng === 'number' && loc.lat !== 0 && loc.lng !== 0)
+      .map((loc) => [loc.lat, loc.lng]);
+
+    if (validPoints.length > 0) {
+      try {
+        if (validPoints.length === 1) {
+          map.setView(validPoints[0], 14);
+        } else {
+          const bounds = L.latLngBounds(validPoints);
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+      } catch (e) {
+        // ignore bounds calculation error
+      }
+    }
   }, [leafletLoaded, donorLocation, ngoLocation, volunteerLocation]);
 
   // Determine Active Route Endpoints (Requirement 6 & 8: Volunteer->Donor vs Volunteer->NGO)

@@ -341,24 +341,24 @@ const NavigationPage = () => {
       {/* 3. Main Modular Delivery Tracking Map Container */}
       <DeliveryTrackingMap
         donorLocation={{
-          lat: activeTask.donorLat || (activeTask.donationId?.location?.lat) || 12.9750,
-          lng: activeTask.donorLng || (activeTask.donationId?.location?.lng) || 77.6000,
+          lat: activeTask.donorLat || (activeTask.donationId?.donorId?.latitude) || (activeTask.donationId?.location?.lat) || (user?.latitude) || (user?.location?.lat) || 12.9546,
+          lng: activeTask.donorLng || (activeTask.donationId?.donorId?.longitude) || (activeTask.donationId?.location?.lng) || (user?.longitude) || (user?.location?.lng) || 74.8847,
           title: activeTask.donorName || 'Donor Pickup',
-          address: activeTask.donorAddress || 'Donor Address',
+          address: activeTask.donorAddress || activeTask.donationId?.donorId?.formattedAddress || 'Donor Address',
           phone: activeTask.donorPhone || activeTask.donationId?.donorId?.phone || '',
           email: activeTask.donationId?.donorId?.email || '',
           contactPerson: activeTask.donationId?.donorId?.name || '',
         }}
         ngoLocation={{
-          lat: activeTask.ngoLat || (user?.location?.lat) || 12.9850,
-          lng: activeTask.ngoLng || (user?.location?.lng) || 77.6150,
+          lat: activeTask.ngoLat || (activeTask.ngoId?.latitude) || (activeTask.ngoId?.location?.lat) || (user?.latitude) || (user?.location?.lat) || 12.9600,
+          lng: activeTask.ngoLng || (activeTask.ngoId?.longitude) || (activeTask.ngoId?.location?.lng) || (user?.longitude) || (user?.location?.lng) || 74.8900,
           title: activeTask.ngoName || 'NGO Dropoff',
-          address: activeTask.ngoAddress || 'NGO Address',
+          address: activeTask.ngoAddress || activeTask.ngoId?.formattedAddress || 'NGO Address',
           phone: activeTask.ngoPhone || user?.phone || '',
         }}
         volunteerLocation={{
-          lat: user?.currentLocation?.latitude || user?.latitude || 12.9650,
-          lng: user?.currentLocation?.longitude || user?.longitude || 77.5850,
+          lat: user?.currentLocation?.latitude || user?.latitude || (user?.location?.lat) || 12.9546,
+          lng: user?.currentLocation?.longitude || user?.longitude || (user?.location?.lng) || 74.8847,
           title: `Courier (${user?.name || 'You'})`,
           phone: user?.phone || '',
         }}
