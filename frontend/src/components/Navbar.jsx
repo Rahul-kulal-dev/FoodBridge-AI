@@ -132,7 +132,7 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal, isInstallab
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-[#E7EAF0] px-4 pt-3 pb-6 space-y-3 shadow-lg">
+        <div className="md:hidden bg-white border-b border-[#E7EAF0] px-4 pt-3 pb-6 space-y-1 shadow-lg">
           {navLinks.map((link) => (
             <a
               key={link.name}
@@ -143,6 +143,20 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal, isInstallab
               {link.name}
             </a>
           ))}
+
+          {!isInstalled && (
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (triggerInstallPrompt) triggerInstallPrompt();
+              }}
+              className="w-full text-left block text-base font-medium text-emerald-700 hover:text-emerald-800 py-2 border-b border-slate-100 flex items-center justify-between cursor-pointer"
+            >
+              <span>Install App</span>
+              <Download className="w-4 h-4 text-emerald-600" />
+            </button>
+          )}
+
           <div className="pt-3 flex flex-col gap-2.5">
             {isLoggedIn ? (
               <>
