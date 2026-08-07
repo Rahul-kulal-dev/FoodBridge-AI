@@ -80,6 +80,7 @@ const userSchema = new mongoose.Schema(
     },
     verificationDocs: [
       {
+        docType: { type: String, default: '' },
         docUrl: { type: String, required: true },
         publicId: { type: String, default: '' },
         resourceType: { type: String, default: 'auto' },

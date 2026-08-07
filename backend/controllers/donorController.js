@@ -107,12 +107,12 @@ const createDonation = async (req, res, next) => {
 // @access  Private (Donor / Admin)
 const uploadFoodImage = async (req, res, next) => {
   try {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ success: false, message: 'Please upload an image file' });
     }
 
-    // Upload food image to Cloudinary (or fallback upload server)
-    const cloudRes = await uploadToCloudinary(req.file.path, 'foodbridge_donations');
+    // Upload food image buffer to Cloudinary
+    const cloudRes = await uploadToCloudinary(req.file, 'foodbridge_donations');
     const imageUrl = typeof cloudRes === 'string'
       ? cloudRes
       : (cloudRes.secure_url || cloudRes.url || cloudRes.toString());

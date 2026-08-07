@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { uploadToCloudinary } = require('../config/cloudinary');
+const { uploadToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -114,32 +114,17 @@ const updateUserProfile = async (req, res, next) => {
 // @access  Private
 const uploadVerificationDoc = async (req, res, next) => {
   try {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
     const docType = req.body.docType || req.body.docLabel || 'Compliance Document';
 
-    // Upload file to Cloudinary and retrieve full metadata
-    const cloudRes = await uploadToCloudinary(req.file.path, 'foodbridge_verifications');
-    const finalDocUrl = cloudRes.secure_url || cloudRes.toString();
-
-    // Find the authenticated user and save doc with metadata
+    // Find the authenticated user
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-
-    const docMetadata = {
-      docType,
-      docUrl: finalDocUrl,
-      publicId: cloudRes.public_id || '',
-      resourceType: cloudRes.resource_type || 'auto',
-      format: cloudRes.format || '',
-      bytes: cloudRes.bytes || req.file.size || 0,
-      fileName: req.file.originalname || '',
-      uploadedAt: new Date(),
-    };
 
     if (!user.verificationDocs) {
       user.verificationDocs = [];
@@ -149,6 +134,29 @@ const uploadVerificationDoc = async (req, res, next) => {
     const existingIndex = user.verificationDocs.findIndex(
       (d) => d.docType && d.docType.toLowerCase() === docType.toLowerCase()
     );
+
+    // Delete old Cloudinary file if replacing an existing document
+    if (existingIndex !== -1) {
+      const oldDoc = user.verificationDocs[existingIndex];
+      if (oldDoc && oldDoc.publicId) {
+        await deleteFromCloudinary(oldDoc.publicId, oldDoc.resourceType || 'image');
+      }
+    }
+
+    // Upload in-memory file buffer directly to Cloudinary
+    const cloudRes = await uploadToCloudinary(req.file, 'foodbridge_verifications');
+    const finalDocUrl = cloudRes.secure_url || cloudRes.url || cloudRes.toString();
+
+    const docMetadata = {
+      docType,
+      docUrl: finalDocUrl,
+      publicId: cloudRes.public_id || '',
+      resourceType: cloudRes.resource_type || 'image',
+      format: cloudRes.format || '',
+      bytes: cloudRes.bytes || req.file.size || 0,
+      fileName: req.file.originalname || '',
+      uploadedAt: new Date(),
+    };
 
     if (existingIndex !== -1) {
       user.verificationDocs[existingIndex] = docMetadata;

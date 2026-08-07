@@ -116,17 +116,17 @@ const getAssignedTasks = async (req, res, next) => {
 // @access  Private (Volunteer)
 const uploadPickupVerification = async (req, res, next) => {
   try {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ success: false, message: 'Please upload a pickup photo' });
     }
 
     let task = await VolunteerTask.findById(req.params.id);
     let donationId = task ? task.donationId : req.params.id;
 
-    const uploadedObj = await uploadToCloudinary(req.file.path, 'foodbridge_pickups');
+    const uploadedObj = await uploadToCloudinary(req.file, 'foodbridge_pickups');
     const pickupPhoto = typeof uploadedObj === 'string'
       ? uploadedObj
-      : (uploadedObj.secure_url || uploadedObj.toString());
+      : (uploadedObj.secure_url || uploadedObj.url || uploadedObj.toString());
 
     if (task) {
       task.pickupPhoto = pickupPhoto;
