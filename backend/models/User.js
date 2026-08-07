@@ -70,6 +70,14 @@ const userSchema = new mongoose.Schema(
     locationUpdatedAt: {
       type: Date,
     },
+    currentLocation: {
+      latitude: { type: Number, default: 0 },
+      longitude: { type: Number, default: 0 },
+      accuracy: { type: Number, default: 0 },
+      heading: { type: Number, default: null },
+      speed: { type: Number, default: null },
+      updatedAt: { type: Date, default: Date.now },
+    },
     verificationDocs: [
       {
         docUrl: { type: String, required: true },

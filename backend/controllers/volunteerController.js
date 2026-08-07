@@ -1,6 +1,8 @@
 const VolunteerTask = require('../models/VolunteerTask');
 const Donation = require('../models/Donation');
 const Feedback = require('../models/Feedback');
+const User = require('../models/User');
+const VolunteerLocation = require('../models/VolunteerLocation');
 const { uploadToCloudinary } = require('../config/cloudinary');
 
 // @desc    Get volunteer stats from MongoDB
@@ -238,10 +240,103 @@ const getDeliveryHistory = async (req, res, next) => {
   }
 };
 
+// @desc    Update volunteer live GPS location
+// @route   POST /api/volunteer/location
+// @access  Private (Volunteer)
+const updateVolunteerLocation = async (req, res, next) => {
+  try {
+    const { latitude, longitude, accuracy, heading, speed } = req.body;
+
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, message: 'Latitude and longitude are required' });
+    }
+
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    const acc = Number(accuracy) || 0;
+    const head = heading !== undefined && heading !== null ? Number(heading) : null;
+    const spd = speed !== undefined && speed !== null ? Number(speed) : null;
+    const now = new Date();
+
+    // Upsert VolunteerLocation document
+    const locationDoc = await VolunteerLocation.findOneAndUpdate(
+      { volunteerId: req.user._id },
+      {
+        latitude: lat,
+        longitude: lng,
+        accuracy: acc,
+        heading: head,
+        speed: spd,
+        updatedAt: now,
+      },
+      { new: true, upsert: true }
+    );
+
+    // Update User currentLocation sub-document
+    await User.findByIdAndUpdate(req.user._id, {
+      currentLocation: {
+        latitude: lat,
+        longitude: lng,
+        accuracy: acc,
+        heading: head,
+        speed: spd,
+        updatedAt: now,
+      },
+      location: { lat, lng },
+    });
+
+    res.json({
+      success: true,
+      message: 'Location updated successfully',
+      location: locationDoc,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get latest live location of a volunteer
+// @route   GET /api/volunteer/location/:volunteerId
+// @access  Private (NGO / Volunteer / Admin)
+const getVolunteerLocation = async (req, res, next) => {
+  try {
+    const { volunteerId } = req.params;
+    let locationDoc = await VolunteerLocation.findOne({ volunteerId });
+
+    if (!locationDoc) {
+      const userDoc = await User.findById(volunteerId);
+      if (userDoc && userDoc.currentLocation && userDoc.currentLocation.latitude) {
+        locationDoc = {
+          volunteerId,
+          latitude: userDoc.currentLocation.latitude,
+          longitude: userDoc.currentLocation.longitude,
+          accuracy: userDoc.currentLocation.accuracy || 0,
+          heading: userDoc.currentLocation.heading || null,
+          speed: userDoc.currentLocation.speed || null,
+          updatedAt: userDoc.currentLocation.updatedAt || userDoc.updatedAt,
+        };
+      }
+    }
+
+    if (!locationDoc) {
+      return res.status(404).json({ success: false, message: 'No live location found for this volunteer' });
+    }
+
+    res.json({
+      success: true,
+      location: locationDoc,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getVolunteerStats,
   getAssignedTasks,
   uploadPickupVerification,
   updateTaskStatus,
   getDeliveryHistory,
+  updateVolunteerLocation,
+  getVolunteerLocation,
 };

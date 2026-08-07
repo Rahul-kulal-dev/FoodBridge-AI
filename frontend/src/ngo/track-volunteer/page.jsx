@@ -27,6 +27,7 @@ const TrackVolunteerPage = () => {
   const { token, user } = useAuth();
 
   const [activeDonation, setActiveDonation] = useState(null);
+  const [liveVolunteerLoc, setLiveVolunteerLoc] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTrackData = async () => {
@@ -65,6 +66,35 @@ const TrackVolunteerPage = () => {
   useEffect(() => {
     fetchTrackData();
   }, [token, donationIdParam]);
+
+  // Poll live volunteer GPS location (Req 9)
+  useEffect(() => {
+    let isMounted = true;
+    const volId = activeDonation?.volunteerId?._id || activeDonation?.volunteerId;
+    if (!volId || !token) return;
+
+    const fetchLiveLocation = async () => {
+      try {
+        const res = await fetch(getApiUrl(`/api/volunteer/location/${volId}`), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (isMounted && res.ok && data.location) {
+          setLiveVolunteerLoc(data.location);
+        }
+      } catch (err) {
+        console.warn('Error fetching live volunteer GPS position:', err);
+      }
+    };
+
+    fetchLiveLocation();
+    const timer = setInterval(fetchLiveLocation, 6000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, [activeDonation, token]);
 
   if (loading) {
     return (
@@ -123,6 +153,9 @@ const TrackVolunteerPage = () => {
   const ngoLat = user?.location?.lat || 0;
   const ngoLng = user?.location?.lng || 0;
 
+  const courierLat = liveVolunteerLoc?.latitude || (donorLat ? donorLat + 0.002 : 0);
+  const courierLng = liveVolunteerLoc?.longitude || (donorLng ? donorLng + 0.003 : 0);
+
   const markers = [];
   if (donorLat && donorLng) {
     markers.push({
@@ -142,12 +175,12 @@ const TrackVolunteerPage = () => {
       iconType: 'ngo',
     });
   }
-  if (hasVolunteer && donorLat && donorLng) {
+  if (hasVolunteer && courierLat && courierLng) {
     markers.push({
-      lat: donorLat + 0.002,
-      lng: donorLng + 0.003,
+      lat: courierLat,
+      lng: courierLng,
       title: `Courier: ${volunteerName}`,
-      description: `Status: ${status.toUpperCase()}`,
+      description: liveVolunteerLoc ? `Live GPS (±${Math.round(liveVolunteerLoc.accuracy || 0)}m)` : `Status: ${status.toUpperCase()}`,
       iconType: 'courier',
     });
   }

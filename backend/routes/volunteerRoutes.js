@@ -6,6 +6,8 @@ const {
   uploadPickupVerification,
   updateTaskStatus,
   getDeliveryHistory,
+  updateVolunteerLocation,
+  getVolunteerLocation,
 } = require('../controllers/volunteerController');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -21,5 +23,8 @@ router.post(
 );
 router.patch('/tasks/:id/status', protect, authorizeRoles('volunteer', 'admin'), updateTaskStatus);
 router.get('/history', protect, authorizeRoles('volunteer', 'admin'), getDeliveryHistory);
+
+router.post('/location', protect, authorizeRoles('volunteer', 'admin'), updateVolunteerLocation);
+router.get('/location/:volunteerId', protect, authorizeRoles('volunteer', 'ngo', 'admin'), getVolunteerLocation);
 
 module.exports = router;
