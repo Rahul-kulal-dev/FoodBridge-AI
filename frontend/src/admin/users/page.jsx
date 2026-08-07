@@ -34,12 +34,28 @@ const AdminUsersPage = () => {
       const data = await res.json();
       if (res.ok && data.users) {
         setUsers(data.users);
+        try {
+          localStorage.setItem('cached_admin_users', JSON.stringify(data.users));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
       } else {
-        setUsers([]);
+        const cached = localStorage.getItem('cached_admin_users');
+        if (cached) setUsers(JSON.parse(cached));
+        else setUsers([]);
       }
     } catch (err) {
       console.warn('Error fetching users:', err);
-      setUsers([]);
+      const cached = localStorage.getItem('cached_admin_users');
+      if (cached) {
+        try {
+          setUsers(JSON.parse(cached));
+        } catch (e) {
+          console.warn('LocalStorage parse error:', e);
+        }
+      } else {
+        setUsers([]);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import AdminSidebar from './components/AdminSidebar';
+import usePwaStatus from '../ngo/hooks/usePwaStatus';
+import OfflineIndicator from '../ngo/components/OfflineIndicator';
+import PwaInstallBanner from '../ngo/components/PwaInstallBanner';
 
 /**
  * AdminLayout Component
@@ -8,9 +11,24 @@ import AdminSidebar from './components/AdminSidebar';
  */
 const AdminLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isOnline, isInstallable, isInstalled, triggerInstallPrompt } = usePwaStatus();
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.log('[SW] Admin Service worker registered successfully:', registration.scope);
+          })
+          .catch((err) => {
+            console.warn('[SW] Admin Service worker registration failed:', err);
+          });
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -37,6 +55,16 @@ const AdminLayout = () => {
         }`}
       >
         <main className="flex-1 p-4 md:p-6 lg:p-8 w-full mx-auto">
+          {/* Global Offline Status Alert */}
+          <OfflineIndicator isOnline={isOnline} />
+
+          {/* PWA App Install Banner Prompt */}
+          <PwaInstallBanner
+            isInstallable={isInstallable}
+            isInstalled={isInstalled}
+            triggerInstallPrompt={triggerInstallPrompt}
+          />
+
           <Outlet />
         </main>
       </div>

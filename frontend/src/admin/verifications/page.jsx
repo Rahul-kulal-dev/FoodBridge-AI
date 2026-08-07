@@ -42,7 +42,6 @@ const AdminVerificationsPage = () => {
       const data = await res.json();
 
       if (res.ok && data.users) {
-        // Show non-admin users who have verification documents uploaded or explicitly have a verification status
         const verifiableUsers = data.users.filter((u) => {
           const userRole = u.user_role || u.role;
           if (userRole === 'admin' || u.role === 'admin') return false;
@@ -55,13 +54,28 @@ const AdminVerificationsPage = () => {
           );
         });
         setUsers(verifiableUsers);
+        try {
+          localStorage.setItem('cached_admin_verifications', JSON.stringify(verifiableUsers));
+        } catch (e) {
+          console.warn('LocalStorage save error:', e);
+        }
       } else {
-
-        setUsers([]);
+        const cached = localStorage.getItem('cached_admin_verifications');
+        if (cached) setUsers(JSON.parse(cached));
+        else setUsers([]);
       }
     } catch (err) {
       console.warn('Error fetching verification users from MongoDB Atlas:', err.message);
-      setUsers([]);
+      const cached = localStorage.getItem('cached_admin_verifications');
+      if (cached) {
+        try {
+          setUsers(JSON.parse(cached));
+        } catch (e) {
+          console.warn('LocalStorage parse error:', e);
+        }
+      } else {
+        setUsers([]);
+      }
     } finally {
       setLoading(false);
     }
