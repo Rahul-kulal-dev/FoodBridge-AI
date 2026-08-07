@@ -345,17 +345,22 @@ const NavigationPage = () => {
           lng: activeTask.donorLng || (activeTask.donationId?.location?.lng) || 77.6000,
           title: activeTask.donorName || 'Donor Pickup',
           address: activeTask.donorAddress || 'Donor Address',
+          phone: activeTask.donorPhone || activeTask.donationId?.donorId?.phone || '',
+          email: activeTask.donationId?.donorId?.email || '',
+          contactPerson: activeTask.donationId?.donorId?.name || '',
         }}
         ngoLocation={{
           lat: activeTask.ngoLat || (user?.location?.lat) || 12.9850,
           lng: activeTask.ngoLng || (user?.location?.lng) || 77.6150,
           title: activeTask.ngoName || 'NGO Dropoff',
           address: activeTask.ngoAddress || 'NGO Address',
+          phone: activeTask.ngoPhone || user?.phone || '',
         }}
         volunteerLocation={{
           lat: user?.currentLocation?.latitude || user?.latitude || 12.9650,
           lng: user?.currentLocation?.longitude || user?.longitude || 77.5850,
           title: `Courier (${user?.name || 'You'})`,
+          phone: user?.phone || '',
         }}
         deliveryStatus={activeTask.status || 'assigned'}
         className="w-full h-[520px] rounded-[20px] border border-slate-200 overflow-hidden shadow-xl"

@@ -96,37 +96,119 @@ const DeliveryTrackingMap = ({
     // 1. Donor Marker
     if (donorLocation && typeof donorLocation.lat === 'number' && typeof donorLocation.lng === 'number') {
       const donorIcon = createCustomIcon(L, 'donor');
+      const popupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 190px;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+            <span style="background-color: #ECFDF5; color: #059669; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; border: 1px solid #A7F3D0;">
+              DONOR DETAILS
+            </span>
+          </div>
+          <div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 3px;">
+            ${donorLocation.title || 'Food Donor'}
+          </div>
+          ${donorLocation.address ? `
+            <div style="font-size: 11px; color: #64748B; margin-bottom: 8px; font-weight: 500; line-height: 1.3;">
+              📍 ${donorLocation.address}
+            </div>
+          ` : ''}
+          <div style="border-top: 1px solid #E2E8F0; padding-top: 6px; font-size: 11px; color: #334155; display: flex; flex-direction: column; gap: 4px;">
+            ${donorLocation.phone ? `
+              <div style="font-weight: 700;">
+                📞 Phone: <a href="tel:${donorLocation.phone}" style="color: #059669; font-weight: 800; text-decoration: none;">${donorLocation.phone}</a>
+              </div>
+            ` : ''}
+            ${donorLocation.email ? `
+              <div style="font-size: 10px; color: #475569;">
+                ✉️ Email: <a href="mailto:${donorLocation.email}" style="color: #2563EB; font-weight: 600; text-decoration: none;">${donorLocation.email}</a>
+              </div>
+            ` : ''}
+            ${donorLocation.contactPerson ? `
+              <div style="font-size: 10px; color: #475569;">
+                👤 Contact: <strong>${donorLocation.contactPerson}</strong>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
       if (!donorMarkerRef.current) {
         donorMarkerRef.current = L.marker([donorLocation.lat, donorLocation.lng], { icon: donorIcon })
           .addTo(map)
-          .bindTooltip(`Donor: ${donorLocation.title || 'Food Pickup'}`, { direction: 'top', offset: [0, -12] });
+          .bindTooltip(`Donor: ${donorLocation.title || 'Food Pickup'}`, { direction: 'top', offset: [0, -12] })
+          .bindPopup(popupHtml);
       } else {
         donorMarkerRef.current.setLatLng([donorLocation.lat, donorLocation.lng]);
+        donorMarkerRef.current.setPopupContent(popupHtml);
       }
     }
 
     // 2. NGO Marker
     if (ngoLocation && typeof ngoLocation.lat === 'number' && typeof ngoLocation.lng === 'number') {
       const ngoIcon = createCustomIcon(L, 'ngo');
+      const ngoPopupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 190px;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+            <span style="background-color: #EFF6FF; color: #2563EB; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; border: 1px solid #BFDBFE;">
+              NGO DETAILS
+            </span>
+          </div>
+          <div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 3px;">
+            ${ngoLocation.title || 'NGO Dropoff'}
+          </div>
+          ${ngoLocation.address ? `
+            <div style="font-size: 11px; color: #64748B; margin-bottom: 8px; font-weight: 500; line-height: 1.3;">
+              📍 ${ngoLocation.address}
+            </div>
+          ` : ''}
+          ${ngoLocation.phone ? `
+            <div style="border-top: 1px solid #E2E8F0; padding-top: 6px; font-size: 11px; font-weight: 700; color: #334155;">
+              📞 Phone: <a href="tel:${ngoLocation.phone}" style="color: #2563EB; font-weight: 800; text-decoration: none;">${ngoLocation.phone}</a>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
       if (!ngoMarkerRef.current) {
         ngoMarkerRef.current = L.marker([ngoLocation.lat, ngoLocation.lng], { icon: ngoIcon })
           .addTo(map)
-          .bindTooltip(`NGO: ${ngoLocation.title || 'Food Dropoff'}`, { direction: 'top', offset: [0, -12] });
+          .bindTooltip(`NGO: ${ngoLocation.title || 'Food Dropoff'}`, { direction: 'top', offset: [0, -12] })
+          .bindPopup(ngoPopupHtml);
       } else {
         ngoMarkerRef.current.setLatLng([ngoLocation.lat, ngoLocation.lng]);
+        ngoMarkerRef.current.setPopupContent(ngoPopupHtml);
       }
     }
 
     // 3. Volunteer Live Marker (Requirement 5: Flicker-free update)
     if (volunteerLocation && typeof volunteerLocation.lat === 'number' && typeof volunteerLocation.lng === 'number') {
       const volunteerIcon = createCustomIcon(L, 'courier');
+      const volPopupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 180px;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+            <span style="background-color: #FFF7ED; color: #EA580C; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; border: 1px solid #FFEDD5;">
+              COURIER DETAILS
+            </span>
+          </div>
+          <div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 3px;">
+            ${volunteerLocation.title || 'Volunteer Courier'}
+          </div>
+          ${volunteerLocation.phone ? `
+            <div style="border-top: 1px solid #E2E8F0; padding-top: 6px; font-size: 11px; font-weight: 700; color: #334155;">
+              📞 Phone: <a href="tel:${volunteerLocation.phone}" style="color: #EA580C; font-weight: 800; text-decoration: none;">${volunteerLocation.phone}</a>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
       if (!volunteerMarkerRef.current) {
         volunteerMarkerRef.current = L.marker([volunteerLocation.lat, volunteerLocation.lng], { icon: volunteerIcon })
           .addTo(map)
-          .bindTooltip(`Courier: ${volunteerLocation.title || 'Live Volunteer'}`, { direction: 'top', offset: [0, -12] });
+          .bindTooltip(`Courier: ${volunteerLocation.title || 'Live Volunteer'}`, { direction: 'top', offset: [0, -12] })
+          .bindPopup(volPopupHtml);
       } else {
         // Smoothly update position without resetting map or causing flicker
         volunteerMarkerRef.current.setLatLng([volunteerLocation.lat, volunteerLocation.lng]);
+        volunteerMarkerRef.current.setPopupContent(volPopupHtml);
       }
     }
   }, [leafletLoaded, donorLocation, ngoLocation, volunteerLocation]);

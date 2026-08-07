@@ -367,17 +367,22 @@ const TrackVolunteerPage = () => {
                 lng: donorLng,
                 title: donorName,
                 address: activeDonation.location?.address || activeDonation.donorId?.address || 'Donor Pickup',
+                phone: activeDonation.donorId?.phone || activeDonation.phone || '',
+                email: activeDonation.donorId?.email || '',
+                contactPerson: activeDonation.donorId?.name || '',
               }}
               ngoLocation={{
                 lat: ngoLat || 12.9850,
                 lng: ngoLng || 77.6150,
                 title: ngoName,
                 address: user?.address || 'NGO Dropoff',
+                phone: user?.phone || '',
               }}
               volunteerLocation={{
                 lat: courierLat,
                 lng: courierLng,
                 title: volunteerName || 'Volunteer Courier',
+                phone: volunteerPhone || '',
               }}
               deliveryStatus={activeDonation.status || 'assigned'}
               className="w-full h-full min-h-[480px]"
