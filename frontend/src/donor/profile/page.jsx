@@ -3,6 +3,8 @@ import { Save, BadgeCheck, Clock, XCircle, User, Building2, Mail, Phone, MapPin,
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 
+import LocationSearchInput from '../../components/LocationSearchInput';
+
 const DonorProfilePage = () => {
   const { user, token, updateUser, fetchProfile } = useAuth();
 
@@ -12,6 +14,10 @@ const DonorProfilePage = () => {
     email: '',
     phone: '',
     address: '',
+    locationName: '',
+    formattedAddress: '',
+    latitude: 0,
+    longitude: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,10 +31,25 @@ const DonorProfilePage = () => {
         organizationName: user.organizationName || '',
         email: user.email || '',
         phone: user.phone || '',
-        address: user.address || '',
+        address: user.address || user.formattedAddress || '',
+        locationName: user.locationName || '',
+        formattedAddress: user.formattedAddress || user.address || '',
+        latitude: user.latitude || (user.location?.lat) || 0,
+        longitude: user.longitude || (user.location?.lng) || 0,
       });
     }
   }, [user]);
+
+  const handleLocationChange = (loc) => {
+    setFormData((prev) => ({
+      ...prev,
+      locationName: loc.locationName,
+      formattedAddress: loc.formattedAddress,
+      address: loc.formattedAddress,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +67,12 @@ const DonorProfilePage = () => {
           name: formData.name,
           organizationName: formData.organizationName,
           phone: formData.phone,
-          address: formData.address,
+          address: formData.formattedAddress || formData.address,
+          locationName: formData.locationName,
+          formattedAddress: formData.formattedAddress || formData.address,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          locationUpdatedAt: new Date(),
         }),
       });
 
@@ -186,19 +212,17 @@ const DonorProfilePage = () => {
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-[#0F172A] uppercase flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Pickup Address</span>
-          </label>
-          <textarea
-            rows={2}
-            placeholder="Full physical street address for food pickup..."
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            className="w-full px-4 py-2.5 rounded-xl border border-[#E7EAF0] bg-[#f7f8fb] text-xs text-[#0F172A] focus:outline-hidden focus:border-emerald-500 font-medium"
-          />
-        </div>
+        <LocationSearchInput
+          label="Pickup Address / Primary Location"
+          placeholder="Search city, area, or full street address..."
+          value={{
+            locationName: formData.locationName,
+            formattedAddress: formData.formattedAddress || formData.address,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          }}
+          onChange={handleLocationChange}
+        />
 
         <div className="pt-2">
           <button

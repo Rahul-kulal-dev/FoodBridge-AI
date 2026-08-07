@@ -16,6 +16,8 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
 
+import LocationSearchInput from '../../components/LocationSearchInput';
+
 /**
  * Editable NGO Profile Page (/ngo/profile)
  * Persists changes directly to MongoDB Atlas database.
@@ -32,6 +34,10 @@ const NgoProfilePage = () => {
     servingCapacity: '',
     operatingHours: '',
     foodCategories: '',
+    locationName: '',
+    formattedAddress: '',
+    latitude: 0,
+    longitude: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -45,10 +51,14 @@ const NgoProfilePage = () => {
         organizationName: user.organizationName || user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        address: user.address || '',
+        address: user.address || user.formattedAddress || '',
         servingCapacity: user.servingCapacity || '',
         operatingHours: user.operatingHours || '',
         foodCategories: user.foodCategories || '',
+        locationName: user.locationName || '',
+        formattedAddress: user.formattedAddress || user.address || '',
+        latitude: user.latitude || (user.location?.lat) || 0,
+        longitude: user.longitude || (user.location?.lng) || 0,
       });
     }
   }, [user]);
@@ -56,6 +66,17 @@ const NgoProfilePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocationChange = (loc) => {
+    setFormData((prev) => ({
+      ...prev,
+      locationName: loc.locationName,
+      formattedAddress: loc.formattedAddress,
+      address: loc.formattedAddress,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+    }));
   };
 
   const handleSave = async (e) => {
@@ -76,10 +97,15 @@ const NgoProfilePage = () => {
           name: formData.name,
           organizationName: formData.organizationName,
           phone: formData.phone,
-          address: formData.address,
+          address: formData.formattedAddress || formData.address,
           servingCapacity: formData.servingCapacity,
           operatingHours: formData.operatingHours,
           foodCategories: formData.foodCategories,
+          locationName: formData.locationName,
+          formattedAddress: formData.formattedAddress || formData.address,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          locationUpdatedAt: new Date(),
         }),
       });
 
@@ -197,14 +223,16 @@ const NgoProfilePage = () => {
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-xs font-bold text-[#0F172A] block mb-1">Primary Pickup / Kitchen Address</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              placeholder="e.g. Sector 5 Community Hub, Metro City"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500 focus:bg-white transition-colors"
+            <LocationSearchInput
+              label="Primary Kitchen / Dropoff Location"
+              placeholder="Search area, landmark, or full street address..."
+              value={{
+                locationName: formData.locationName,
+                formattedAddress: formData.formattedAddress || formData.address,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+              }}
+              onChange={handleLocationChange}
             />
           </div>
 

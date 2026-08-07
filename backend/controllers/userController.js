@@ -35,6 +35,11 @@ const updateUserProfile = async (req, res, next) => {
       servingCapacity,
       operatingHours,
       foodCategories,
+      locationName,
+      formattedAddress,
+      latitude,
+      longitude,
+      locationUpdatedAt,
     } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -54,6 +59,24 @@ const updateUserProfile = async (req, res, next) => {
     if (servingCapacity !== undefined) user.servingCapacity = servingCapacity;
     if (operatingHours !== undefined) user.operatingHours = operatingHours;
     if (foodCategories !== undefined) user.foodCategories = foodCategories;
+
+    if (locationName !== undefined) user.locationName = locationName;
+    if (formattedAddress !== undefined) {
+      user.formattedAddress = formattedAddress;
+      if (!user.address || formattedAddress) {
+        user.address = formattedAddress;
+      }
+    }
+    if (latitude !== undefined) user.latitude = latitude;
+    if (longitude !== undefined) user.longitude = longitude;
+    if (latitude !== undefined && longitude !== undefined) {
+      user.location = { lat: Number(latitude) || 0, lng: Number(longitude) || 0 };
+    }
+    if (locationUpdatedAt !== undefined) {
+      user.locationUpdatedAt = locationUpdatedAt;
+    } else if (latitude !== undefined || formattedAddress !== undefined) {
+      user.locationUpdatedAt = new Date();
+    }
 
     if (req.body.password) {
       user.password = req.body.password;

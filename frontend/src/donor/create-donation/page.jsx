@@ -150,52 +150,13 @@ const CreateDonationPage = () => {
 
   const handleUseCurrentLocation = () => {
     setIsLocating(true);
-
-    if (!navigator.geolocation) {
-      if (user && user.address) {
-        setAddress(user.address);
-      } else {
-        setAddress('Bengaluru, Karnataka, India');
-      }
-      setIsLocating(false);
-      return;
+    const savedLocation = user?.formattedAddress || user?.address || user?.locationName;
+    if (savedLocation) {
+      setAddress(savedLocation);
+    } else {
+      setAddress('Bengaluru, Karnataka, India');
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          // Query OpenStreetMap Nominatim API for real physical address
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-          );
-          const data = await res.json();
-          if (data && data.display_name) {
-            setAddress(data.display_name);
-          } else {
-            setAddress(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`);
-          }
-        } catch (err) {
-          if (user && user.address) {
-            setAddress(user.address);
-          } else {
-            setAddress(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`);
-          }
-        } finally {
-          setIsLocating(false);
-        }
-      },
-      (err) => {
-        console.warn('Geolocation access error:', err);
-        if (user && user.address) {
-          setAddress(user.address);
-        } else {
-          setAddress('Bengaluru, Karnataka, India');
-        }
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    setIsLocating(false);
   };
 
   const handleSubmit = async (e) => {

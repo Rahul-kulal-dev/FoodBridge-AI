@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { getApiUrl } from '../../config/api';
+import LocationSearchInput from '../../components/LocationSearchInput';
 
 /**
  * Volunteer Profile Page (/volunteer/profile)
@@ -31,6 +31,11 @@ const VolunteerProfilePage = () => {
     organizationName: user?.organizationName || '',
     email: user?.email || '',
     phone: user?.phone || '',
+    address: user?.address || user?.formattedAddress || '',
+    locationName: user?.locationName || '',
+    formattedAddress: user?.formattedAddress || user?.address || '',
+    latitude: user?.latitude || (user?.location?.lat) || 0,
+    longitude: user?.longitude || (user?.location?.lng) || 0,
     vehicleType: user?.vehicleType || '',
     vehicleNumber: user?.vehicleNumber || '',
     emergencyContact: user?.emergencyContact || '',
@@ -57,6 +62,11 @@ const VolunteerProfilePage = () => {
         organizationName: user.organizationName || '',
         email: user.email || '',
         phone: user.phone || '',
+        address: user.address || user.formattedAddress || '',
+        locationName: user.locationName || '',
+        formattedAddress: user.formattedAddress || user.address || '',
+        latitude: user.latitude || (user.location?.lat) || 0,
+        longitude: user.longitude || (user.location?.lng) || 0,
         vehicleType: user.vehicleType || '',
         vehicleNumber: user.vehicleNumber || '',
         emergencyContact: user.emergencyContact || '',
@@ -111,6 +121,17 @@ const VolunteerProfilePage = () => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleLocationChange = (loc) => {
+    setProfile((prev) => ({
+      ...prev,
+      locationName: loc.locationName,
+      formattedAddress: loc.formattedAddress,
+      address: loc.formattedAddress,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+    }));
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -129,11 +150,17 @@ const VolunteerProfilePage = () => {
           name: profile.name,
           organizationName: profile.organizationName,
           phone: profile.phone,
+          address: profile.formattedAddress || profile.address,
           vehicleType: profile.vehicleType,
           vehicleNumber: profile.vehicleNumber,
           emergencyContact: profile.emergencyContact,
           deliveryRadius: profile.deliveryRadius,
           availability: profile.availability,
+          locationName: profile.locationName,
+          formattedAddress: profile.formattedAddress || profile.address,
+          latitude: profile.latitude,
+          longitude: profile.longitude,
+          locationUpdatedAt: new Date(),
         }),
       });
 
@@ -296,6 +323,20 @@ const VolunteerProfilePage = () => {
               value={profile.emergencyContact}
               onChange={handleChange}
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#E7EAF0] text-xs font-bold text-[#0F172A] bg-[#f7f8fb] focus:outline-emerald-500"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <LocationSearchInput
+              label="Courier Base / Primary Operating Location"
+              placeholder="Search area, landmark, or full street address..."
+              value={{
+                locationName: profile.locationName,
+                formattedAddress: profile.formattedAddress || profile.address,
+                latitude: profile.latitude,
+                longitude: profile.longitude,
+              }}
+              onChange={handleLocationChange}
             />
           </div>
 

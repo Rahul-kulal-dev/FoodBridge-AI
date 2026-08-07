@@ -51,6 +51,25 @@ const userSchema = new mongoose.Schema(
       lat: { type: Number, default: 0 },
       lng: { type: Number, default: 0 },
     },
+    locationName: {
+      type: String,
+      default: '',
+    },
+    formattedAddress: {
+      type: String,
+      default: '',
+    },
+    latitude: {
+      type: Number,
+      default: 0,
+    },
+    longitude: {
+      type: Number,
+      default: 0,
+    },
+    locationUpdatedAt: {
+      type: Date,
+    },
     verificationDocs: [
       {
         docUrl: { type: String, required: true },
