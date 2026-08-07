@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import usePwaStatus from './ngo/hooks/usePwaStatus';
+import OfflineIndicator from './ngo/components/OfflineIndicator';
+import PwaInstallBanner from './ngo/components/PwaInstallBanner';
 
 // Landing Page Components
 import Navbar from './components/Navbar';
@@ -69,6 +72,23 @@ import NotFoundPage from './pages/NotFoundPage';
 function LandingPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState('register');
+  const { isOnline, isInstallable, isInstalled, triggerInstallPrompt } = usePwaStatus();
+
+  useEffect(() => {
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.log('[SW] Landing page Service worker registered successfully:', registration.scope);
+          })
+          .catch((err) => {
+            console.warn('[SW] Landing page Service worker registration failed:', err);
+          });
+      });
+    }
+  }, []);
 
   const handleOpenDonateModal = (type = 'register') => {
     setModalType(type);
@@ -85,9 +105,22 @@ function LandingPage() {
       <Navbar 
         onOpenDonateModal={handleOpenDonateModal} 
         onOpenAuthModal={handleOpenAuthModal} 
+        isInstallable={isInstallable}
+        isInstalled={isInstalled}
+        triggerInstallPrompt={triggerInstallPrompt}
       />
 
-      <main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        {/* Global Offline Status Alert */}
+        <OfflineIndicator isOnline={isOnline} />
+
+        {/* PWA App Install Banner Prompt */}
+        <PwaInstallBanner
+          isInstallable={isInstallable}
+          isInstalled={isInstalled}
+          triggerInstallPrompt={triggerInstallPrompt}
+        />
+
         <Hero onOpenDonateModal={handleOpenDonateModal} />
         <StatsBar />
         <TrustSection />

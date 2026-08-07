@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Leaf, Menu, X, ArrowRight, LayoutDashboard, LogOut } from 'lucide-react';
+import { Leaf, Menu, X, ArrowRight, LayoutDashboard, LogOut, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
+export default function Navbar({ onOpenDonateModal, onOpenAuthModal, isInstallable, isInstalled, triggerInstallPrompt }) {
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
@@ -71,6 +71,16 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal }) {
 
           {/* Desktop Right Side CTA */}
           <div className="hidden md:flex items-center gap-4">
+            {isInstallable && !isInstalled && (
+              <button
+                onClick={triggerInstallPrompt}
+                className="text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>Install App</span>
+              </button>
+            )}
+
             {isLoggedIn ? (
               <>
                 <button

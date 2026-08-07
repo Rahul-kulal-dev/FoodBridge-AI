@@ -1,4 +1,4 @@
-const CACHE_NAME = 'foodbridge-pwa-v4';
+const CACHE_NAME = 'foodbridge-pwa-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -8,6 +8,8 @@ const STATIC_ASSETS = [
   '/apple-touch-icon.png',
   '/web-app-manifest-192x192.png',
   '/web-app-manifest-512x512.png',
+  '/hero.png',
+  '/icons.svg',
   '/ngo',
   '/ngo/browse-food',
   '/ngo/accepted-donations',
