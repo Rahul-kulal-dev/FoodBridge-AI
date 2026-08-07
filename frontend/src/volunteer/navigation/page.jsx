@@ -21,7 +21,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
-import OpenStreetMap from '../../components/OpenStreetMap';
+import DeliveryTrackingMap from '../../components/maps/DeliveryTrackingMap';
 
 /**
  * Modern Logistics Navigation Page (/volunteer/navigation)
@@ -338,14 +338,28 @@ const NavigationPage = () => {
         </a>
       </div>
 
-      {/* 3. Main Leaflet OpenStreetMap Container (Req 2 - 7) */}
-      <div className="relative w-full h-[520px] rounded-[20px] border border-slate-200 overflow-hidden shadow-xl bg-slate-900">
-        <OpenStreetMap
-          markers={osmMarkers}
-          drawRoute={true}
-          onRouteCalculated={handleRouteCalculated}
-          className="w-full h-full"
-        />
+      {/* 3. Main Modular Delivery Tracking Map Container */}
+      <DeliveryTrackingMap
+        donorLocation={{
+          lat: activeTask.donorLat || (activeTask.donationId?.location?.lat) || 12.9750,
+          lng: activeTask.donorLng || (activeTask.donationId?.location?.lng) || 77.6000,
+          title: activeTask.donorName || 'Donor Pickup',
+          address: activeTask.donorAddress || 'Donor Address',
+        }}
+        ngoLocation={{
+          lat: activeTask.ngoLat || (user?.location?.lat) || 12.9850,
+          lng: activeTask.ngoLng || (user?.location?.lng) || 77.6150,
+          title: activeTask.ngoName || 'NGO Dropoff',
+          address: activeTask.ngoAddress || 'NGO Address',
+        }}
+        volunteerLocation={{
+          lat: user?.currentLocation?.latitude || user?.latitude || 12.9650,
+          lng: user?.currentLocation?.longitude || user?.longitude || 77.5850,
+          title: `Courier (${user?.name || 'You'})`,
+        }}
+        deliveryStatus={activeTask.status || 'assigned'}
+        className="w-full h-[520px] rounded-[20px] border border-slate-200 overflow-hidden shadow-xl"
+      />
 
         {/* 4. Top-Left Floating Controls (Req 7) */}
         <div className="absolute top-4 left-4 z-[400] flex flex-col gap-2 pointer-events-auto">

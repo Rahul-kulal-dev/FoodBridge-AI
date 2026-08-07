@@ -18,7 +18,7 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
-import OpenStreetMap from '../../components/OpenStreetMap';
+import DeliveryTrackingMap from '../../components/maps/DeliveryTrackingMap';
 
 const TrackVolunteerPage = () => {
   const navigate = useNavigate();
@@ -360,10 +360,26 @@ const TrackVolunteerPage = () => {
         </div>
 
         <div className="lg:col-span-7 bg-slate-900 rounded-2xl border border-[#E7EAF0] shadow-xl overflow-hidden min-h-[480px] relative">
-          {markers.length >= 2 ? (
-            <OpenStreetMap
-              markers={markers}
-              drawRoute={true}
+          {donorLat && donorLng ? (
+            <DeliveryTrackingMap
+              donorLocation={{
+                lat: donorLat,
+                lng: donorLng,
+                title: donorName,
+                address: activeDonation.location?.address || activeDonation.donorId?.address || 'Donor Pickup',
+              }}
+              ngoLocation={{
+                lat: ngoLat || 12.9850,
+                lng: ngoLng || 77.6150,
+                title: ngoName,
+                address: user?.address || 'NGO Dropoff',
+              }}
+              volunteerLocation={{
+                lat: courierLat,
+                lng: courierLng,
+                title: volunteerName || 'Volunteer Courier',
+              }}
+              deliveryStatus={activeDonation.status || 'assigned'}
               className="w-full h-full min-h-[480px]"
             />
           ) : (

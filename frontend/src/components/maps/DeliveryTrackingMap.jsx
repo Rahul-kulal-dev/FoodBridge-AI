@@ -1,0 +1,221 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Navigation, Clock, MapPin, AlertCircle, ShieldCheck, CheckCircle2, Truck } from 'lucide-react';
+import RoutingMachine from './RoutingMachine';
+import { createCustomIcon } from './CustomMarker';
+import { determineActiveRoute } from '../../services/routingService';
+
+/**
+ * Modular Leaflet Delivery Tracking Map Component
+ * Displays static Donor & NGO markers, dynamic live Volunteer marker (smooth non-flickering updates),
+ * OSRM route switching, and floating metrics overlay (Distance & ETA).
+ */
+const DeliveryTrackingMap = ({
+  donorLocation,
+  ngoLocation,
+  volunteerLocation,
+  deliveryStatus = 'assigned',
+  className = 'w-full h-[420px] sm:h-[500px] rounded-2xl overflow-hidden shadow-soft-card border border-[#E7EAF0]',
+}) => {
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const volunteerMarkerRef = useRef(null);
+  const donorMarkerRef = useRef(null);
+  const ngoMarkerRef = useRef(null);
+
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+  const [routeMetrics, setRouteMetrics] = useState({ distance: '—', duration: '—' });
+  const [routeError, setRouteError] = useState(false);
+
+  // Dynamically load Leaflet CSS & JS
+  useEffect(() => {
+    if (window.L) {
+      setLeafletLoaded(true);
+      return;
+    }
+
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    if (!document.getElementById('leaflet-js')) {
+      const script = document.createElement('script');
+      script.id = 'leaflet-js';
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => setLeafletLoaded(true);
+      document.body.appendChild(script);
+    } else {
+      const existingScript = document.getElementById('leaflet-js');
+      existingScript.addEventListener('load', () => setLeafletLoaded(true));
+    }
+  }, []);
+
+  // Initialize Map Instance once
+  useEffect(() => {
+    if (!leafletLoaded || !mapContainerRef.current || mapInstanceRef.current) return;
+    const L = window.L;
+
+    const initialCenter = [
+      volunteerLocation?.lat || donorLocation?.lat || ngoLocation?.lat || 12.9716,
+      volunteerLocation?.lng || donorLocation?.lng || ngoLocation?.lng || 77.5946,
+    ];
+
+    const map = L.map(mapContainerRef.current, {
+      zoomControl: false,
+      scrollWheelZoom: true,
+    }).setView(initialCenter, 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          // ignore cleanup error
+        }
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [leafletLoaded]);
+
+  // Update Static & Live Markers smoothly without map re-renders (Requirement 5)
+  useEffect(() => {
+    if (!leafletLoaded || !mapInstanceRef.current) return;
+    const L = window.L;
+    const map = mapInstanceRef.current;
+
+    // 1. Donor Marker
+    if (donorLocation && typeof donorLocation.lat === 'number' && typeof donorLocation.lng === 'number') {
+      const donorIcon = createCustomIcon(L, 'donor');
+      if (!donorMarkerRef.current) {
+        donorMarkerRef.current = L.marker([donorLocation.lat, donorLocation.lng], { icon: donorIcon })
+          .addTo(map)
+          .bindTooltip(`Donor: ${donorLocation.title || 'Food Pickup'}`, { direction: 'top', offset: [0, -12] });
+      } else {
+        donorMarkerRef.current.setLatLng([donorLocation.lat, donorLocation.lng]);
+      }
+    }
+
+    // 2. NGO Marker
+    if (ngoLocation && typeof ngoLocation.lat === 'number' && typeof ngoLocation.lng === 'number') {
+      const ngoIcon = createCustomIcon(L, 'ngo');
+      if (!ngoMarkerRef.current) {
+        ngoMarkerRef.current = L.marker([ngoLocation.lat, ngoLocation.lng], { icon: ngoIcon })
+          .addTo(map)
+          .bindTooltip(`NGO: ${ngoLocation.title || 'Food Dropoff'}`, { direction: 'top', offset: [0, -12] });
+      } else {
+        ngoMarkerRef.current.setLatLng([ngoLocation.lat, ngoLocation.lng]);
+      }
+    }
+
+    // 3. Volunteer Live Marker (Requirement 5: Flicker-free update)
+    if (volunteerLocation && typeof volunteerLocation.lat === 'number' && typeof volunteerLocation.lng === 'number') {
+      const volunteerIcon = createCustomIcon(L, 'courier');
+      if (!volunteerMarkerRef.current) {
+        volunteerMarkerRef.current = L.marker([volunteerLocation.lat, volunteerLocation.lng], { icon: volunteerIcon })
+          .addTo(map)
+          .bindTooltip(`Courier: ${volunteerLocation.title || 'Live Volunteer'}`, { direction: 'top', offset: [0, -12] });
+      } else {
+        // Smoothly update position without resetting map or causing flicker
+        volunteerMarkerRef.current.setLatLng([volunteerLocation.lat, volunteerLocation.lng]);
+      }
+    }
+  }, [leafletLoaded, donorLocation, ngoLocation, volunteerLocation]);
+
+  // Determine Active Route Endpoints (Requirement 6 & 8: Volunteer->Donor vs Volunteer->NGO)
+  const activeRouteConfig = determineActiveRoute(
+    deliveryStatus,
+    volunteerLocation,
+    donorLocation,
+    ngoLocation
+  );
+
+  const getStatusBadge = () => {
+    switch (deliveryStatus) {
+      case 'picked_up':
+      case 'on_the_way':
+        return { label: 'In Transit to NGO', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      case 'delivered':
+        return { label: 'Delivery Completed', color: 'bg-blue-50 text-blue-700 border-blue-200' };
+      case 'accepted':
+      default:
+        return { label: 'En Route to Donor Pickup', color: 'bg-amber-50 text-amber-700 border-amber-200' };
+    }
+  };
+
+  const badgeInfo = getStatusBadge();
+
+  return (
+    <div className={`relative ${className}`}>
+      {/* Map Container */}
+      <div ref={mapContainerRef} className="w-full h-full z-0" />
+
+      {/* Floating Status & Metrics Banner (Requirement 7) */}
+      <div className="absolute top-4 left-4 right-4 z-[400] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-[#E7EAF0] shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold shrink-0">
+            <Truck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${badgeInfo.color}`}>
+                {badgeInfo.label}
+              </span>
+              <span className="text-[11px] text-slate-500 font-bold">{activeRouteConfig.phaseLabel}</span>
+            </div>
+            <p className="text-xs font-black text-[#0F172A] mt-0.5 line-clamp-1">
+              To: {activeRouteConfig.to?.title || activeRouteConfig.to?.address || 'Destination'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0 shrink-0">
+          <div className="text-left sm:text-right">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Remaining Dist</span>
+            <span className="text-sm font-black text-[#0F172A]">{routeMetrics.distance}</span>
+          </div>
+
+          <div className="text-right">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Est. Time (ETA)</span>
+            <span className="text-sm font-black text-emerald-600">{routeMetrics.duration}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Routing Error Warning Fallback (Requirement 9) */}
+      {routeError && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xl z-[400] border border-slate-700 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>Routing service offline. Direct marker location enabled.</span>
+        </div>
+      )}
+
+      {/* Leaflet OSRM Route Layer (Requirement 6) */}
+      {leafletLoaded && mapInstanceRef.current && activeRouteConfig.from && activeRouteConfig.to && (
+        <RoutingMachine
+          map={mapInstanceRef.current}
+          from={activeRouteConfig.from}
+          to={activeRouteConfig.to}
+          onRouteFound={({ distance, duration }) => {
+            setRouteError(false);
+            setRouteMetrics({ distance, duration });
+          }}
+          onError={() => {
+            setRouteError(true);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+export default DeliveryTrackingMap;
