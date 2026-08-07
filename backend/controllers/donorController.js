@@ -82,7 +82,11 @@ const createDonation = async (req, res, next) => {
       quantity: Number(quantity),
       unit: unit || 'kg',
       expiryTime: new Date(expiryTime),
-      location: typeof location === 'object' ? location : { address: addressStr },
+      location: {
+        address: addressStr || req.user.formattedAddress || req.user.address || '',
+        lat: typeof location === 'object' && location?.lat ? Number(location.lat) : (req.user.latitude || req.user.location?.lat || 0),
+        lng: typeof location === 'object' && location?.lng ? Number(location.lng) : (req.user.longitude || req.user.location?.lng || 0),
+      },
       image: primaryImage,
       images: imageArray.length > 0 ? imageArray : [primaryImage],
       status: 'available',

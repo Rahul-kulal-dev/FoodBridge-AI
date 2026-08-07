@@ -124,16 +124,22 @@ const OpenStreetMap = ({
       const customIcon = createCustomIcon(m.iconType);
       const marker = L.marker(point, { icon: customIcon }).addTo(map);
 
-      if (m.title || m.description) {
-        const content = `
-          <div style="font-family: system-ui, -apple-system, sans-serif; padding: 2px 4px;">
-            <div style="font-weight: 800; font-size: 12px; color: #0F172A; margin-bottom: 2px;">${m.title || ''}</div>
-            ${m.description ? `<div style="font-size: 11px; color: #64748B; font-weight: 500;">${m.description}</div>` : ''}
-          </div>
-        `;
-        marker.bindTooltip(m.title || 'Location', { direction: 'top', offset: [0, -12], opacity: 0.95 });
-        marker.bindPopup(content);
-      }
+      const donorName = m.donorName || (m.iconType === 'donor' ? (m.description?.includes('Donor:') ? '' : 'Verified Donor') : '');
+      const address = m.address || m.formattedAddress || '';
+      const phone = m.phone || m.contactPhone || '';
+
+      const content = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 180px;">
+          ${m.title ? `<div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 4px;">${m.title}</div>` : ''}
+          ${donorName ? `<div style="font-size: 11px; font-weight: 700; color: #059669; margin-bottom: 3px;">Donor: ${donorName}</div>` : ''}
+          ${address ? `<div style="font-size: 11px; color: #475569; margin-bottom: 4px; font-weight: 500; line-height: 1.3;">Address: ${address}</div>` : ''}
+          ${phone ? `<div style="font-size: 11px; font-weight: 700; color: #0F172A; margin-top: 4px; border-top: 1px solid #E2E8F0; padding-top: 4px;">Contact: <a href="tel:${phone}" style="color: #059669; font-weight: 800; text-decoration: none;">${phone}</a></div>` : ''}
+          ${m.description && !donorName ? `<div style="font-size: 11px; color: #64748B; font-weight: 500; margin-top: 3px;">${m.description}</div>` : ''}
+        </div>
+      `;
+
+      marker.bindTooltip(m.title || 'Location', { direction: 'top', offset: [0, -12], opacity: 0.95 });
+      marker.bindPopup(content);
     });
 
     return () => {

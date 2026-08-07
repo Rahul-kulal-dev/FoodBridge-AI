@@ -168,10 +168,14 @@ const NgoMapsPage = () => {
     const latOffset = (idx % 2 === 0 ? 1 : -1) * (0.008 + (idx * 0.005));
     const lngOffset = (idx % 3 === 0 ? -1 : 1) * (0.007 + (idx * 0.004));
     return {
-      lat: (user?.location?.lat || 12.9716) + latOffset,
-      lng: (user?.location?.lng || 77.5946) + lngOffset,
+      lat: d.donorId?.latitude || (d.donorId?.location?.lat) || d.location?.lat || (user?.location?.lat || 12.9716) + latOffset,
+      lng: d.donorId?.longitude || (d.donorId?.location?.lng) || d.location?.lng || (user?.location?.lng || 77.5946) + lngOffset,
       title: d.title || `${d.foodType} (${d.quantity} ${d.unit})`,
-      description: `Donor: ${d.donorId?.organizationName || d.donorId?.name || 'Verified Donor'} • Expiry: ${d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'}`,
+      donorName: d.donorId?.organizationName || d.donorId?.name || 'Verified Donor',
+      address: d.donorId?.formattedAddress || d.donorId?.address || d.location?.address || 'Pickup Location',
+      phone: d.donorId?.phone || d.phone || d.donorPhone || '+91 98765 43210',
+      email: d.donorId?.email || '',
+      description: `Expiry: ${d.expiryDate ? new Date(d.expiryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Today'}`,
       iconType: 'donor',
     };
   });

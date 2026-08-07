@@ -97,37 +97,20 @@ const DeliveryTrackingMap = ({
     if (donorLocation && typeof donorLocation.lat === 'number' && typeof donorLocation.lng === 'number') {
       const donorIcon = createCustomIcon(L, 'donor');
       const popupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 190px;">
-          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
-            <span style="background-color: #ECFDF5; color: #059669; padding: 2px 8px; border-radius: 9999px; font-weight: 800; font-size: 10px; border: 1px solid #A7F3D0;">
-              DONOR DETAILS
-            </span>
-          </div>
-          <div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 3px;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; padding: 4px 2px; min-width: 180px;">
+          <div style="font-weight: 900; font-size: 13px; color: #0F172A; margin-bottom: 4px;">
             ${donorLocation.title || 'Food Donor'}
           </div>
           ${donorLocation.address ? `
-            <div style="font-size: 11px; color: #64748B; margin-bottom: 8px; font-weight: 500; line-height: 1.3;">
-              📍 ${donorLocation.address}
+            <div style="font-size: 11px; color: #475569; margin-bottom: 4px; font-weight: 500; line-height: 1.3;">
+              Address: ${donorLocation.address}
             </div>
           ` : ''}
-          <div style="border-top: 1px solid #E2E8F0; padding-top: 6px; font-size: 11px; color: #334155; display: flex; flex-direction: column; gap: 4px;">
-            ${donorLocation.phone ? `
-              <div style="font-weight: 700;">
-                📞 Phone: <a href="tel:${donorLocation.phone}" style="color: #059669; font-weight: 800; text-decoration: none;">${donorLocation.phone}</a>
-              </div>
-            ` : ''}
-            ${donorLocation.email ? `
-              <div style="font-size: 10px; color: #475569;">
-                ✉️ Email: <a href="mailto:${donorLocation.email}" style="color: #2563EB; font-weight: 600; text-decoration: none;">${donorLocation.email}</a>
-              </div>
-            ` : ''}
-            ${donorLocation.contactPerson ? `
-              <div style="font-size: 10px; color: #475569;">
-                👤 Contact: <strong>${donorLocation.contactPerson}</strong>
-              </div>
-            ` : ''}
-          </div>
+          ${donorLocation.phone ? `
+            <div style="font-size: 11px; font-weight: 700; color: #0F172A; border-top: 1px solid #E2E8F0; padding-top: 4px; margin-top: 4px;">
+              Contact: <a href="tel:${donorLocation.phone}" style="color: #059669; font-weight: 800; text-decoration: none;">${donorLocation.phone}</a>
+            </div>
+          ` : ''}
         </div>
       `;
 

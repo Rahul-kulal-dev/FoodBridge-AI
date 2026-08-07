@@ -42,7 +42,7 @@ const resolveDonationImages = (d) => {
 const getNearbyDonations = async (req, res, next) => {
   try {
     const rawDonations = await Donation.find({ status: 'available' })
-      .populate('donorId', 'name email phone address organizationName')
+      .populate('donorId', 'name email phone address organizationName formattedAddress locationName location latitude longitude')
       .sort({ createdAt: -1 });
 
     const donations = rawDonations.map(resolveDonationImages);
@@ -122,8 +122,8 @@ const acceptDonation = async (req, res, next) => {
 const getDonationHistory = async (req, res, next) => {
   try {
     const rawDonations = await Donation.find({ ngoId: req.user._id })
-      .populate('donorId', 'name email phone address')
-      .populate('volunteerId', 'name email phone')
+      .populate('donorId', 'name email phone address organizationName formattedAddress locationName location latitude longitude')
+      .populate('volunteerId', 'name email phone address formattedAddress locationName location latitude longitude currentLocation')
       .sort({ updatedAt: -1 });
 
     const donations = await Promise.all(
@@ -189,9 +189,9 @@ const getNgoStats = async (req, res, next) => {
 const getDonationDetails = async (req, res, next) => {
   try {
     const donation = await Donation.findById(req.params.id)
-      .populate('donorId', 'name email phone address organizationName verificationStatus')
-      .populate('volunteerId', 'name email phone address')
-      .populate('ngoId', 'name email phone address organizationName');
+      .populate('donorId', 'name email phone address organizationName formattedAddress locationName location latitude longitude verificationStatus')
+      .populate('volunteerId', 'name email phone address formattedAddress locationName location latitude longitude currentLocation')
+      .populate('ngoId', 'name email phone address organizationName formattedAddress locationName location latitude longitude');
 
     if (!donation) {
       return res.status(404).json({ success: false, message: 'Donation not found' });
