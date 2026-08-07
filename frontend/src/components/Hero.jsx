@@ -6,14 +6,10 @@ import {
   ShieldCheck,
   ChevronRight,
   Apple,
-  Salad,
-  Download,
-  Smartphone
+  Salad
 } from 'lucide-react';
-import usePwaStatus from '../ngo/hooks/usePwaStatus';
 
 export default function Hero({ onOpenDonateModal }) {
-  const { isInstallable, isInstalled, triggerInstallPrompt } = usePwaStatus();
 
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden bg-white">
@@ -83,7 +79,7 @@ export default function Hero({ onOpenDonateModal }) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3.5 pt-2"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2"
             >
               <button
                 onClick={() => onOpenDonateModal('donor')}
@@ -92,16 +88,6 @@ export default function Hero({ onOpenDonateModal }) {
                 <span>Start Donating</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
-
-              {!isInstalled && (
-                <button
-                  onClick={triggerInstallPrompt}
-                  className="bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 text-base cursor-pointer active:scale-95 border border-emerald-400/30"
-                >
-                  <Smartphone className="w-5 h-5 text-emerald-200" />
-                  <span>Install PWA App</span>
-                </button>
-              )}
 
               <a
                 href="#how-it-works"

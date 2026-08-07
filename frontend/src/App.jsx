@@ -110,17 +110,8 @@ function LandingPage() {
         triggerInstallPrompt={triggerInstallPrompt}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        {/* Global Offline Status Alert */}
+      <main>
         <OfflineIndicator isOnline={isOnline} />
-
-        {/* PWA App Install Banner Prompt */}
-        <PwaInstallBanner
-          isInstallable={isInstallable}
-          isInstalled={isInstalled}
-          triggerInstallPrompt={triggerInstallPrompt}
-        />
-
         <Hero onOpenDonateModal={handleOpenDonateModal} />
         <StatsBar />
         <TrustSection />
