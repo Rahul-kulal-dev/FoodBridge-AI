@@ -22,6 +22,10 @@ const registerUser = async (req, res, next) => {
 
     const assignedRole = user_role || role || 'donor';
 
+    const regLat = Number(req.body.latitude || location?.lat) || 0;
+    const regLng = Number(req.body.longitude || location?.lng) || 0;
+    const regAddress = req.body.formattedAddress || address || '';
+
     const user = await User.create({
       name,
       email,
@@ -29,9 +33,14 @@ const registerUser = async (req, res, next) => {
       role: assignedRole,
       user_role: assignedRole,
       phone: phone || '',
-      address: address || '',
+      address: regAddress,
+      formattedAddress: regAddress,
       organizationName: organizationName || '',
-      location: location || { lat: 0, lng: 0 },
+      location: { lat: regLat, lng: regLng },
+      latitude: regLat,
+      longitude: regLng,
+      locationName: req.body.locationName || '',
+      locationUpdatedAt: new Date(),
     });
 
     // Create initial welcome notification for new user

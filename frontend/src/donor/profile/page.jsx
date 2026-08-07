@@ -72,6 +72,10 @@ const DonorProfilePage = () => {
           formattedAddress: formData.formattedAddress || formData.address,
           latitude: formData.latitude,
           longitude: formData.longitude,
+          location: {
+            lat: Number(formData.latitude) || 0,
+            lng: Number(formData.longitude) || 0,
+          },
           locationUpdatedAt: new Date(),
         }),
       });

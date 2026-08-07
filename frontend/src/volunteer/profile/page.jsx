@@ -160,6 +160,10 @@ const VolunteerProfilePage = () => {
           formattedAddress: profile.formattedAddress || profile.address,
           latitude: profile.latitude,
           longitude: profile.longitude,
+          location: {
+            lat: Number(profile.latitude) || 0,
+            lng: Number(profile.longitude) || 0,
+          },
           locationUpdatedAt: new Date(),
         }),
       });

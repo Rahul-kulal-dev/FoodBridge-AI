@@ -48,9 +48,7 @@ const updateUserProfile = async (req, res, next) => {
 
     if (name !== undefined) user.name = name;
     if (phone !== undefined) user.phone = phone;
-    if (address !== undefined) user.address = address;
     if (organizationName !== undefined) user.organizationName = organizationName;
-    if (location !== undefined) user.location = location;
     if (vehicleType !== undefined) user.vehicleType = vehicleType;
     if (vehicleNumber !== undefined) user.vehicleNumber = vehicleNumber;
     if (emergencyContact !== undefined) user.emergencyContact = emergencyContact;
@@ -60,21 +58,36 @@ const updateUserProfile = async (req, res, next) => {
     if (operatingHours !== undefined) user.operatingHours = operatingHours;
     if (foodCategories !== undefined) user.foodCategories = foodCategories;
 
+    // Handle address synchronization
+    const resolvedAddress = formattedAddress || address;
+    if (resolvedAddress !== undefined) {
+      user.address = resolvedAddress;
+      user.formattedAddress = resolvedAddress;
+    }
+
     if (locationName !== undefined) user.locationName = locationName;
-    if (formattedAddress !== undefined) {
-      user.formattedAddress = formattedAddress;
-      if (!user.address || formattedAddress) {
-        user.address = formattedAddress;
-      }
+
+    // Handle lat/lng synchronization across all formats (location object or top-level latitude/longitude)
+    let finalLat = latitude !== undefined ? Number(latitude) : (location?.lat !== undefined ? Number(location.lat) : undefined);
+    let finalLng = longitude !== undefined ? Number(longitude) : (location?.lng !== undefined ? Number(location.lng) : undefined);
+
+    if (finalLat !== undefined && !isNaN(finalLat)) {
+      user.latitude = finalLat;
     }
-    if (latitude !== undefined) user.latitude = latitude;
-    if (longitude !== undefined) user.longitude = longitude;
-    if (latitude !== undefined && longitude !== undefined) {
-      user.location = { lat: Number(latitude) || 0, lng: Number(longitude) || 0 };
+    if (finalLng !== undefined && !isNaN(finalLng)) {
+      user.longitude = finalLng;
     }
+
+    if (user.latitude !== undefined || user.longitude !== undefined) {
+      user.location = {
+        lat: Number(user.latitude) || 0,
+        lng: Number(user.longitude) || 0,
+      };
+    }
+
     if (locationUpdatedAt !== undefined) {
       user.locationUpdatedAt = locationUpdatedAt;
-    } else if (latitude !== undefined || formattedAddress !== undefined) {
+    } else if (finalLat !== undefined || resolvedAddress !== undefined) {
       user.locationUpdatedAt = new Date();
     }
 
