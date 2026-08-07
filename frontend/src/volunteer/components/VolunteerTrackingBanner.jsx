@@ -43,7 +43,7 @@ const VolunteerTrackingBanner = () => {
 
   if (trackerState.status === 'permission_denied' || trackerState.status === 'error') {
     return (
-      <div className="bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-soft-card animate-scale-up">
+      <div className="hidden bg-amber-50 border border-amber-200 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-soft-card animate-scale-up">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
             <Radio className="w-5 h-5 animate-pulse" />
@@ -75,7 +75,7 @@ const VolunteerTrackingBanner = () => {
 
   if (trackerState.status === 'tracking') {
     return (
-      <div className="bg-emerald-50/80 border border-emerald-200 p-3 sm:p-3.5 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-soft-card">
+      <div className="hidden bg-emerald-50/80 border border-emerald-200 p-3 sm:p-3.5 rounded-2xl flex items-center justify-between gap-3 text-xs shadow-soft-card">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-3 w-3 shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
