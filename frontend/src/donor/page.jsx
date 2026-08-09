@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Lock,
   Upload,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -255,60 +256,63 @@ const DonorDashboardPage = () => {
         })}
       </div>
 
-      {/* 4. FastAPI AI Surplus Food Prediction Widget Card (Clean Light Aesthetic) */}
+      {/* 4. AI Surplus Food Forecast Widget Card (Exact UI Layout requested by User) */}
       {aiPrediction && (
-        <div className="bg-gradient-to-br from-[#F0FDF4] via-white to-[#F8FAFC] p-5 sm:p-6 rounded-2xl border border-emerald-200/80 shadow-soft-card space-y-4 relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0 font-bold">
-                <Brain className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-[#0F172A] tracking-tight">
-                  AI Surplus Food Forecast
-                </h3>
-                <p className="text-[11px] text-[#64748B] font-medium">
-                  Analyzed from historical MongoDB donation patterns, categories, and expiration rates.
-                </p>
-              </div>
-            </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200 w-fit shrink-0">
-              Advisory Mode Active
-            </span>
+        <div className="bg-white rounded-2xl border border-emerald-200/90 shadow-soft-card overflow-hidden">
+          {/* Header Bar */}
+          <div className="px-5 py-3.5 border-b border-emerald-100/80 bg-[#F4FBF7] flex items-center gap-2.5">
+            <BarChart3 className="w-5 h-5 text-[#059669]" />
+            <h3 className="text-base sm:text-lg font-bold text-[#0F172A] tracking-tight">
+              AI Surplus Food Forecast
+            </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            <div className="space-y-1.5 p-3.5 rounded-xl bg-white border border-emerald-100 shadow-xs">
-              <span className="text-[10px] uppercase font-bold text-[#64748B] block tracking-wider">
-                Predicted Surplus Quantity
+          {/* Card Body */}
+          <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            {/* Left Column: Predicted Surplus Quantity */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] sm:text-xs font-bold text-[#64748B] uppercase tracking-wider block">
+                PREDICTED SURPLUS QUANTITY
               </span>
-              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
-                {aiPrediction.predictedQuantity ?? 0} <span className="text-lg text-emerald-600 font-bold">{aiPrediction.unit || 'kg'}</span>
-              </div>
-              <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                <span>Model Confidence:</span>
-                <span className="font-extrabold">{aiPrediction.confidenceScore || '0%'}</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-extrabold text-[#059669] tracking-tight">
+                  {aiPrediction.predictedQuantity ?? 0}
+                </span>
+                <span className="text-lg sm:text-xl font-bold text-[#334155]">
+                  {aiPrediction.unit || 'kg'}
+                </span>
               </div>
             </div>
 
-            <div className="md:col-span-2 space-y-2 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
-              <span className="text-[10px] uppercase font-extrabold text-emerald-700 tracking-wider block">
-                Key Contributing Factors
-              </span>
-              <ul className="space-y-1.5 text-xs text-[#334155]">
-                {(aiPrediction.contributingFactors || ['Not enough donation data for prediction']).slice(0, 2).map((factor, fIdx) => (
-                  <li key={fIdx} className="flex items-start gap-2">
-                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
-                    <span className="line-clamp-1 font-medium">{factor}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50/90 px-2.5 py-1 rounded-lg border border-amber-200/80 font-medium">
-                <span className="font-bold uppercase text-[10px] text-amber-900 shrink-0">Note:</span>
-                <span className="truncate">Purely advisory for inventory planning. Does not auto-create donations.</span>
+            {/* Right Column: Confidence Score & Advisory Only Pill Badge */}
+            <div className="md:border-l md:border-emerald-100 md:pl-8 flex items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <span className="text-[11px] sm:text-xs font-bold text-[#64748B] uppercase tracking-wider block">
+                  CONFIDENCE SCORE
+                </span>
+                <div className="text-3xl sm:text-4xl font-extrabold text-[#059669] tracking-tight">
+                  {aiPrediction.confidenceScore || '0%'}
+                </div>
               </div>
+
+              <span className="px-3.5 py-1 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] text-xs font-semibold shrink-0">
+                Advisory Only
+              </span>
             </div>
           </div>
+
+          {/* Sub-strip for Contributing Factors / No Data notice */}
+          {aiPrediction.contributingFactors && aiPrediction.contributingFactors.length > 0 && (
+            <div className="px-5 py-2.5 bg-[#FAFDFA] border-t border-emerald-100/60 text-xs text-[#475569] font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 truncate">
+                <span className="font-bold text-[#059669] shrink-0">•</span>
+                <span className="truncate">{aiPrediction.contributingFactors[0]}</span>
+              </div>
+              <span className="text-[11px] text-[#94A3B8] shrink-0 font-medium italic">
+                *Advisory information only • Does not auto-create donations
+              </span>
+            </div>
+          )}
         </div>
       )}
 
