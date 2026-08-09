@@ -1,4 +1,6 @@
-const CACHE_NAME = 'foodbridge-pwa-v5';
+/* eslint-disable no-undef */
+// FoodBridge AI PWA Caching Service Worker Strategy
+const CACHE_NAME = 'foodbridge-pwa-v7';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -39,6 +41,7 @@ const STATIC_ASSETS = [
   '/admin/profile'
 ];
 
+
 // Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -70,7 +73,6 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and browser extensions
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
     return;
   }

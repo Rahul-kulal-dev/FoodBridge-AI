@@ -69,7 +69,7 @@ export function NotificationProvider({ children }) {
           swRegistration = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${swParams}`);
           console.log('[FCM Context] Service Worker registered for FCM:', swRegistration.scope);
         } catch (swErr) {
-          console.warn('[FCM Context] Custom SW registration fallback:', swErr);
+          console.warn('[FCM Context] SW registration fallback:', swErr);
         }
       }
 
