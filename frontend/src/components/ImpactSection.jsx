@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { 
@@ -11,21 +11,55 @@ import {
   Share2,
   FileCheck2
 } from 'lucide-react';
+import { getApiUrl } from '../config/api';
 
 export default function ImpactSection() {
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch(getApiUrl('/api/analytics/impact'));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.metrics && isMounted) {
+            setMetrics(data.metrics);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching impact metrics in ImpactSection:', err);
+      }
+    };
+    fetchMetrics();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const monthlyImpactData = [
     { month: 'Jan', meals: 1800, co2: 2.1 },
     { month: 'Feb', meals: 2400, co2: 2.8 },
     { month: 'Mar', meals: 3100, co2: 3.5 },
     { month: 'Apr', meals: 4200, co2: 4.8 },
     { month: 'May', meals: 5600, co2: 6.2 },
-    { month: 'Jun', meals: 7900, co2: 8.9 },
+    { month: 'Jun', meals: metrics ? metrics.mealsSaved : 7900, co2: metrics ? (metrics.co2SavedKg / 1000).toFixed(1) : 8.9 },
   ];
+
+  const mealsVal = metrics ? metrics.mealsSaved.toLocaleString() : '25,480';
+  const peopleFedVal = metrics ? metrics.peopleFed.toLocaleString() : '18,200';
+  const wasteVal = metrics
+    ? metrics.wasteReducedKg >= 1000
+      ? (metrics.wasteReducedKg / 1000).toFixed(1)
+      : metrics.wasteReducedKg.toString()
+    : '15.4';
+  const wasteUnit = metrics && metrics.wasteReducedKg < 1000 ? 'Kg' : 'Metric Tons';
+  const co2Val = metrics ? (metrics.co2SavedKg / 1000).toFixed(1) : '38.2';
 
   const impactCards = [
     {
       title: 'Meals Saved',
-      value: '25,480',
+      value: mealsVal,
       unit: 'Portions',
       change: '+34% vs last month',
       icon: Utensils,
@@ -35,9 +69,9 @@ export default function ImpactSection() {
     },
     {
       title: 'People Fed',
-      value: '18,200',
+      value: peopleFedVal,
       unit: 'Individuals',
-      change: 'Across 42 shelter hubs',
+      change: `Across ${metrics ? metrics.activeNGOs : 42} shelter hubs`,
       icon: Users,
       color: 'bg-amber-500 text-white',
       progress: 76,
@@ -45,8 +79,8 @@ export default function ImpactSection() {
     },
     {
       title: 'Food Waste Reduced',
-      value: '15.4',
-      unit: 'Metric Tons',
+      value: wasteVal,
+      unit: wasteUnit,
       change: '100% Diverted from Landfills',
       icon: Leaf,
       color: 'bg-blue-500 text-white',
@@ -55,9 +89,9 @@ export default function ImpactSection() {
     },
     {
       title: 'CO₂ Emissions Prevented',
-      value: '38.2',
+      value: co2Val,
       unit: 'Tons CO₂e',
-      change: 'Equivalent to 84 trees planted',
+      change: `Equivalent to ${metrics ? Math.round(metrics.co2SavedKg * 2.2) : 84} trees planted`,
       icon: Globe,
       color: 'bg-indigo-500 text-white',
       progress: 82,

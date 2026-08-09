@@ -1,11 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { getApiUrl } from '../config/api';
 
 export default function StatsBar() {
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch(getApiUrl('/api/analytics/impact'));
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.metrics && isMounted) {
+            setMetrics(data.metrics);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching live stats from DB:', err);
+      }
+    };
+
+    fetchMetrics();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const getMealsSavedText = () => {
+    if (!metrics) return '25,000+';
+    const val = metrics.mealsSaved;
+    if (val === 0) return '0+';
+    return val >= 1000 ? `${val.toLocaleString()}+` : `${val}+`;
+  };
+
+  const getFoodWasteText = () => {
+    if (!metrics) return '15 Tons';
+    const kg = metrics.wasteReducedKg;
+    if (kg >= 1000) {
+      const tons = (kg / 1000).toFixed(1);
+      return `${tons} Tons`;
+    }
+    return `${kg} kg`;
+  };
+
+  const getNgosText = () => {
+    if (!metrics) return '500+';
+    const count = metrics.activeNGOs;
+    if (count === 0) return '0';
+    return count >= 10 ? `${count}+` : `${count}`;
+  };
+
+  const getDeliveriesText = () => {
+    if (!metrics) return '1,200+';
+    const count = metrics.successfulDeliveries;
+    if (count === 0) return '0';
+    return count >= 10 ? `${count.toLocaleString()}+` : `${count}`;
+  };
+
   const stats = [
     {
       image: '/imgs/Cutlery.png',
-      value: '25,000+',
+      value: getMealsSavedText(),
       label: 'Meals Saved',
       subtext: 'Provided to families in need',
       accentColor: 'text-green-600',
@@ -14,7 +70,7 @@ export default function StatsBar() {
     },
     {
       image: '/imgs/web.png',
-      value: '15 Tons',
+      value: getFoodWasteText(),
       label: 'Food Waste Reduced',
       subtext: 'Kept away from landfills',
       accentColor: 'text-green-600',
@@ -23,7 +79,7 @@ export default function StatsBar() {
     },
     {
       image: '/imgs/heart.png',
-      value: '500+',
+      value: getNgosText(),
       label: 'Partner NGOs',
       subtext: 'Shelters & community kitchens',
       accentColor: 'text-amber-600',
@@ -32,7 +88,7 @@ export default function StatsBar() {
     },
     {
       image: '/imgs/truck.png',
-      value: '1,200+',
+      value: getDeliveriesText(),
       label: 'Successful Deliveries',
       subtext: 'Zero food spoilage rate',
       accentColor: 'text-blue-600',

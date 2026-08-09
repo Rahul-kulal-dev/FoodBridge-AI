@@ -6,18 +6,45 @@ const User = require('../models/User');
 // @access  Public
 const getImpactMetrics = async (req, res, next) => {
   try {
-    const completedDonations = await Donation.find({ status: 'delivered' });
-    const totalQuantity = completedDonations.reduce((acc, d) => acc + (d.quantity || 0), 0);
+    const allDonations = await Donation.find();
+    
+    // Delivered donations count & quantity
+    const deliveredDonations = allDonations.filter(
+      (d) => d.status === 'delivered' || d.status === 'completed'
+    );
+    const deliveredQty = deliveredDonations.reduce(
+      (acc, d) => acc + (Number(d.quantity) || 0),
+      0
+    );
 
-    // Dynamic metrics calculation with sensible defaults
-    const mealsSaved = totalQuantity > 0 ? Math.round(totalQuantity * 3) : 12450;
-    const peopleFed = totalQuantity > 0 ? Math.round(totalQuantity * 2.5) : 8900;
-    const wasteReducedKg = totalQuantity > 0 ? Math.round(totalQuantity) : 4150;
+    // Total donated quantity across all valid donations
+    const totalDonatedQty = allDonations.reduce(
+      (acc, d) => acc + (Number(d.quantity) || 0),
+      0
+    );
+
+    // Use deliveredQty if available, otherwise totalDonatedQty to reflect live database donations
+    const activeQty = deliveredQty > 0 ? deliveredQty : totalDonatedQty;
+
+    // Metrics calculations (approx. 3 meals per kg)
+    const mealsSaved = Math.round(activeQty * 3);
+    const peopleFed = Math.round(activeQty * 2.5);
+    const wasteReducedKg = Math.round(activeQty);
     const co2SavedKg = Math.round(wasteReducedKg * 2.5);
 
-    const activeDonors = await User.countDocuments({ role: 'donor' });
-    const activeNGOs = await User.countDocuments({ role: 'ngo' });
-    const activeVolunteers = await User.countDocuments({ role: 'volunteer' });
+    // Dynamic counts from User model in MongoDB
+    const activeDonors = await User.countDocuments({
+      $or: [{ role: 'donor' }, { user_role: 'donor' }],
+    });
+    const activeNGOs = await User.countDocuments({
+      $or: [{ role: 'ngo' }, { user_role: 'ngo' }],
+    });
+    const activeVolunteers = await User.countDocuments({
+      $or: [{ role: 'volunteer' }, { user_role: 'volunteer' }],
+    });
+
+    const successfulDeliveries = deliveredDonations.length;
+    const totalDonationsCount = allDonations.length;
 
     res.json({
       success: true,
@@ -26,9 +53,12 @@ const getImpactMetrics = async (req, res, next) => {
         peopleFed,
         wasteReducedKg,
         co2SavedKg,
-        activeDonors: activeDonors || 120,
-        activeNGOs: activeNGOs || 45,
-        activeVolunteers: activeVolunteers || 85,
+        activeDonors,
+        activeNGOs,
+        activeVolunteers,
+        successfulDeliveries,
+        totalDonationsCount,
+        totalFoodKg: activeQty,
       },
     });
   } catch (error) {
