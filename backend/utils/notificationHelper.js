@@ -1,13 +1,16 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const { sendPushNotification } = require('../config/firebase');
 
 /**
- * Create a single notification for a specific user
+ * Create a single notification for a specific user and send real-time FCM push notification
  */
 const createNotification = async ({ userId, role = 'all', title, message, type = 'info', link = '' }) => {
   try {
     if (!userId || !title || !message) return null;
-    return await Notification.create({
+
+    // 1. Save in-app notification in MongoDB history
+    const notification = await Notification.create({
       userId,
       role,
       title,
@@ -16,6 +19,28 @@ const createNotification = async ({ userId, role = 'all', title, message, type =
       link,
       isRead: false,
     });
+
+    // 2. Fetch user's FCM tokens and dispatch real-time FCM push notification
+    try {
+      const user = await User.findById(userId).select('fcmTokens');
+      if (user && user.fcmTokens && user.fcmTokens.length > 0) {
+        sendPushNotification({
+          tokens: user.fcmTokens,
+          title,
+          body: message,
+          link,
+          type,
+          role,
+          userId: user._id,
+        }).catch((pushErr) => {
+          console.warn('[Notification Helper Push Error]:', pushErr.message);
+        });
+      }
+    } catch (pushLookupErr) {
+      console.warn('[Notification Helper FCM Fetch Error]:', pushLookupErr.message);
+    }
+
+    return notification;
   } catch (error) {
     console.error('[Notification Helper Error]:', error.message);
     return null;
@@ -23,7 +48,7 @@ const createNotification = async ({ userId, role = 'all', title, message, type =
 };
 
 /**
- * Send notification to all admins (e.g. for pending approvals, photo reviews)
+ * Send notification to all admins (e.g. for pending approvals, photo reviews, completed deliveries)
  */
 const notifyAdmins = async ({ title, message, type = 'warning', link = '/admin/verifications' }) => {
   try {

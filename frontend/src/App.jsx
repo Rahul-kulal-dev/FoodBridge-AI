@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import usePwaStatus from './ngo/hooks/usePwaStatus';
 import OfflineIndicator from './ngo/components/OfflineIndicator';
@@ -139,76 +140,78 @@ function LandingPage() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Landing Page Route */}
-          <Route path="/" element={<LandingPage />} />
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Landing Page Route */}
+            <Route path="/" element={<LandingPage />} />
 
-          {/* Admin Login Page */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+            {/* Admin Login Page */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
 
-          {/* Admin Portal Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="verifications" element={<AdminVerificationsPage />} />
-              <Route path="notifications" element={<AdminNotificationsPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="donations" element={<AdminDonationsPage />} />
-              <Route path="feedback" element={<AdminFeedbackPage />} />
-              <Route path="profile" element={<AdminProfilePage />} />
+            {/* Admin Portal Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="verifications" element={<AdminVerificationsPage />} />
+                <Route path="notifications" element={<AdminNotificationsPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="donations" element={<AdminDonationsPage />} />
+                <Route path="feedback" element={<AdminFeedbackPage />} />
+                <Route path="profile" element={<AdminProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Donor Portal Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['donor']} />}>
-            <Route path="/donor" element={<DonorLayout />}>
-              <Route index element={<DonorDashboardPage />} />
-              <Route path="verification" element={<DonorVerificationPage />} />
-              <Route path="create-donation" element={<CreateDonationPage />} />
-              <Route path="donations" element={<MyDonationsPage />} />
-              <Route path="ai-predictions" element={<AIPredictionsPage />} />
-              <Route path="notifications" element={<DonorNotificationsPage />} />
-              <Route path="feedback" element={<DonorFeedbackPage />} />
-              <Route path="profile" element={<DonorProfilePage />} />
+            {/* Donor Portal Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['donor']} />}>
+              <Route path="/donor" element={<DonorLayout />}>
+                <Route index element={<DonorDashboardPage />} />
+                <Route path="verification" element={<DonorVerificationPage />} />
+                <Route path="create-donation" element={<CreateDonationPage />} />
+                <Route path="donations" element={<MyDonationsPage />} />
+                <Route path="ai-predictions" element={<AIPredictionsPage />} />
+                <Route path="notifications" element={<DonorNotificationsPage />} />
+                <Route path="feedback" element={<DonorFeedbackPage />} />
+                <Route path="profile" element={<DonorProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* NGO Portal Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ngo']} />}>
-            <Route path="/ngo" element={<NgoLayout />}>
-              <Route index element={<NgoDashboardPage />} />
-              <Route path="verification" element={<NgoVerificationPage />} />
-              <Route path="browse-food" element={<BrowseFoodPage />} />
-              <Route path="accepted-donations" element={<AcceptedDonationsPage />} />
-              <Route path="maps" element={<NgoMapsPage />} />
-              <Route path="food-details" element={<FoodDetailsPage />} />
-              <Route path="track-volunteer" element={<TrackVolunteerPage />} />
-              <Route path="notifications" element={<NgoNotificationsPage />} />
-              <Route path="feedback" element={<NgoFeedbackPage />} />
-              <Route path="profile" element={<NgoProfilePage />} />
+            {/* NGO Portal Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['ngo']} />}>
+              <Route path="/ngo" element={<NgoLayout />}>
+                <Route index element={<NgoDashboardPage />} />
+                <Route path="verification" element={<NgoVerificationPage />} />
+                <Route path="browse-food" element={<BrowseFoodPage />} />
+                <Route path="accepted-donations" element={<AcceptedDonationsPage />} />
+                <Route path="maps" element={<NgoMapsPage />} />
+                <Route path="food-details" element={<FoodDetailsPage />} />
+                <Route path="track-volunteer" element={<TrackVolunteerPage />} />
+                <Route path="notifications" element={<NgoNotificationsPage />} />
+                <Route path="feedback" element={<NgoFeedbackPage />} />
+                <Route path="profile" element={<NgoProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Volunteer Portal Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}>
-            <Route path="/volunteer" element={<VolunteerLayout />}>
-              <Route index element={<VolunteerDashboardPage />} />
-              <Route path="assignments" element={<AssignedPickupsPage />} />
-              <Route path="navigation" element={<NavigationPage />} />
-              <Route path="verification" element={<PickupVerificationPage />} />
-              <Route path="doc-verification" element={<VolunteerDocVerificationPage />} />
-              <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
-              <Route path="notifications" element={<VolunteerNotificationsPage />} />
-              <Route path="history" element={<DeliveryHistoryPage />} />
-              <Route path="profile" element={<VolunteerProfilePage />} />
+            {/* Volunteer Portal Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}>
+              <Route path="/volunteer" element={<VolunteerLayout />}>
+                <Route index element={<VolunteerDashboardPage />} />
+                <Route path="assignments" element={<AssignedPickupsPage />} />
+                <Route path="navigation" element={<NavigationPage />} />
+                <Route path="verification" element={<PickupVerificationPage />} />
+                <Route path="doc-verification" element={<VolunteerDocVerificationPage />} />
+                <Route path="delivery-status" element={<UpdateDeliveryStatusPage />} />
+                <Route path="notifications" element={<VolunteerNotificationsPage />} />
+                <Route path="history" element={<DeliveryHistoryPage />} />
+                <Route path="profile" element={<VolunteerProfilePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Catch-all 404 Error Page Route */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Catch-all 404 Error Page Route */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

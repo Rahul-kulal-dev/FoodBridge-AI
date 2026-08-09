@@ -1,4 +1,7 @@
 const Notification = require('../models/Notification');
+const User = require('../models/User');
+const { createNotification } = require('../utils/notificationHelper');
+const { sendPushNotification } = require('../config/firebase');
 
 // @desc    Send notification to a user
 // @route   POST /api/notifications
@@ -7,14 +10,13 @@ const sendNotification = async (req, res, next) => {
   try {
     const { userId, role, title, message, type, link } = req.body;
 
-    const notification = await Notification.create({
+    const notification = await createNotification({
       userId: userId || req.user._id,
-      role: role || req.user.role || 'all',
-      title,
-      message,
+      role: role || req.user.user_role || req.user.role || 'all',
+      title: title || 'Notification',
+      message: message || '',
       type: type || 'info',
       link: link || '',
-      isRead: false,
     });
 
     res.status(201).json({
@@ -49,16 +51,16 @@ const getNotifications = async (req, res, next) => {
         roleSpecificWelcome += ' Monitor platform verifications, user roles, and photo reviews.';
       }
 
-      const welcomeNotif = await Notification.create({
+      const welcomeNotif = await createNotification({
         userId: req.user._id,
         role: activeRole,
         title: `Welcome to FoodBridge AI (${roleUpper})`,
         message: roleSpecificWelcome,
         type: 'system',
         link: activeRole === 'donor' ? '/donor/donate' : activeRole === 'ngo' ? '/ngo/browse-food' : activeRole === 'volunteer' ? '/volunteer/assignments' : '/admin',
-        isRead: false,
       });
-      notifications = [welcomeNotif];
+      
+      notifications = welcomeNotif ? [welcomeNotif] : [];
     }
 
     const unreadCount = await Notification.countDocuments({ userId: req.user._id, isRead: false });
@@ -122,6 +124,7 @@ const markAllAsRead = async (req, res, next) => {
     next(error);
   }
 };
+
 // @desc    Delete notification
 // @route   DELETE /api/notifications/:id
 // @access  Private
@@ -142,10 +145,90 @@ const deleteNotification = async (req, res, next) => {
   }
 };
 
+// @desc    Register user FCM push notification token
+// @route   POST /api/notifications/fcm-token
+// @access  Private
+const registerFcmToken = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ success: false, message: 'FCM Token is required' });
+    }
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { fcmTokens: token.trim() } },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: 'FCM push token registered successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove user FCM push notification token
+// @route   DELETE /api/notifications/fcm-token
+// @access  Private
+const removeFcmToken = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      // Remove all tokens for user on complete logout
+      await User.findByIdAndUpdate(req.user._id, { $set: { fcmTokens: [] } });
+    } else {
+      await User.findByIdAndUpdate(req.user._id, { $pull: { fcmTokens: token.trim() } });
+    }
+
+    res.json({
+      success: true,
+      message: 'FCM token removed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send test FCM push notification
+// @route   POST /api/notifications/test-push
+// @access  Private
+const testPushNotification = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select('fcmTokens role user_role name');
+    const userRole = user?.user_role || user?.role || 'donor';
+
+    const testNotif = await createNotification({
+      userId: req.user._id,
+      role: userRole,
+      title: 'Real-Time FCM Push Test',
+      message: `Hello ${user.name || 'User'}! Real-time FCM push notifications are working on your device.`,
+      type: 'info',
+      link: `/${userRole}/notifications`,
+    });
+
+    res.json({
+      success: true,
+      message: 'Test FCM push notification triggered',
+      tokensCount: user?.fcmTokens?.length || 0,
+      notification: testNotif,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   sendNotification,
   getNotifications,
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  registerFcmToken,
+  removeFcmToken,
+  testPushNotification,
 };

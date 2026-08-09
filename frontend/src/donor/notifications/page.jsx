@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Truck, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Bell, Truck, ShieldCheck, CheckCircle2, Send } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotificationContext } from '../../context/NotificationContext';
 import { getApiUrl } from '../../config/api';
 
 const DonorNotificationsPage = () => {
   const { token } = useAuth();
+  const {
+    isPushEnabled,
+    permissionStatus,
+    loading: pushLoading,
+    requestNotificationPermission,
+    sendTestPushNotification,
+  } = useNotificationContext();
+
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [testPushStatus, setTestPushStatus] = useState('');
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -51,7 +61,7 @@ const DonorNotificationsPage = () => {
         });
       }
     } catch (err) {
-      console.warn('Mark as read API notice:', err);
+      console.warn('Error marking notification read:', err);
     }
   };
 
@@ -66,7 +76,7 @@ const DonorNotificationsPage = () => {
         });
       }
     } catch (err) {
-      console.warn('Mark all as read API notice:', err);
+      console.warn('Error marking all notifications read:', err);
     }
   };
 
@@ -81,7 +91,18 @@ const DonorNotificationsPage = () => {
         });
       }
     } catch (err) {
-      console.warn('Delete notification API notice:', err);
+      console.warn('Error deleting notification:', err);
+    }
+  };
+
+  const handleTestPush = async () => {
+    setTestPushStatus('Sending test notification...');
+    const success = await sendTestPushNotification();
+    if (success) {
+      setTestPushStatus('Test notification sent!');
+      setTimeout(() => setTestPushStatus(''), 4000);
+    } else {
+      setTestPushStatus('Failed to send test push.');
     }
   };
 
@@ -89,14 +110,15 @@ const DonorNotificationsPage = () => {
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
+      {/* Header Card */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-[-0.045em]">
-              Notifications Center
+              Donor Notifications Center
             </h1>
             <p className="text-xs text-[#64748B] font-medium">
-              Live updates on dispatch status, driver arrivals, and AI alerts.
+              Live push & in-app updates on dispatch status, driver arrivals, and NGO requests.
             </p>
           </div>
           {unreadCount > 0 && (
@@ -117,6 +139,61 @@ const DonorNotificationsPage = () => {
         )}
       </div>
 
+      {/* Real-Time FCM Push Banner */}
+      <div className="bg-gradient-to-r from-[#0F172A] to-slate-800 text-white p-4 sm:p-5 rounded-2xl border border-slate-700 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-[#ff6b35]/20 text-[#ff6b35] rounded-xl shrink-0">
+            <Bell className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-extrabold text-white">FCM Real-Time Push Notifications</h3>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                isPushEnabled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+              }`}>
+                {isPushEnabled ? 'Active' : 'Disabled'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-0.5">
+              {isPushEnabled
+                ? 'Push notifications are enabled! You will receive alerts even when the PWA is closed.'
+                : permissionStatus === 'denied'
+                ? 'Push permissions blocked. Please enable notification permissions in your browser site settings.'
+                : 'Enable real-time push notifications to get background alerts for food claims & driver pickups.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
+          {!isPushEnabled && permissionStatus !== 'denied' && (
+            <button
+              onClick={requestNotificationPermission}
+              disabled={pushLoading}
+              className="w-full sm:w-auto px-4 py-2 bg-[#ff6b35] hover:bg-[#e05a2b] text-white text-xs font-extrabold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              {pushLoading ? 'Enabling...' : 'Enable Real-Time Push'}
+            </button>
+          )}
+
+          {isPushEnabled && (
+            <button
+              onClick={handleTestPush}
+              className="w-full sm:w-auto px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Send Test Push</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {testPushStatus && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl">
+          {testPushStatus}
+        </div>
+      )}
+
+      {/* Notifications List */}
       <div className="bg-white rounded-2xl border border-[#E7EAF0] shadow-soft-card divide-y divide-[#E7EAF0]">
         {loading ? (
           <div className="p-8 text-center text-xs text-slate-500 font-bold">
@@ -139,43 +216,70 @@ const DonorNotificationsPage = () => {
                   !isItemRead ? 'bg-emerald-50/20' : 'hover:bg-slate-50/70'
                 }`}
               >
-                <div className="flex items-start gap-3 min-w-0 flex-1">
-                  <div className="space-y-1 min-w-0 flex-1">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div
+                    className={`p-2.5 rounded-xl shrink-0 ${
+                      item.type === 'urgent'
+                        ? 'bg-red-50 text-red-600 border border-red-200'
+                        : item.type === 'system'
+                        ? 'bg-purple-50 text-purple-600 border border-purple-200'
+                        : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                    }`}
+                  >
+                    {item.type === 'urgent' ? (
+                      <Truck className="w-5 h-5" />
+                    ) : item.type === 'system' ? (
+                      <ShieldCheck className="w-5 h-5" />
+                    ) : (
+                      <Bell className="w-5 h-5" />
+                    )}
+                  </div>
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-xs sm:text-sm font-extrabold text-[#0F172A] break-words">
-                        {item.title || 'Notification'}
+                      <h3
+                        className={`text-xs sm:text-sm font-bold ${
+                          !isItemRead ? 'text-[#0F172A]' : 'text-slate-700'
+                        }`}
+                      >
+                        {item.title}
                       </h3>
                       {!isItemRead && (
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-wider">
+                          New
+                        </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#334155] font-medium leading-relaxed break-words">
-                      {item.message || item.text}
-                    </p>
-                    <span className="text-[10px] font-bold text-[#64748B] block pt-0.5">
-                      {item.createdAt ? new Date(item.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Recently'}
-                    </span>
+                    <p className="text-xs text-[#64748B] leading-relaxed">{item.message}</p>
+                    <div className="flex items-center gap-3 pt-1">
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Just now'}
+                      </span>
+                      {item.link && (
+                        <a
+                          href={item.link}
+                          className="text-[11px] font-bold text-[#ff6b35] hover:underline"
+                        >
+                          View Details &rarr;
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-start shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end border-slate-100/80">
+                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                   {!isItemRead && (
                     <button
                       onClick={() => handleMarkAsRead(targetId)}
-                      title="Mark as read"
-                      className="p-1.5 rounded-lg text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer flex items-center gap-1 text-xs font-bold"
+                      className="px-3 py-1.5 text-xs font-bold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span className="sm:hidden">Mark Read</span>
+                      Mark Read
                     </button>
                   )}
                   <button
                     onClick={() => handleDelete(targetId)}
-                    title="Delete notification"
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer flex items-center gap-1 text-xs font-bold"
+                    className="px-2.5 py-1.5 text-xs font-bold text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                   >
-                    <span className="sm:hidden">Delete</span>
-                    ✕
+                    Delete
                   </button>
                 </div>
               </div>
