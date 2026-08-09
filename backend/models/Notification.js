@@ -7,6 +7,11 @@ const notificationSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    role: {
+      type: String,
+      enum: ['donor', 'ngo', 'volunteer', 'admin', 'all'],
+      default: 'all',
+    },
     title: {
       type: String,
       required: true,
@@ -19,6 +24,10 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       enum: ['info', 'success', 'warning', 'urgent', 'system'],
       default: 'info',
+    },
+    link: {
+      type: String,
+      default: '',
     },
     isRead: {
       type: Boolean,

@@ -5,13 +5,16 @@ const Notification = require('../models/Notification');
 // @access  Private
 const sendNotification = async (req, res, next) => {
   try {
-    const { userId, title, message, type } = req.body;
+    const { userId, role, title, message, type, link } = req.body;
 
     const notification = await Notification.create({
       userId: userId || req.user._id,
+      role: role || req.user.role || 'all',
       title,
       message,
       type: type || 'info',
+      link: link || '',
+      isRead: false,
     });
 
     res.status(201).json({
@@ -23,21 +26,36 @@ const sendNotification = async (req, res, next) => {
   }
 };
 
-// @desc    Get current user's notifications
+// @desc    Get current user's role-based notifications
 // @route   GET /api/notifications
 // @access  Private
 const getNotifications = async (req, res, next) => {
   try {
+    const activeRole = req.user.user_role || req.user.role || 'donor';
     let notifications = await Notification.find({ userId: req.user._id }).sort({ createdAt: -1 });
 
     // Auto-seed initial welcome notification for any user with 0 notifications
     if (notifications.length === 0) {
-      const userRole = (req.user.user_role || req.user.role || 'partner').toUpperCase();
+      const roleUpper = activeRole.toUpperCase();
+      let roleSpecificWelcome = `Welcome ${req.user.name || 'Partner'}! Your ${roleUpper} account is active.`;
+      
+      if (activeRole === 'donor') {
+        roleSpecificWelcome += ' Post your surplus food to connect with local NGOs and volunteers.';
+      } else if (activeRole === 'ngo') {
+        roleSpecificWelcome += ' Browse nearby food posts and request pickups for community distribution.';
+      } else if (activeRole === 'volunteer') {
+        roleSpecificWelcome += ' Check your assignments to navigate and assist in food redistribution.';
+      } else if (activeRole === 'admin') {
+        roleSpecificWelcome += ' Monitor platform verifications, user roles, and photo reviews.';
+      }
+
       const welcomeNotif = await Notification.create({
         userId: req.user._id,
-        title: 'Welcome to FoodBridge AI!',
-        message: `Welcome ${req.user.name || 'Partner'}! Your ${userRole} account is active. Connect with local donors, shelters, and volunteers to eliminate surplus food waste.`,
+        role: activeRole,
+        title: `Welcome to FoodBridge AI (${roleUpper})`,
+        message: roleSpecificWelcome,
         type: 'system',
+        link: activeRole === 'donor' ? '/donor/donate' : activeRole === 'ngo' ? '/ngo/browse-food' : activeRole === 'volunteer' ? '/volunteer/assignments' : '/admin',
         isRead: false,
       });
       notifications = [welcomeNotif];

@@ -7,6 +7,7 @@ import {
   Package,
   MessageSquare,
   User,
+  Bell,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -35,6 +36,11 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
       path: '/admin/verifications',
       icon: ShieldCheck,
       badge: 'Review',
+    },
+    {
+      name: 'Notifications',
+      path: '/admin/notifications',
+      icon: Bell,
     },
     {
       name: 'Manage Users',

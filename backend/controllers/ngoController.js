@@ -2,6 +2,7 @@ const Donation = require('../models/Donation');
 const NgoRequest = require('../models/NgoRequest');
 const VolunteerTask = require('../models/VolunteerTask');
 const User = require('../models/User');
+const { createNotification } = require('../utils/notificationHelper');
 
 const resolveDonationImages = (d) => {
   if (!d) return d;
@@ -104,6 +105,29 @@ const acceptDonation = async (req, res, next) => {
       ngoId: req.user._id,
       status: 'assigned',
     });
+
+    // Send role-based real-time notifications to Donor and Volunteer
+    if (donation.donorId) {
+      await createNotification({
+        userId: donation.donorId,
+        role: 'donor',
+        title: 'Donation Accepted by NGO',
+        message: `Great news! Your food donation '${donation.title}' has been accepted by ${req.user.organizationName || req.user.name}.`,
+        type: 'success',
+        link: '/donor/my-donations',
+      });
+    }
+
+    if (req.body.volunteerId) {
+      await createNotification({
+        userId: req.body.volunteerId,
+        role: 'volunteer',
+        title: 'New Pickup Task Assigned',
+        message: `You have been assigned to pick up donation '${donation.title}' for ${req.user.organizationName || req.user.name}.`,
+        type: 'urgent',
+        link: '/volunteer/assignments',
+      });
+    }
 
     res.json({
       success: true,

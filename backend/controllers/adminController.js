@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Donation = require('../models/Donation');
 const VolunteerTask = require('../models/VolunteerTask');
 const Feedback = require('../models/Feedback');
+const { createNotification } = require('../utils/notificationHelper');
 
 // @desc    Get pending NGOs awaiting verification
 // @route   GET /api/admin/pending-ngos
@@ -49,6 +50,16 @@ const approveUser = async (req, res, next) => {
     user.rejectionReason = '';
     await user.save();
 
+    const targetRole = user.user_role || user.role || 'donor';
+    await createNotification({
+      userId: user._id,
+      role: targetRole,
+      title: 'Account Verification Approved 🎉',
+      message: `Congratulations ${user.name}! Your ${targetRole.toUpperCase()} verification has been approved. You now have full access to FoodBridge AI.`,
+      type: 'success',
+      link: targetRole === 'volunteer' ? '/volunteer' : targetRole === 'ngo' ? '/ngo' : '/donor',
+    });
+
     res.json({
       success: true,
       message: `User ${user.name} approved successfully`,
@@ -73,6 +84,16 @@ const rejectUser = async (req, res, next) => {
     user.verificationStatus = 'rejected';
     user.rejectionReason = rejectionReason || 'Document incomplete or illegible. Please re-upload clear government-issued document.';
     await user.save();
+
+    const targetRole = user.user_role || user.role || 'donor';
+    await createNotification({
+      userId: user._id,
+      role: targetRole,
+      title: 'Account Verification Action Required',
+      message: `Your ${targetRole.toUpperCase()} verification was rejected. Reason: ${user.rejectionReason}`,
+      type: 'warning',
+      link: targetRole === 'volunteer' ? '/volunteer/doc-verification' : targetRole === 'ngo' ? '/ngo/verification' : '/donor/profile',
+    });
 
     res.json({
       success: true,

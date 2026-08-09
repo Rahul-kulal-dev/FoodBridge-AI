@@ -59,6 +59,7 @@ import VolunteerProfilePage from './volunteer/profile/page';
 import AdminLayout from './admin/layout';
 import AdminDashboardPage from './admin/page';
 import AdminVerificationsPage from './admin/verifications/page';
+import AdminNotificationsPage from './admin/notifications/page';
 import AdminUsersPage from './admin/users/page';
 import AdminDonationsPage from './admin/donations/page';
 import AdminFeedbackPage from './admin/feedback/page';
@@ -151,6 +152,7 @@ function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
               <Route path="verifications" element={<AdminVerificationsPage />} />
+              <Route path="notifications" element={<AdminNotificationsPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="donations" element={<AdminDonationsPage />} />
               <Route path="feedback" element={<AdminFeedbackPage />} />

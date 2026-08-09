@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const { notifyAdmins } = require('../utils/notificationHelper');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id, user_role) => {
@@ -43,17 +44,28 @@ const registerUser = async (req, res, next) => {
       locationUpdatedAt: new Date(),
     });
 
-    // Create initial welcome notification for new user
+    // Create initial welcome notification for new user and alert admins
     try {
       await Notification.create({
         userId: user._id,
-        title: 'Welcome to FoodBridge AI!',
+        role: assignedRole,
+        title: `Welcome to FoodBridge AI (${assignedRole.toUpperCase()})`,
         message: `Welcome ${user.name || 'Partner'}! Your ${assignedRole.toUpperCase()} account is active. Connect with local donors, shelters, and volunteers to eliminate surplus food waste.`,
         type: 'system',
+        link: assignedRole === 'donor' ? '/donor/donate' : assignedRole === 'ngo' ? '/ngo/browse-food' : assignedRole === 'volunteer' ? '/volunteer/assignments' : '/admin',
         isRead: false,
       });
+
+      if (assignedRole !== 'admin') {
+        await notifyAdmins({
+          title: 'New Partner Registration Pending',
+          message: `${user.name || 'A user'} registered as ${assignedRole.toUpperCase()} and requires account document review.`,
+          type: 'warning',
+          link: '/admin/verifications',
+        });
+      }
     } catch (notifErr) {
-      console.warn('Welcome notification creation notice:', notifErr.message);
+      console.warn('Notification creation notice:', notifErr.message);
     }
 
     res.status(201).json({

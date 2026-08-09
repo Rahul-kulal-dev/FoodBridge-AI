@@ -1,5 +1,6 @@
 const Donation = require('../models/Donation');
 const { uploadToCloudinary } = require('../config/cloudinary');
+const { notifyNgos } = require('../utils/notificationHelper');
 
 // @desc    Create a new donation
 // @route   POST /api/donations
@@ -90,6 +91,14 @@ const createDonation = async (req, res, next) => {
       image: primaryImage,
       images: imageArray.length > 0 ? imageArray : [primaryImage],
       status: 'available',
+    });
+
+    // Notify all active NGOs of new nearby food availability
+    notifyNgos({
+      title: 'New Surplus Food Available',
+      message: `Fresh food '${donation.title}' (${donation.quantity} ${donation.unit}) was posted nearby by ${req.user.name || 'a Donor'}.`,
+      type: 'info',
+      link: '/ngo/browse-food',
     });
 
     res.status(201).json({

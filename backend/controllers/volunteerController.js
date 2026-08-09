@@ -4,6 +4,7 @@ const Feedback = require('../models/Feedback');
 const User = require('../models/User');
 const VolunteerLocation = require('../models/VolunteerLocation');
 const { uploadToCloudinary } = require('../config/cloudinary');
+const { createNotification, notifyAdmins } = require('../utils/notificationHelper');
 
 // @desc    Get volunteer stats from MongoDB
 // @route   GET /api/volunteer/stats
@@ -152,6 +153,36 @@ const uploadPickupVerification = async (req, res, next) => {
       { new: true }
     );
 
+    // Notify Donor, NGO, and Admins about pickup photo verification
+    if (updatedDonation) {
+      if (updatedDonation.donorId) {
+        await createNotification({
+          userId: updatedDonation.donorId,
+          role: 'donor',
+          title: 'Donation Picked Up',
+          message: `Volunteer ${req.user.name || 'Courier'} has picked up your donation '${updatedDonation.title}'.`,
+          type: 'info',
+          link: '/donor/my-donations',
+        });
+      }
+      if (updatedDonation.ngoId) {
+        await createNotification({
+          userId: updatedDonation.ngoId,
+          role: 'ngo',
+          title: 'Food En Route',
+          message: `Volunteer ${req.user.name || 'Courier'} picked up '${updatedDonation.title}' and is en route.`,
+          type: 'info',
+          link: '/ngo/track-volunteer',
+        });
+      }
+      await notifyAdmins({
+        title: 'Pickup Photo Uploaded for Review',
+        message: `Volunteer ${req.user.name || 'Courier'} uploaded a pickup photo for '${updatedDonation.title}'.`,
+        type: 'info',
+        link: '/admin/donations',
+      });
+    }
+
     res.json({
       success: true,
       message: 'Pickup verification uploaded successfully',
@@ -197,7 +228,31 @@ const updateTaskStatus = async (req, res, next) => {
     if (task.pickupPhoto) {
       donationUpdate.pickupPhoto = task.pickupPhoto;
     }
-    await Donation.findByIdAndUpdate(task.donationId, donationUpdate);
+    const updatedDonation = await Donation.findByIdAndUpdate(task.donationId, donationUpdate, { new: true });
+
+    // Send notifications when delivery status is updated
+    if (updatedDonation && status === 'delivered') {
+      if (updatedDonation.donorId) {
+        await createNotification({
+          userId: updatedDonation.donorId,
+          role: 'donor',
+          title: 'Donation Delivered Successfully',
+          message: `Your food donation '${updatedDonation.title}' was successfully delivered! Thank you for eliminating waste.`,
+          type: 'success',
+          link: '/donor/my-donations',
+        });
+      }
+      if (updatedDonation.ngoId) {
+        await createNotification({
+          userId: updatedDonation.ngoId,
+          role: 'ngo',
+          title: 'Food Donation Delivered',
+          message: `Donation '${updatedDonation.title}' has been delivered to your location by volunteer ${req.user.name || 'Courier'}.`,
+          type: 'success',
+          link: '/ngo/food-details',
+        });
+      }
+    }
 
     res.json({
       success: true,
