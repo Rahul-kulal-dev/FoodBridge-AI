@@ -29,6 +29,7 @@ const DonorDashboardPage = () => {
   const user = authUser || { name: 'Donor', verificationStatus: 'pending' };
 
   const [donations, setDonations] = useState([]);
+  const [aiPrediction, setAiPrediction] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchMyDonations = async () => {
@@ -76,9 +77,25 @@ const DonorDashboardPage = () => {
     }
   };
 
+  const fetchAiPrediction = async () => {
+    try {
+      if (!token) return;
+      const res = await fetch(getApiUrl('/api/donations/ai-predictions'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok && data.predictions) {
+        setAiPrediction(data.predictions);
+      }
+    } catch (err) {
+      console.warn('Error fetching AI prediction for dashboard widget:', err);
+    }
+  };
+
   useEffect(() => {
     fetchMyDonations();
-  }, []);
+    fetchAiPrediction();
+  }, [token]);
 
   // Check donor verification status
   const isVerified = user.verificationStatus === 'approved';
@@ -154,11 +171,10 @@ const DonorDashboardPage = () => {
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-[-0.04em]">
             Welcome back, <span className="text-emerald-600">{user.organizationName || user.name || 'Donor'}</span>
           </h1>
-          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border w-fit ${
-            isVerified 
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' 
-              : 'bg-amber-50 text-amber-700 border-amber-200/80'
-          }`}>
+          <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border w-fit ${isVerified
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+            : 'bg-amber-50 text-amber-700 border-amber-200/80'
+            }`}>
             {isVerified ? (
               <>
                 <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -223,11 +239,10 @@ const DonorDashboardPage = () => {
               </div>
               <div className="mt-3 sm:mt-4">
                 <div
-                  className={`font-black text-[#0F172A] tracking-[-0.03em] ${
-                    typeof stat.value === 'string' && stat.value.length > 6
-                      ? 'text-sm sm:text-base lg:text-lg leading-snug'
-                      : 'text-xl sm:text-2xl lg:text-3xl'
-                  }`}
+                  className={`font-black text-[#0F172A] tracking-[-0.03em] ${typeof stat.value === 'string' && stat.value.length > 6
+                    ? 'text-sm sm:text-base lg:text-lg leading-snug'
+                    : 'text-xl sm:text-2xl lg:text-3xl'
+                    }`}
                 >
                   {stat.value}
                 </div>
@@ -239,6 +254,63 @@ const DonorDashboardPage = () => {
           );
         })}
       </div>
+
+      {/* 4. FastAPI AI Surplus Food Prediction Widget Card (Clean Light Aesthetic) */}
+      {aiPrediction && (
+        <div className="bg-gradient-to-br from-[#F0FDF4] via-white to-[#F8FAFC] p-5 sm:p-6 rounded-2xl border border-emerald-200/80 shadow-soft-card space-y-4 relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-100 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0 font-bold">
+                <Brain className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-extrabold text-[#0F172A] tracking-tight">
+                  AI Surplus Food Forecast
+                </h3>
+                <p className="text-[11px] text-[#64748B] font-medium">
+                  Analyzed from historical MongoDB donation patterns, categories, and expiration rates.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200 w-fit shrink-0">
+              Advisory Mode Active
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <div className="space-y-1.5 p-3.5 rounded-xl bg-white border border-emerald-100 shadow-xs">
+              <span className="text-[10px] uppercase font-bold text-[#64748B] block tracking-wider">
+                Predicted Surplus Quantity
+              </span>
+              <div className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight">
+                {aiPrediction.predictedQuantity ?? 0} <span className="text-lg text-emerald-600 font-bold">{aiPrediction.unit || 'kg'}</span>
+              </div>
+              <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                <span>Model Confidence:</span>
+                <span className="font-extrabold">{aiPrediction.confidenceScore || '0%'}</span>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 space-y-2 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+              <span className="text-[10px] uppercase font-extrabold text-emerald-700 tracking-wider block">
+                Key Contributing Factors
+              </span>
+              <ul className="space-y-1.5 text-xs text-[#334155]">
+                {(aiPrediction.contributingFactors || ['Not enough donation data for prediction']).slice(0, 2).map((factor, fIdx) => (
+                  <li key={fIdx} className="flex items-start gap-2">
+                    <span className="text-emerald-500 font-bold mt-0.5">•</span>
+                    <span className="line-clamp-1 font-medium">{factor}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] text-amber-800 bg-amber-50/90 px-2.5 py-1 rounded-lg border border-amber-200/80 font-medium">
+                <span className="font-bold uppercase text-[10px] text-amber-900 shrink-0">Note:</span>
+                <span className="truncate">Purely advisory for inventory planning. Does not auto-create donations.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
 
 
