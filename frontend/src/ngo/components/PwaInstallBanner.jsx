@@ -2,18 +2,34 @@ import React, { useState } from 'react';
 import { Download, X, Smartphone, ShieldCheck, Info, CheckCircle2 } from 'lucide-react';
 
 const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, title = "Install FoodBridge AI App" }) => {
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    return typeof window !== 'undefined' && localStorage.getItem('foodbridge_pwa_dismissed') === 'true';
+  });
   const [showInstructions, setShowInstructions] = useState(false);
 
-  if (isInstalled || dismissed) {
+  const isAlreadyInstalled =
+    isInstalled ||
+    (typeof window !== 'undefined' && localStorage.getItem('foodbridge_pwa_installed') === 'true');
+
+  if (isAlreadyInstalled || dismissed) {
     return null;
   }
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('foodbridge_pwa_dismissed', 'true');
+    }
+  };
 
   const handleInstall = async () => {
     if (isInstallable && triggerInstallPrompt) {
       const success = await triggerInstallPrompt();
       if (success) {
-        setDismissed(true);
+        handleDismiss();
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('foodbridge_pwa_installed', 'true');
+        }
       }
     } else {
       setShowInstructions(true);
@@ -54,7 +70,7 @@ const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, ti
               <span>Install PWA App</span>
             </button>
             <button
-              onClick={() => setDismissed(true)}
+              onClick={handleDismiss}
               className="p-2 text-emerald-200 hover:text-white hover:bg-white/15 rounded-xl transition-colors cursor-pointer"
               title="Dismiss prompt"
             >

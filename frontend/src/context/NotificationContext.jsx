@@ -14,10 +14,20 @@ export function NotificationProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [isSupportedDevice, setIsSupportedDevice] = useState(true);
 
-  // Check existing Notification permission on mount
+  // Check existing Notification permission on mount & auto-fetch token if granted
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
-      setPermissionStatus(Notification.permission);
+      const currentPerm = Notification.permission;
+      setPermissionStatus(currentPerm);
+
+      if (currentPerm === 'granted') {
+        const savedToken = localStorage.getItem('foodbridge_fcm_token');
+        if (savedToken) {
+          setFcmToken(savedToken);
+        } else {
+          requestNotificationPermission();
+        }
+      }
     } else {
       setIsSupportedDevice(false);
       setPermissionStatus('unsupported');
@@ -205,7 +215,7 @@ export function NotificationProvider({ children }) {
       value={{
         permissionStatus,
         fcmToken,
-        isPushEnabled: permissionStatus === 'granted' && !!fcmToken,
+        isPushEnabled: permissionStatus === 'granted',
         loading,
         isSupportedDevice,
         toastNotif,

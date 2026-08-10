@@ -136,6 +136,66 @@ const VolunteerNotificationsPage = () => {
 
   return (
     <div className="w-full space-y-4 sm:space-y-6 animate-fade-in pb-12">
+      {/* Real-Time FCM Push Banner - Placed at Top */}
+      <div className={`p-4 sm:p-5 rounded-2xl border shadow-lg transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+        isPushEnabled
+          ? 'bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 text-white border-emerald-500/30 shadow-emerald-900/10'
+          : 'bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 text-white border-emerald-400/30 shadow-emerald-900/10'
+      }`}>
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-white/20 text-white rounded-xl shrink-0 backdrop-blur-md border border-white/20">
+            <Bell className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-black text-white tracking-tight">FCM Real-Time Push Notifications</h3>
+              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider backdrop-blur-md ${
+                isPushEnabled
+                  ? 'bg-white/20 text-white border border-white/40 shadow-xs'
+                  : 'bg-amber-400/30 text-amber-100 border border-amber-300/40'
+              }`}>
+                {isPushEnabled ? 'Active' : 'Disabled'}
+              </span>
+            </div>
+            <p className="text-xs text-emerald-50/90 font-medium mt-0.5">
+              {isPushEnabled
+                ? 'Real-time FCM push notifications active! Receive instant pickup alerts even when browser is closed.'
+                : permissionStatus === 'denied'
+                ? 'Notifications blocked. Please enable notification permissions in browser settings.'
+                : 'Enable push notifications to instantly get notified when new pickup tasks are available.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
+          {!isPushEnabled && permissionStatus !== 'denied' && (
+            <button
+              onClick={requestNotificationPermission}
+              disabled={pushLoading}
+              className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-emerald-50 text-emerald-800 hover:text-emerald-900 text-xs font-black rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 border border-white/80"
+            >
+              {pushLoading ? 'Enabling...' : 'Enable Real-Time Push'}
+            </button>
+          )}
+
+          {isPushEnabled && (
+            <button
+              onClick={handleTestPush}
+              className="w-full sm:w-auto px-4 py-2 bg-white/15 hover:bg-white/25 text-white text-xs font-extrabold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/25 backdrop-blur-md"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>Send Test Push</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {testPushStatus && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl shadow-xs">
+          {testPushStatus}
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
@@ -164,60 +224,6 @@ const VolunteerNotificationsPage = () => {
           </button>
         )}
       </div>
-
-      {/* Real-Time FCM Push Banner */}
-      <div className="bg-gradient-to-r from-[#0F172A] to-slate-800 text-white p-4 sm:p-5 rounded-2xl border border-slate-700 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-[#10B981]/20 text-[#10B981] rounded-xl shrink-0">
-            <Bell className="w-5 h-5 animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-extrabold text-white">FCM Real-Time Push Notifications</h3>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                isPushEnabled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-              }`}>
-                {isPushEnabled ? 'Active' : 'Disabled'}
-              </span>
-            </div>
-            <p className="text-xs text-slate-300 mt-0.5">
-              {isPushEnabled
-                ? 'Real-time FCM push notifications active! Receive instant pickup alerts even when browser is closed.'
-                : permissionStatus === 'denied'
-                ? 'Notifications blocked. Please enable notification permissions in browser settings.'
-                : 'Enable push notifications to instantly get notified when new pickup tasks are available.'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0">
-          {!isPushEnabled && permissionStatus !== 'denied' && (
-            <button
-              onClick={requestNotificationPermission}
-              disabled={pushLoading}
-              className="w-full sm:w-auto px-4 py-2 bg-[#10B981] hover:bg-[#059669] text-white text-xs font-extrabold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
-            >
-              {pushLoading ? 'Enabling...' : 'Enable Real-Time Push'}
-            </button>
-          )}
-
-          {isPushEnabled && (
-            <button
-              onClick={handleTestPush}
-              className="w-full sm:w-auto px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-slate-600"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Send Test Push</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {testPushStatus && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl">
-          {testPushStatus}
-        </div>
-      )}
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 bg-white p-2 rounded-xl border border-[#E7EAF0] shadow-xs">

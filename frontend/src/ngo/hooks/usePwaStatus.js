@@ -16,8 +16,14 @@ export function usePwaStatus() {
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Check if app is already running in standalone mode (installed)
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    // Check if app is already running in standalone mode (installed) or stored in localStorage
+    const isStandalone =
+      (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) ||
+      (typeof window !== 'undefined' && window.navigator.standalone) ||
+      (typeof document !== 'undefined' && document.referrer.includes('android-app://')) ||
+      localStorage.getItem('foodbridge_pwa_installed') === 'true';
+
+    if (isStandalone) {
       setIsInstalled(true);
     }
 
@@ -32,6 +38,7 @@ export function usePwaStatus() {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
+      localStorage.setItem('foodbridge_pwa_installed', 'true');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
