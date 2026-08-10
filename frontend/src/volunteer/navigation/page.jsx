@@ -198,37 +198,37 @@ const NavigationPage = () => {
 
   const osmMarkers = currentStep >= 3 ? [
     {
-      lat: 12.9750,
-      lng: 77.6000,
+      lat: 12.9141,
+      lng: 74.8560,
       title: `Volunteer Courier (${user?.name || 'You'})`,
       description: 'In Transit to NGO',
       iconType: 'courier',
     },
     {
-      lat: 12.9850,
-      lng: 77.6150,
+      lat: 12.9250,
+      lng: 74.8750,
       title: activeTask.ngoName,
       description: activeTask.ngoAddress,
       iconType: 'ngo',
     },
   ] : [
     {
-      lat: 12.9650,
-      lng: 77.5850,
+      lat: 12.9050,
+      lng: 74.8450,
       title: `Volunteer Courier (${user?.name || 'You'})`,
       description: 'Current Location',
       iconType: 'courier',
     },
     {
-      lat: 12.9750,
-      lng: 77.6000,
+      lat: 12.9141,
+      lng: 74.8560,
       title: activeTask.donorName,
       description: activeTask.donorAddress,
       iconType: 'donor',
     },
     {
-      lat: 12.9850,
-      lng: 77.6150,
+      lat: 12.9250,
+      lng: 74.8750,
       title: activeTask.ngoName,
       description: activeTask.ngoAddress,
       iconType: 'ngo',
@@ -379,7 +379,7 @@ const NavigationPage = () => {
         ngoLocation={{
           lat: validateCoordinates(activeTask.ngoLat, activeTask.ngoLng)
             ? Number(activeTask.ngoLat)
-            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.latitude) + 0.015 : 12.9700),
+            : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.latitude) + 0.015 : 12.9250),
           lng: validateCoordinates(activeTask.ngoLat, activeTask.ngoLng)
             ? Number(activeTask.ngoLng)
             : (validateCoordinates(user?.latitude, user?.longitude) ? Number(user.longitude) + 0.015 : 74.9000),

@@ -186,7 +186,7 @@ const CreateDonationPage = () => {
     if (savedLocation) {
       setAddress(savedLocation);
     } else {
-      setAddress('Bengaluru, Karnataka, India');
+      setAddress('Mangaluru, Karnataka, India');
     }
     setIsLocating(false);
   };
