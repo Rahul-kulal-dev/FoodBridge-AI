@@ -36,13 +36,14 @@ export function NotificationProvider({ children }) {
 
   // Sync token registration with backend when user logs in and permission is already granted
   const registerTokenWithBackend = useCallback(async (deviceToken) => {
-    if (!token || !deviceToken) return;
+    const authToken = token || localStorage.getItem('foodbridge_token');
+    if (!authToken || !deviceToken) return;
     try {
       const res = await fetch(getApiUrl('/api/notifications/fcm-token'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ token: deviceToken }),
       });
@@ -76,8 +77,9 @@ export function NotificationProvider({ children }) {
             appId: firebaseConfig.appId || '',
             measurementId: firebaseConfig.measurementId || '',
           }).toString();
-          swRegistration = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${swParams}`);
-          console.log('[FCM Context] Service Worker registered for FCM:', swRegistration.scope);
+          await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${swParams}`);
+          swRegistration = await navigator.serviceWorker.ready;
+          console.log('[FCM Context] Service Worker active & ready for FCM:', swRegistration?.scope);
         } catch (swErr) {
           console.warn('[FCM Context] SW registration fallback:', swErr);
         }
@@ -90,18 +92,17 @@ export function NotificationProvider({ children }) {
       if (result === 'granted') {
         const messaging = await getFirebaseMessaging();
         if (messaging) {
-          let swReg = swRegistration;
-          if ('serviceWorker' in navigator && !swReg) {
+          if ('serviceWorker' in navigator && !swRegistration) {
             try {
-              swReg = await navigator.serviceWorker.ready;
+              swRegistration = await navigator.serviceWorker.ready;
             } catch (e) {
               console.warn('[FCM Context] SW ready wait warning:', e);
             }
           }
 
           const tokenOptions = {};
-          if (swReg) {
-            tokenOptions.serviceWorkerRegistration = swReg;
+          if (swRegistration) {
+            tokenOptions.serviceWorkerRegistration = swRegistration;
           }
           if (VAPID_KEY && VAPID_KEY.trim()) {
             tokenOptions.vapidKey = VAPID_KEY.trim();
@@ -194,7 +195,7 @@ export function NotificationProvider({ children }) {
       if (messaging) {
         unsubscribe = onMessage(messaging, (payload) => {
           console.log('[FCM Context] Received foreground FCM payload:', payload);
-          const title = payload.notification?.title || payload.data?.title || 'New Notification';
+          const title = payload.notification?.title || payload.data?.title || 'FoodBridge AI Alert';
           const body = payload.notification?.body || payload.data?.body || '';
           const link = payload.data?.link || '';
           const type = payload.data?.type || 'info';
@@ -206,6 +207,33 @@ export function NotificationProvider({ children }) {
             link,
             type,
           });
+
+          // Trigger native system banner popup on OS/browser level
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            try {
+              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.ready.then((reg) => {
+                  reg.showNotification(title, {
+                    body,
+                    icon: '/web-app-manifest-192x192.png',
+                    badge: '/favicon-96x96.png',
+                    tag: type || 'foodbridge-fcm-foreground',
+                    data: { link },
+                  });
+                });
+              } else {
+                new Notification(title, {
+                  body,
+                  icon: '/web-app-manifest-192x192.png',
+                  badge: '/favicon-96x96.png',
+                  tag: type || 'foodbridge-fcm-foreground',
+                  data: { link },
+                });
+              }
+            } catch (notifErr) {
+              console.warn('[FCM Context] Native notification popup fallback error:', notifErr);
+            }
+          }
         });
       }
     };
@@ -219,10 +247,11 @@ export function NotificationProvider({ children }) {
     };
   }, [permissionStatus]);
 
-  // Sync token when user authenticates
+  // Sync token when user authenticates or on page mount
   useEffect(() => {
-    if (user && token && permissionStatus === 'granted') {
-      const savedToken = localStorage.getItem('foodbridge_fcm_token');
+    const authToken = token || localStorage.getItem('foodbridge_token');
+    if (authToken && permissionStatus === 'granted') {
+      const savedToken = fcmToken || localStorage.getItem('foodbridge_fcm_token');
       if (savedToken) {
         setFcmToken(savedToken);
         registerTokenWithBackend(savedToken);
@@ -230,7 +259,7 @@ export function NotificationProvider({ children }) {
         requestNotificationPermission();
       }
     }
-  }, [user, token, permissionStatus, registerTokenWithBackend]);
+  }, [token, permissionStatus, registerTokenWithBackend]);
 
   const dismissToast = () => setToastNotif(null);
 

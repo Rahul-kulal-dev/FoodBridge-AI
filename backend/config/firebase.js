@@ -22,10 +22,16 @@ try {
       }
     } else if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
       try {
+        let rawPrivateKey = process.env.FIREBASE_PRIVATE_KEY.trim();
+        if (rawPrivateKey.startsWith('"') && rawPrivateKey.endsWith('"')) {
+          rawPrivateKey = rawPrivateKey.slice(1, -1);
+        }
+        const formattedPrivateKey = rawPrivateKey.replace(/\\n/g, '\n');
+
         credential = admin.credential.cert({
           projectId: process.env.FIREBASE_PROJECT_ID || '',
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL.trim(),
+          privateKey: formattedPrivateKey,
         });
         hasServiceAccountCredential = true;
       } catch (err) {
