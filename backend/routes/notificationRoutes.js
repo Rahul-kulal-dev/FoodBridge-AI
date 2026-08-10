@@ -9,8 +9,9 @@ const {
   registerFcmToken,
   removeFcmToken,
   testPushNotification,
+  broadcastNotification,
 } = require('../controllers/notificationController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, authorizeRoles } = require('../middleware/authMiddleware');
 
 router.use(protect);
 
@@ -20,9 +21,10 @@ router.patch('/read-all', markAllAsRead);
 router.patch('/:id/read', markAsRead);
 router.delete('/:id', deleteNotification);
 
-// FCM Push Notification Token Management & Testing
+// FCM Push Notification Token Management, Testing & Admin Broadcast
 router.post('/fcm-token', registerFcmToken);
 router.delete('/fcm-token', removeFcmToken);
 router.post('/test-push', testPushNotification);
+router.post('/broadcast', authorizeRoles('admin'), broadcastNotification);
 
 module.exports = router;

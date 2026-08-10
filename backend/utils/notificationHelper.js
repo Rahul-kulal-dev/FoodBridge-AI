@@ -134,9 +134,77 @@ const notifyVolunteers = async ({ title, message, type = 'info', link = '/volunt
   }
 };
 
+/**
+ * Send broadcast notification to all registered users (donors, ngos, volunteers, admins)
+ */
+const notifyAllUsers = async ({ title, message, type = 'system', link = '/', targetRole = 'all' }) => {
+  try {
+    let query = {};
+    if (targetRole && targetRole !== 'all') {
+      query = { $or: [{ role: targetRole }, { user_role: targetRole }] };
+    }
+
+    const targetUsers = await User.find(query).select('_id fcmTokens role user_role');
+    if (!targetUsers || targetUsers.length === 0) {
+      return { success: false, reason: 'No matching target users found in database' };
+    }
+
+    // 1. Create in-app notifications in MongoDB history for all target users
+    const notifDocs = targetUsers.map((u) => ({
+      userId: u._id,
+      role: u.user_role || u.role || 'all',
+      title,
+      message,
+      type,
+      link,
+      isRead: false,
+    }));
+    await Notification.insertMany(notifDocs);
+
+    // 2. Aggregate all active FCM push tokens across all target users
+    const allTokens = [];
+    targetUsers.forEach((u) => {
+      if (u.fcmTokens && Array.isArray(u.fcmTokens)) {
+        u.fcmTokens.forEach((t) => {
+          if (t && typeof t === 'string' && t.trim().length > 0) {
+            allTokens.push(t.trim());
+          }
+        });
+      }
+    });
+
+    const uniqueTokens = [...new Set(allTokens)];
+
+    // 3. Dispatch FCM Push Notification via Firebase Admin SDK
+    let pushResult = { success: false, successCount: 0, failureCount: 0 };
+    if (uniqueTokens.length > 0) {
+      pushResult = await sendPushNotification({
+        tokens: uniqueTokens,
+        title,
+        body: message,
+        link,
+        type,
+        role: targetRole || 'all',
+      });
+    }
+
+    return {
+      success: true,
+      totalUsers: targetUsers.length,
+      tokensCount: uniqueTokens.length,
+      pushResult,
+    };
+  } catch (error) {
+    console.error('[Notify All Users Error]:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   createNotification,
   notifyAdmins,
   notifyNgos,
   notifyVolunteers,
+  notifyAllUsers,
 };
+

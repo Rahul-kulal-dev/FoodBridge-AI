@@ -111,6 +111,61 @@ const AdminNotificationsPage = () => {
     }
   };
 
+  const [broadcastTitle, setBroadcastTitle] = useState('');
+  const [broadcastBody, setBroadcastBody] = useState('');
+  const [targetAudience, setTargetAudience] = useState('all');
+  const [broadcasting, setBroadcasting] = useState(false);
+  const [broadcastStatus, setBroadcastStatus] = useState(null);
+
+  const handleTriggerBroadcast = async (e) => {
+    e.preventDefault();
+    if (!broadcastTitle.trim() || !broadcastBody.trim()) {
+      setBroadcastStatus({ type: 'error', text: 'Please fill in both notification title and message body.' });
+      return;
+    }
+
+    setBroadcasting(true);
+    setBroadcastStatus(null);
+
+    try {
+      const authToken = token || localStorage.getItem('foodbridge_token');
+      const res = await fetch(getApiUrl('/api/notifications/broadcast'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          title: broadcastTitle.trim(),
+          message: broadcastBody.trim(),
+          targetRole: targetAudience,
+          type: 'system',
+          link: '/',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setBroadcastStatus({
+          type: 'success',
+          text: `Broadcast sent via Firebase FCM! Reached ${data.details?.totalUsers || 0} user account(s) and ${data.details?.tokensCount || 0} device token(s).`,
+        });
+        setBroadcastTitle('');
+        setBroadcastBody('');
+        fetchNotifications();
+      } else {
+        setBroadcastStatus({
+          type: 'error',
+          text: data.message || 'Failed to dispatch broadcast notification.',
+        });
+      }
+    } catch (err) {
+      setBroadcastStatus({ type: 'error', text: `Broadcast request failed: ${err.message}` });
+    } finally {
+      setBroadcasting(false);
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.read && !n.isRead).length;
 
   return (
@@ -174,6 +229,89 @@ const AdminNotificationsPage = () => {
           {testPushStatus}
         </div>
       )}
+
+      {/* Push Notifications Broadcast Section */}
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight">Push Notifications</h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Broadcast important alerts to all installed staff and user devices instantly.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-soft-card space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shrink-0">
+              <Bell className="w-5 h-5" />
+            </div>
+            <h3 className="text-base sm:text-lg font-extrabold text-[#0F172A]">Compose Broadcast</h3>
+          </div>
+
+          <form onSubmit={handleTriggerBroadcast} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Notification Title</label>
+              <input
+                type="text"
+                value={broadcastTitle}
+                onChange={(e) => setBroadcastTitle(e.target.value)}
+                placeholder="e.g. System Maintenance"
+                className="w-full px-4 py-3 bg-[#F8FAFC] border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Target Audience</label>
+              <select
+                value={targetAudience}
+                onChange={(e) => setTargetAudience(e.target.value)}
+                className="w-full px-4 py-3 bg-[#F8FAFC] border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium cursor-pointer"
+              >
+                <option value="all">All Users (Donors, NGOs, Volunteers, Admins)</option>
+                <option value="donor">Donors Only</option>
+                <option value="ngo">NGOs Only</option>
+                <option value="volunteer">Volunteers Only</option>
+                <option value="admin">Admins Only</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Message Body</label>
+              <textarea
+                value={broadcastBody}
+                onChange={(e) => setBroadcastBody(e.target.value)}
+                rows={4}
+                placeholder="Enter your message details..."
+                className="w-full px-4 py-3 bg-[#F8FAFC] border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium resize-none"
+                required
+              />
+            </div>
+
+            <p className="text-xs text-slate-500 flex items-start gap-1.5 pt-1">
+              <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <span>This message will be dispatched via Firebase Cloud Messaging bypassing the browser. Users will see it even if the app UI is closed.</span>
+            </p>
+
+            {broadcastStatus && (
+              <div className={`p-3.5 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                broadcastStatus.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                {broadcastStatus.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />}
+                <span>{broadcastStatus.text}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={broadcasting}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#475569] hover:bg-[#334155] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              <span>{broadcasting ? 'Dispatching Broadcast...' : 'Trigger Broadcast'}</span>
+            </button>
+          </form>
+        </div>
+      </div>
 
       {/* Top Header Card */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#E7EAF0] shadow-soft-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">

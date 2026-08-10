@@ -1,6 +1,6 @@
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const { createNotification } = require('../utils/notificationHelper');
+const { createNotification, notifyAllUsers } = require('../utils/notificationHelper');
 const { sendPushNotification } = require('../config/firebase');
 
 // @desc    Send notification to a user
@@ -222,6 +222,35 @@ const testPushNotification = async (req, res, next) => {
   }
 };
 
+// @desc    Admin broadcast push notification to all users via Firebase FCM
+// @route   POST /api/notifications/broadcast
+// @access  Private/Admin
+const broadcastNotification = async (req, res, next) => {
+  try {
+    const { title, message, targetRole, type, link } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({ success: false, message: 'Notification title and message body are required' });
+    }
+
+    const result = await notifyAllUsers({
+      title: title.trim(),
+      message: message.trim(),
+      targetRole: targetRole || 'all',
+      type: type || 'system',
+      link: link || '/',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Push notification broadcast dispatched successfully via Firebase FCM',
+      details: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   sendNotification,
   getNotifications,
@@ -231,4 +260,6 @@ module.exports = {
   registerFcmToken,
   removeFcmToken,
   testPushNotification,
+  broadcastNotification,
 };
+
