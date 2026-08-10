@@ -9,6 +9,7 @@ node_modules/
 # Uploads directory
 uploads/*
 !uploads/.gitkeep
+*.json
 
 # Logs
 npm-debug.log*

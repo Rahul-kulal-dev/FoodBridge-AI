@@ -295,7 +295,8 @@ const getAIPredictions = async (req, res, next) => {
 
     // Call FastAPI service
     try {
-      const fastApiRes = await fetch('http://localhost:8000/predict-surplus', {
+      const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+      const fastApiRes = await fetch(`${aiServiceUrl}/predict-surplus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ donations: historicalPayload, donorId: req.user._id.toString() }),
