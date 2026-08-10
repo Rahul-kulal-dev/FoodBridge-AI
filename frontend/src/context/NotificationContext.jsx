@@ -90,24 +90,48 @@ export function NotificationProvider({ children }) {
       if (result === 'granted') {
         const messaging = await getFirebaseMessaging();
         if (messaging) {
-          const tokenOptions = {
-            serviceWorkerRegistration: swRegistration || undefined,
-          };
-          if (VAPID_KEY) {
-            tokenOptions.vapidKey = VAPID_KEY;
+          let swReg = swRegistration;
+          if ('serviceWorker' in navigator && !swReg) {
+            try {
+              swReg = await navigator.serviceWorker.ready;
+            } catch (e) {
+              console.warn('[FCM Context] SW ready wait warning:', e);
+            }
           }
 
-          const currentToken = await getToken(messaging, tokenOptions);
+          const tokenOptions = {};
+          if (swReg) {
+            tokenOptions.serviceWorkerRegistration = swReg;
+          }
+          if (VAPID_KEY && VAPID_KEY.trim()) {
+            tokenOptions.vapidKey = VAPID_KEY.trim();
+          }
+
+          let currentToken = null;
+          try {
+            currentToken = await getToken(messaging, tokenOptions);
+          } catch (tokenErr) {
+            console.warn('[FCM Context] Error getting token with VAPID key:', tokenErr.message);
+            try {
+              // Fallback without custom VAPID key options
+              currentToken = await getToken(messaging);
+            } catch (fallbackErr) {
+              console.error('[FCM Context] Fallback getToken error:', fallbackErr.message);
+            }
+          }
+
           if (currentToken) {
+            console.log('[FCM Context] Obtained FCM Token successfully:', currentToken.substring(0, 15) + '...');
             setFcmToken(currentToken);
             localStorage.setItem('foodbridge_fcm_token', currentToken);
-            if (token) {
+            const authToken = token || localStorage.getItem('foodbridge_token');
+            if (authToken) {
               await registerTokenWithBackend(currentToken);
             }
             setLoading(false);
             return true;
           } else {
-            console.warn('[FCM Context] No registration token available. Request permission to generate one.');
+            console.warn('[FCM Context] No registration token returned by Firebase.');
           }
         }
       }
