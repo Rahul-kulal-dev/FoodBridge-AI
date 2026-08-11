@@ -4,8 +4,13 @@
  */
 
 const getDynamicBaseUrl = () => {
-  if (import.meta.env.VITE_BACKEND_URL) return import.meta.env.VITE_BACKEND_URL;
-  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
+  // If explicitly provided via environment variables (and not default localhost fallback in production)
+  if (import.meta.env.VITE_BACKEND_URL && import.meta.env.VITE_BACKEND_URL !== 'http://localhost:5000') {
+    return import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '');
+  }
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '');
+  }
 
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const hostname = window.location.hostname;
@@ -20,12 +25,11 @@ const getDynamicBaseUrl = () => {
       return `${window.location.protocol}//${hostname}:5000`;
     }
 
-    // Cloud / Vercel / Netlify production deployment (e.g., frontend.vercel.app)
-    // Uses current origin without forcing :5000 which causes connection failure on Vercel
-    return window.location.origin;
+    // Production Vercel / Cloud deployment backend endpoint
+    return 'https://food-bridge-backend.vercel.app';
   }
 
-  return 'http://localhost:5000';
+  return 'https://food-bridge-backend.vercel.app';
 };
 
 export const API_BASE_URL = getDynamicBaseUrl();
