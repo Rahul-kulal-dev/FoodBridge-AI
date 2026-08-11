@@ -287,9 +287,12 @@ const NgoVerificationPage = () => {
                           <input
                             type="file"
                             className="hidden"
-                            accept=".pdf,.png,.jpg,.jpeg"
+                            accept="image/*,.pdf,application/pdf,.doc,.docx"
                             disabled={isUploading}
-                            onChange={(e) => handleFileUpload(field.label, e)}
+                            onChange={(e) => {
+                              handleFileUpload(field.label, e);
+                              e.target.value = '';
+                            }}
                           />
                         </label>
                       )}
@@ -305,13 +308,16 @@ const NgoVerificationPage = () => {
                     <span className="text-xs font-extrabold text-[#0F172A]">
                       {isUploading ? 'Uploading...' : `Upload ${field.label}`}
                     </span>
-                    <span className="text-[10px] text-[#64748B]">PDF, PNG, JPG up to 10MB</span>
+                    <span className="text-[10px] text-[#64748B]">PDF, PNG, JPG up to 15MB</span>
                     <input
                       type="file"
                       className="hidden"
-                      accept=".pdf,.png,.jpg,.jpeg"
+                      accept="image/*,.pdf,application/pdf,.doc,.docx"
                       disabled={isUploading}
-                      onChange={(e) => handleFileUpload(field.label, e)}
+                      onChange={(e) => {
+                        handleFileUpload(field.label, e);
+                        e.target.value = '';
+                      }}
                     />
                   </label>
                 )}

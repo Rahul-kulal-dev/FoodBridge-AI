@@ -316,8 +316,11 @@ const DonorVerificationPage = () => {
         <input
           ref={govIdInputRef}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          onChange={(e) => handleFileUpload(e.target.files, 'Government ID')}
+          accept="image/*,.pdf,application/pdf,.doc,.docx"
+          onChange={(e) => {
+            handleFileUpload(e.target.files, 'Government ID');
+            e.target.value = '';
+          }}
           className="hidden"
           disabled={uploadingDocType !== null}
         />
@@ -325,8 +328,11 @@ const DonorVerificationPage = () => {
         <input
           ref={businessProofInputRef}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          onChange={(e) => handleFileUpload(e.target.files, 'Business Proof')}
+          accept="image/*,.pdf,application/pdf,.doc,.docx"
+          onChange={(e) => {
+            handleFileUpload(e.target.files, 'Business Proof');
+            e.target.value = '';
+          }}
           className="hidden"
           disabled={uploadingDocType !== null}
         />

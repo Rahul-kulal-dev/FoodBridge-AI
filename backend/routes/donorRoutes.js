@@ -9,10 +9,10 @@ const {
   getAIPredictions,
 } = require('../controllers/donorController');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { handleUploadSingle } = require('../middleware/uploadMiddleware');
 
 router.post('/', protect, authorizeRoles('donor', 'admin'), createDonation);
-router.post('/upload-image', protect, authorizeRoles('donor', 'admin'), upload.single('image'), uploadFoodImage);
+router.post('/upload-image', protect, authorizeRoles('donor', 'admin'), handleUploadSingle('image'), uploadFoodImage);
 router.get('/my', protect, authorizeRoles('donor', 'admin'), getMyDonations);
 router.get('/ai-predictions', protect, authorizeRoles('donor', 'admin'), getAIPredictions);
 router.put('/:id', protect, authorizeRoles('donor', 'admin'), updateDonation);

@@ -10,7 +10,7 @@ const {
   getVolunteerLocation,
 } = require('../controllers/volunteerController');
 const { protect, authorizeRoles } = require('../middleware/authMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { handleUploadSingle } = require('../middleware/uploadMiddleware');
 
 router.get('/stats', protect, authorizeRoles('volunteer', 'admin'), getVolunteerStats);
 router.get('/tasks', protect, authorizeRoles('volunteer', 'admin'), getAssignedTasks);
@@ -18,7 +18,7 @@ router.post(
   '/tasks/:id/pickup-verification',
   protect,
   authorizeRoles('volunteer', 'admin'),
-  upload.single('photo'),
+  handleUploadSingle('photo'),
   uploadPickupVerification
 );
 router.patch('/tasks/:id/status', protect, authorizeRoles('volunteer', 'admin'), updateTaskStatus);

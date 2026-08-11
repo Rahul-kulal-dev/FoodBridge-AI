@@ -163,22 +163,31 @@ const VolunteerDocVerificationPage = () => {
       <input
         type="file"
         ref={licenseInputRef}
-        onChange={(e) => handleFileUpload(e.target.files, 'license', 'Driving License')}
-        accept="image/*,.pdf"
+        onChange={(e) => {
+          handleFileUpload(e.target.files, 'license', 'Driving License');
+          e.target.value = '';
+        }}
+        accept="image/*,.pdf,application/pdf,.doc,.docx"
         className="hidden"
       />
       <input
         type="file"
         ref={govIdInputRef}
-        onChange={(e) => handleFileUpload(e.target.files, 'govid', 'Government Photo ID')}
-        accept="image/*,.pdf"
+        onChange={(e) => {
+          handleFileUpload(e.target.files, 'govid', 'Government Photo ID');
+          e.target.value = '';
+        }}
+        accept="image/*,.pdf,application/pdf,.doc,.docx"
         className="hidden"
       />
       <input
         type="file"
         ref={vehicleInputRef}
-        onChange={(e) => handleFileUpload(e.target.files, 'vehicle', 'Vehicle RC / Insurance Proof')}
-        accept="image/*,.pdf"
+        onChange={(e) => {
+          handleFileUpload(e.target.files, 'vehicle', 'Vehicle RC / Insurance Proof');
+          e.target.value = '';
+        }}
+        accept="image/*,.pdf,application/pdf,.doc,.docx"
         className="hidden"
       />
 

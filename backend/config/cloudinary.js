@@ -42,9 +42,7 @@ const uploadToCloudinary = (fileInput, folder = 'foodbridge_uploads') => {
     };
 
     if (isPdf) {
-      // Use 'image' resource_type with format 'pdf' so Cloudinary generates public /image/upload/ PDF URLs with 200 OK access
-      uploadOptions.resource_type = 'image';
-      uploadOptions.format = 'pdf';
+      uploadOptions.resource_type = 'auto';
     } else if (isImage) {
       uploadOptions.resource_type = 'image';
     } else {
@@ -56,6 +54,40 @@ const uploadToCloudinary = (fileInput, folder = 'foodbridge_uploads') => {
       (error, result) => {
         if (error) {
           console.error('[Cloudinary Upload Stream Error]:', error.message || error);
+
+          // Retry fallback for PDF if primary resource_type attempt failed
+          if (isPdf) {
+            console.log('[Cloudinary PDF Upload Fallback Attempt with raw resource_type]');
+            const fallbackOptions = {
+              folder,
+              resource_type: 'raw',
+              access_mode: 'public',
+            };
+            const fallbackStream = cloudinary.uploader.upload_stream(
+              fallbackOptions,
+              (fallbackErr, fallbackResult) => {
+                if (fallbackErr) {
+                  console.error('[Cloudinary Fallback Error]:', fallbackErr.message || fallbackErr);
+                  return reject(fallbackErr);
+                }
+                const responseObj = {
+                  secure_url: fallbackResult.secure_url,
+                  url: fallbackResult.secure_url,
+                  public_id: fallbackResult.public_id,
+                  resource_type: fallbackResult.resource_type || 'raw',
+                  format: fallbackResult.format || 'pdf',
+                  bytes: fallbackResult.bytes || buffer.length || 0,
+                  toString() {
+                    return this.secure_url;
+                  },
+                };
+                return resolve(responseObj);
+              }
+            );
+            Readable.from(buffer).pipe(fallbackStream);
+            return;
+          }
+
           return reject(error);
         }
 
