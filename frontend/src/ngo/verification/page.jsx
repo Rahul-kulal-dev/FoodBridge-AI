@@ -53,17 +53,28 @@ const NgoVerificationPage = () => {
   };
 
   const handleFileUpload = async (docLabel, e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
 
     setUploadingKey(docLabel);
     setUploadMessage(null);
 
-    const formData = new FormData();
-    formData.append('document', file);
-    formData.append('docType', docLabel);
-
     try {
+      // Compress image if camera/gallery upload
+      const fileToUpload = await compressImageIfNeeded(rawFile);
+
+      // Validate size limit (4.5MB for Vercel payload compatibility)
+      const sizeValidation = validateFileSize(fileToUpload);
+      if (!sizeValidation.valid) {
+        setUploadMessage({ type: 'error', text: sizeValidation.error });
+        setUploadingKey(null);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('document', fileToUpload);
+      formData.append('docType', docLabel);
+
       const res = await fetch(getApiUrl('/api/users/upload-verification'), {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -81,7 +92,10 @@ const NgoVerificationPage = () => {
         setUploadMessage({ type: 'error', text: data.message || 'Failed to upload document' });
       }
     } catch (err) {
-      setUploadMessage({ type: 'error', text: 'Server error uploading file' });
+      const msg = err.message === 'Failed to fetch'
+        ? 'Network connection issue or API unreachable. Please check connection and try again.'
+        : 'Server error uploading file';
+      setUploadMessage({ type: 'error', text: msg });
     } finally {
       setUploadingKey(null);
     }

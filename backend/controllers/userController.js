@@ -121,6 +121,10 @@ const uploadVerificationDoc = async (req, res, next) => {
     const docType = req.body.docType || req.body.docLabel || 'Compliance Document';
 
     // Find the authenticated user
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ success: false, message: 'Not authorized. Please log in again.' });
+    }
+
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });

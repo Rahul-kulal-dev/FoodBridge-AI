@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
 import FileViewerModal from '../../components/FileViewerModal';
+import { compressImageIfNeeded, validateFileSize } from '../../utils/fileUploadHelper';
 
 /**
  * Helper to format uploaded documents list from backend user object
@@ -83,8 +84,20 @@ const DonorVerificationPage = () => {
     setErrorMsg('');
 
     try {
+      const rawFile = filesArray[0];
+
+      // Compress image if camera/gallery upload
+      const fileToUpload = await compressImageIfNeeded(rawFile);
+
+      // Validate size limit (4.5MB for Vercel payload compatibility)
+      const sizeValidation = validateFileSize(fileToUpload);
+      if (!sizeValidation.valid) {
+        setErrorMsg(sizeValidation.error);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append('document', filesArray[0]);
+      formData.append('document', fileToUpload);
       formData.append('docType', docTypeLabel);
 
       const res = await fetch(getApiUrl('/api/users/upload-verification'), {
@@ -103,7 +116,10 @@ const DonorVerificationPage = () => {
         setErrorMsg(data.message || 'Failed to upload verification document.');
       }
     } catch (err) {
-      setErrorMsg('Upload error: ' + err.message);
+      const msg = err.message === 'Failed to fetch'
+        ? 'Network connection issue or API unreachable. Please check connection and try again.'
+        : err.message;
+      setErrorMsg('Upload error: ' + msg);
     } finally {
       setUploadingDocType(null);
     }

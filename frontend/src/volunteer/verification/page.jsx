@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl } from '../../config/api';
+import { compressImageIfNeeded } from '../../utils/fileUploadHelper';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -128,8 +129,9 @@ const PickupVerificationPage = () => {
 
     setSubmitting(true);
     try {
+      const fileToUpload = await compressImageIfNeeded(selectedFile);
       const formData = new FormData();
-      formData.append('photo', selectedFile);
+      formData.append('photo', fileToUpload);
 
       const res = await fetch(getApiUrl(`/api/volunteer/tasks/${activeAssignment.mongoId}/pickup-verification`), {
         method: 'POST',

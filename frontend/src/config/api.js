@@ -9,9 +9,20 @@ const getDynamicBaseUrl = () => {
 
   if (typeof window !== 'undefined' && window.location && window.location.hostname) {
     const hostname = window.location.hostname;
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+
+    // Local development
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:5000';
+    }
+
+    // Local Wi-Fi network mobile testing (e.g., 192.168.x.x)
+    if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
       return `${window.location.protocol}//${hostname}:5000`;
     }
+
+    // Cloud / Vercel / Netlify production deployment (e.g., frontend.vercel.app)
+    // Uses current origin without forcing :5000 which causes connection failure on Vercel
+    return window.location.origin;
   }
 
   return 'http://localhost:5000';

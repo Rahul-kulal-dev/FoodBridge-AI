@@ -6,6 +6,6 @@ const { handleUploadSingle } = require('../middleware/uploadMiddleware');
 
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, updateUserProfile);
-router.post('/upload-verification', optionalProtect, handleUploadSingle('document'), uploadVerificationDoc);
+router.post('/upload-verification', protect, handleUploadSingle('document'), uploadVerificationDoc);
 
 module.exports = router;

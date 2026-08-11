@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getApiUrl, getImageUrl } from '../../config/api';
+import { compressImageIfNeeded, validateFileSize } from '../../utils/fileUploadHelper';
 
 const formatVerificationDocs = (docsList = [], status = 'pending') => {
   const defaults = [
@@ -84,8 +85,20 @@ const VolunteerDocVerificationPage = () => {
     setErrorMsg('');
 
     try {
+      const rawFile = filesArray[0];
+
+      // Compress image if camera/gallery upload
+      const fileToUpload = await compressImageIfNeeded(rawFile);
+
+      // Validate size limit (4.5MB for Vercel payload compatibility)
+      const sizeValidation = validateFileSize(fileToUpload);
+      if (!sizeValidation.valid) {
+        setErrorMsg(sizeValidation.error);
+        return;
+      }
+
       const formData = new FormData();
-      formData.append('document', filesArray[0]);
+      formData.append('document', fileToUpload);
       formData.append('docType', docKey);
       formData.append('docLabel', docTitle);
 
@@ -105,7 +118,10 @@ const VolunteerDocVerificationPage = () => {
         setErrorMsg(data.message || 'Failed to upload document.');
       }
     } catch (err) {
-      setErrorMsg('Upload error: ' + err.message);
+      const msg = err.message === 'Failed to fetch'
+        ? 'Network connection issue or API unreachable. Please check connection and try again.'
+        : err.message;
+      setErrorMsg('Upload error: ' + msg);
     } finally {
       setUploadingDocKey(null);
     }
