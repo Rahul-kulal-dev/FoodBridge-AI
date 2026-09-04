@@ -101,7 +101,7 @@ const AdminProfilePage = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              {user?.email || 'admin@gmail.com'} • Organization: <span className="font-semibold text-slate-700">{user?.organizationName || 'FoodBridge AI'}</span>
+              {user?.email || 'admin@gmail.com'} • Organization: <span className="font-semibold text-slate-700">{user?.organizationName || 'SavorSurplus'}</span>
             </p>
           </div>
         </div>

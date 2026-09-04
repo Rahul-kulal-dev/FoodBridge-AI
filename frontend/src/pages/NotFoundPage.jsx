@@ -32,10 +32,10 @@ export default function NotFoundPage() {
           onClick={() => navigate('/')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
+          <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
           <div>
             <span className="text-xl font-extrabold text-[#0F172A] tracking-tight leading-tight block">
-              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+              Savor<span className="text-emerald-600 font-black">Surplus</span>
             </span>
             <span className="text-xs text-[#64748B] font-medium block">
               Smart Surplus Food Redistribution
@@ -117,7 +117,7 @@ export default function NotFoundPage() {
 
       {/* Footer copyright */}
       <footer className="text-center py-4 text-xs font-medium text-[#64748B]">
-        FoodBridge AI Surplus Redistribution Platform • All rights reserved
+        SavorSurplus Redistribution Platform • All rights reserved
       </footer>
     </div>
   );

@@ -119,7 +119,7 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
               title="Expand Sidebar"
               className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
             >
-              <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
+              <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
             </button>
           </div>
         ) : (
@@ -130,12 +130,12 @@ const NgoSidebar = ({ isCollapsed: externalIsCollapsed, setIsCollapsed: external
                 title="Collapse Sidebar"
                 className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
               >
-                <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
+                <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
               </button>
 
               <div className="flex flex-col min-w-0 transition-opacity duration-200">
                 <span className="text-base font-extrabold text-[#0F172A] tracking-tight leading-tight truncate">
-                  FoodBridge <span className="text-emerald-600 font-black">AI</span>
+                  Savor<span className="text-emerald-600 font-black">Surplus</span>
                 </span>
                 <span className="text-[11px] text-[#64748B] font-medium truncate">
                   NGO Portal Dashboard

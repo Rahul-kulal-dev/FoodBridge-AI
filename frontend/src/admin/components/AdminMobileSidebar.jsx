@@ -52,10 +52,10 @@ export default function AdminMobileSidebar({ navItems }) {
             <Menu className="w-6 h-6 text-emerald-600" />
           </button>
 
-          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-8 h-8 object-contain rounded-lg shadow-xs shrink-0" />
+          <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-8 h-8 object-contain rounded-lg shadow-xs shrink-0" />
           <div>
             <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
-              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+              Savor<span className="text-emerald-600 font-black">Surplus</span>
             </h1>
             <p className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200/80 inline-block">
               Admin Control
@@ -92,10 +92,10 @@ export default function AdminMobileSidebar({ navItems }) {
         {/* Drawer Header */}
         <div className="p-4 border-b border-[#E7EAF0] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-9 h-9 object-contain rounded-xl shadow-xs shrink-0" />
+            <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-9 h-9 object-contain rounded-xl shadow-xs shrink-0" />
             <div>
               <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">
-                FoodBridge <span className="text-emerald-600 font-black">AI</span>
+                Savor<span className="text-emerald-600 font-black">Surplus</span>
               </h2>
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-block">
                 Admin Control

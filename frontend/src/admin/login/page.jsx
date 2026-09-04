@@ -64,13 +64,13 @@ const AdminLoginPage = () => {
       <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-[24px] p-8 shadow-xs space-y-6">
         {/* Brand Header */}
         <div className="flex items-center gap-3">
-          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-11 h-11 object-contain rounded-2xl shadow-xs shrink-0" />
+          <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-11 h-11 object-contain rounded-2xl shadow-xs shrink-0" />
           <div>
             <h1 className="text-xl font-extrabold text-[#0F172A] tracking-[-0.03em]">
               Admin Portal
             </h1>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Sign in to access the FoodBridge AI admin console
+              Sign in to access the SavorSurplus admin console
             </p>
           </div>
         </div>
@@ -132,7 +132,7 @@ const AdminLoginPage = () => {
         {/* Footer Link */}
         <div className="pt-2 border-t border-slate-100 text-center">
           <Link to="/" className="text-xs text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1.5 transition-colors">
-            <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-4 h-4 object-contain" />
+            <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-4 h-4 object-contain" />
             <span>Back to main site</span>
           </Link>
         </div>

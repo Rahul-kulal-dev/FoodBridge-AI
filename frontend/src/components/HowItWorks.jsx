@@ -56,7 +56,7 @@ export default function HowItWorks() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight">
-            How FoodBridge AI Works
+            How SavorSurplus Works
           </h2>
           <p className="text-base sm:text-lg text-[#334155]">
             A friction-free, 4-step workflow connecting donors, volunteers, and shelters in minutes.

@@ -127,7 +127,7 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto animate-bounce">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h3 className="text-2xl font-black text-[#0F172A]">Welcome to FoodBridge AI!</h3>
+              <h3 className="text-2xl font-black text-[#0F172A]">Welcome to SavorSurplus!</h3>
               <p className="text-sm text-[#64748B]">
                 Account authenticated for <strong className="text-[#0F172A]">{formData.email || 'your account'}</strong>.
               </p>
@@ -137,9 +137,9 @@ export default function Modal({ isOpen, onClose, initialType = 'register' }) {
             <div>
               {/* Header */}
               <div className="flex items-center gap-2.5 mb-2">
-                <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
+                <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-7 h-7 object-contain rounded-lg shadow-xs" />
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">
-                  {initialType === 'login' ? 'FoodBridge Account' : 'Join FoodBridge Network'}
+                  {initialType === 'login' ? 'SavorSurplus Account' : 'Join SavorSurplus Network'}
                 </span>
               </div>
 

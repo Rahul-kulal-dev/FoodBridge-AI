@@ -112,7 +112,7 @@ export default function ImpactSection() {
             Quantifiable Environmental & Social Impact
           </h2>
           <p className="text-base sm:text-lg text-[#334155]">
-            Every donation logged on FoodBridge AI generates verifiable ESG reports, tax receipt documentation, and carbon offset tracking.
+            Every donation logged on SavorSurplus generates verifiable ESG reports, tax receipt documentation, and carbon offset tracking.
           </p>
         </div>
 

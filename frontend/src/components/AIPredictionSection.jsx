@@ -180,7 +180,7 @@ export default function AIPredictionSection({ onOpenDonateModal }) {
             </h2>
 
             <p className="text-base sm:text-lg text-[#334155] leading-relaxed">
-              FoodBridge AI uses deep learning algorithms trained on millions of dining variables to forecast surplus before food is even prepared allowing proactive redistribution.
+              SavorSurplus uses deep learning algorithms trained on millions of dining variables to forecast surplus before food is even prepared allowing proactive redistribution.
             </p>
 
             {/* Factor Pills / Accordion list */}

@@ -85,12 +85,12 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
               title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               className="shrink-0 transition-transform hover:scale-105 cursor-pointer"
             >
-              <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
+              <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-10 h-10 object-contain rounded-xl shadow-xs" />
             </button>
             {!isCollapsed && (
               <div className="truncate">
                 <span className="text-lg font-extrabold text-[#0F172A] tracking-tight block truncate">
-                  FoodBridge <span className="text-emerald-600 font-black">AI</span>
+                  Savor<span className="text-emerald-600 font-black">Surplus</span>
                 </span>
                 <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-block">
                   Admin Control

@@ -5,7 +5,7 @@ import { Star, Quote, CheckCircle2, Utensils, HeartHandshake, Truck } from 'luci
 export default function TestimonialsSection() {
   const testimonials = [
     {
-      quote: "FoodBridge AI transformed how we handle evening surplus. What used to end up in disposal now feeds over 80 families every single week with zero extra hassle for our kitchen staff.",
+      quote: "SavorSurplus transformed how we handle evening surplus. What used to end up in disposal now feeds over 80 families every single week with zero extra hassle for our kitchen staff.",
       author: "Marcus Vance",
       role: "Executive Chef & Owner",
       organization: "Green Leaf Bistro",
@@ -49,7 +49,7 @@ export default function TestimonialsSection() {
             Loved by Donors, Shelters & Volunteers
           </h2>
           <p className="text-base sm:text-lg text-[#334155]">
-            Hear how FoodBridge AI is building a zero-waste food ecosystem across cities.
+            Hear how SavorSurplus is building a zero-waste food ecosystem across cities.
           </p>
         </div>
 
