@@ -12,7 +12,7 @@ const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
 
-  const user = authUser || { name: 'Food Donor', email: 'donor@foodbridge.org', verificationStatus: 'pending' };
+  const user = authUser || { name: 'Food Donor', email: 'donor@savorsurplus.org', verificationStatus: 'pending' };
 
   const handleLogoutClick = () => {
     logout();
@@ -89,7 +89,7 @@ const SidebarProfile = ({ isCollapsed = false, onLogout }) => {
                 </h4>
               </div>
               <p className="text-[11px] text-[#64748B] truncate">
-                {user.email || 'donor@foodbridge.org'}
+                {user.email || 'donor@savorsurplus.org'}
               </p>
 
               {/* Verification Badge */}

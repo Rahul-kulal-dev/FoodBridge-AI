@@ -39,10 +39,10 @@ const NgoMobileSidebar = ({ navItems }) => {
             <Menu className="w-6 h-6 text-emerald-600" />
           </button>
 
-          <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-8 h-8 object-contain rounded-lg shadow-xs shrink-0" />
+          <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-8 h-8 object-contain rounded-lg shadow-xs shrink-0" />
           <div>
             <h1 className="text-sm font-extrabold text-[#0F172A] tracking-tight leading-tight">
-              FoodBridge <span className="text-emerald-600 font-black">AI</span>
+              Savor<span className="text-emerald-600 font-black">Surplus</span>
             </h1>
             <p className="text-[10px] text-[#64748B] font-medium">
               NGO Portal
@@ -83,7 +83,7 @@ const NgoMobileSidebar = ({ navItems }) => {
             </div>
             <div>
               <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">
-                FoodBridge <span className="text-emerald-600 font-black">AI</span>
+                Savor<span className="text-emerald-600 font-black">Surplus</span>
               </h2>
               <p className="text-xs text-[#64748B] font-medium">
                 NGO Portal Dashboard

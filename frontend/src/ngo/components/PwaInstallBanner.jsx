@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, X, Smartphone, ShieldCheck, Info, CheckCircle2 } from 'lucide-react';
 
-const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, title = "Install FoodBridge AI App" }) => {
+const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, title = "Install SavorSurplus App" }) => {
   const [dismissed, setDismissed] = useState(() => {
     return typeof window !== 'undefined' && localStorage.getItem('foodbridge_pwa_dismissed') === 'true';
   });
@@ -56,7 +56,7 @@ const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, ti
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl leading-relaxed">
-                Install FoodBridge AI to your home screen or desktop for 1-tap access, offline surplus food tracking, and instant alerts.
+                Install SavorSurplus to your home screen or desktop for 1-tap access, offline surplus food tracking, and instant alerts.
               </p>
             </div>
           </div>
@@ -87,7 +87,7 @@ const PwaInstallBanner = ({ isInstallable, isInstalled, triggerInstallPrompt, ti
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-2 text-emerald-700 font-bold">
                 <Info className="w-5 h-5" />
-                <span>How to Install FoodBridge App</span>
+                <span>How to Install SavorSurplus App</span>
               </div>
               <button
                 onClick={() => setShowInstructions(false)}

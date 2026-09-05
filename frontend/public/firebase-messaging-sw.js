@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-// Firebase Cloud Messaging Background Service Worker for FoodBridge AI PWA
+// Firebase Cloud Messaging Background Service Worker for SavorSurplus PWA
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -26,7 +26,7 @@ try {
   messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background FCM payload:', payload);
 
-    const title = payload.notification?.title || payload.data?.title || 'FoodBridge AI Alert';
+    const title = payload.notification?.title || payload.data?.title || 'SavorSurplus Alert';
     const body = payload.notification?.body || payload.data?.body || 'You have a new notification.';
     const link = payload.data?.link || payload.data?.click_action || '/';
     const icon = payload.notification?.icon || '/web-app-manifest-192x192.png';
@@ -61,7 +61,7 @@ try {
 self.addEventListener('push', (event) => {
   console.log('[firebase-messaging-sw.js] Native push event received:', event);
   
-  let title = 'FoodBridge AI Alert';
+  let title = 'SavorSurplus Alert';
   let body = 'You have a new notification.';
   let link = '/';
 

@@ -71,7 +71,7 @@ export default function Hero({ onOpenDonateModal }) {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-base sm:text-lg text-[#334155] leading-relaxed max-w-xl font-normal"
             >
-              FoodBridge AI connects restaurants, NGOs, volunteers, and communities through AI-powered surplus food redistribution reducing food waste while feeding those in need.
+              SavorSurplus connects restaurants, NGOs, volunteers, and communities through AI-powered surplus food redistribution reducing food waste while feeding those in need.
             </motion.p>
 
             {/* Action Buttons */}
@@ -98,37 +98,6 @@ export default function Hero({ onOpenDonateModal }) {
               </a>
             </motion.div>
 
-            {/* Social Proof / Trust metrics */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="pt-4 border-t border-[#E7EAF0] flex flex-wrap items-center gap-6 text-sm text-[#64748B]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">FB</div>
-                  <div className="w-8 h-8 rounded-full bg-slate-800 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">NG</div>
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">RT</div>
-                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">VL</div>
-                </div>
-                <div className="text-xs">
-                  <div className="flex items-center gap-1 text-amber-500 font-bold">
-                    <span>★★★★★</span>
-                    <span className="text-[#0F172A] font-semibold">4.9/5</span>
-                  </div>
-                  <span className="text-[#64748B]">Trusted by 500+ Partner NGOs</span>
-                </div>
-              </div>
-
-              <div className="h-6 w-px bg-[#E7EAF0] hidden sm:block" />
-
-              <div className="flex items-center gap-2 text-xs text-[#334155] font-medium">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>100% Verified Quality Check</span>
-              </div>
-            </motion.div>
-
           </div>
 
           {/* Right Column - Hero Platform Image */}
@@ -141,7 +110,7 @@ export default function Hero({ onOpenDonateModal }) {
             <div className="relative rounded-3xl overflow-hidden border border-[#E7EAF0] shadow-soft-hover group bg-slate-50">
               <img
                 src="/hero.png"
-                alt="FoodBridge AI Surplus Food Redistribution Platform"
+                alt="SavorSurplus Food Redistribution Platform"
                 className="w-full h-auto object-cover rounded-3xl transition-transform duration-500 group-hover:scale-[1.01]"
               />
             </div>

@@ -50,9 +50,9 @@ export default function Navbar({ onOpenDonateModal, onOpenAuthModal, isInstallab
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
+            <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-10 h-10 object-contain rounded-xl shadow-xs transition-transform group-hover:scale-105" />
             <span className="text-xl font-extrabold text-[#0F172A] tracking-tight">
-              FoodBridge <span className="text-green-600 font-black">AI</span>
+              Savor<span className="text-green-600 font-black">Surplus</span>
             </span>
           </Link>
 

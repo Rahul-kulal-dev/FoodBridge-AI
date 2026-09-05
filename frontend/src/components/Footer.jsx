@@ -12,9 +12,9 @@ export default function Footer() {
           {/* Column 1: Brand & Bio */}
           <div className="lg:col-span-1 space-y-4">
             <a href="#" className="flex items-center gap-2.5">
-              <img src="/apple-touch-icon.png" alt="FoodBridge AI" className="w-9 h-9 object-contain rounded-xl shadow-xs" />
+              <img src="/apple-touch-icon.png" alt="SavorSurplus" className="w-9 h-9 object-contain rounded-xl shadow-xs" />
               <span className="text-lg font-extrabold text-[#0F172A] tracking-tight">
-                FoodBridge <span className="text-green-600">AI</span>
+                Savor<span className="text-green-600">Surplus</span>
               </span>
             </a>
             <p className="text-xs text-[#64748B] leading-relaxed">
@@ -79,7 +79,7 @@ export default function Footer() {
               Company
             </h4>
             <ul className="space-y-2.5 text-xs">
-              <li><a href="#about" className="hover:text-green-600 transition-colors">About FoodBridge AI</a></li>
+              <li><a href="#about" className="hover:text-green-600 transition-colors">About SavorSurplus</a></li>
               <li><a href="#contact" className="hover:text-green-600 transition-colors">Contact Us</a></li>
             </ul>
           </div>
@@ -88,7 +88,7 @@ export default function Footer() {
 
         {/* Bottom Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B]">
-          <p>© 2026 FoodBridge AI. All rights reserved.</p>
+          <p>© 2026 SavorSurplus. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#about" className="hover:text-green-600 transition-colors">Privacy Policy</a>
             <a href="#about" className="hover:text-green-600 transition-colors">Terms of Service</a>

@@ -46,7 +46,7 @@ export default function AboutContactSection() {
             </h2>
 
             <p className="text-base sm:text-lg text-[#334155] leading-relaxed">
-              Founded by technologists, food safety experts, and community leaders, FoodBridge AI is dedicated to eliminating hunger and food waste through investor-grade technology.
+              Founded by technologists, food safety experts, and community leaders, SavorSurplus is dedicated to eliminating hunger and food waste through investor-grade technology.
             </p>
 
             <div className="space-y-4 pt-2">
@@ -90,7 +90,7 @@ export default function AboutContactSection() {
           >
             <div className="mb-6">
               <h3 className="text-2xl font-black text-[#0F172A] tracking-tight">
-                Get in Touch with FoodBridge AI
+                Get in Touch with SavorSurplus
               </h3>
               <p className="text-xs sm:text-sm text-[#64748B] mt-1">
                 Have questions about onboarding your restaurant, NGO, or volunteer group? Send us a message!

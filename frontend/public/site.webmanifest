@@ -1,6 +1,6 @@
 {
-  "name": "FoodBridge AI - NGO Portal",
-  "short_name": "FoodBridge NGO",
+  "name": "SavorSurplus - NGO Portal",
+  "short_name": "SavorSurplus NGO",
   "description": "Real-time surplus food distribution platform for NGOs",
   "start_url": "/ngo",
   "scope": "/",

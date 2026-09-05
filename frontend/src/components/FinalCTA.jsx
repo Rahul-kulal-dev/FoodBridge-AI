@@ -22,7 +22,7 @@ export default function FinalCTA({ onOpenDonateModal }) {
 
             {/* Sub-text */}
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Connect your food business or NGO with FoodBridge AI today. Together, we can redistribute thousands of surplus meals every month.
+              Connect your food business or NGO with SavorSurplus today. Together, we can redistribute thousands of surplus meals every month.
             </p>
 
             {/* Buttons */}
@@ -31,7 +31,7 @@ export default function FinalCTA({ onOpenDonateModal }) {
                 onClick={() => onOpenDonateModal('register')}
                 className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 rounded-xl shadow-green-btn transition-all duration-200 flex items-center justify-center gap-2.5 text-base cursor-pointer active:scale-95"
               >
-                <span>Join FoodBridge AI</span>
+                <span>Join SavorSurplus</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
 

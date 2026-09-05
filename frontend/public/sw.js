@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-// FoodBridge AI PWA Caching Service Worker Strategy
+// SavorSurplus PWA Caching Service Worker Strategy
 const CACHE_NAME = 'foodbridge-pwa-v7';
 const STATIC_ASSETS = [
   '/',

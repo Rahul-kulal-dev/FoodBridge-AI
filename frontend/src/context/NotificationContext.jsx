@@ -195,7 +195,7 @@ export function NotificationProvider({ children }) {
       if (messaging) {
         unsubscribe = onMessage(messaging, (payload) => {
           console.log('[FCM Context] Received foreground FCM payload:', payload);
-          const title = payload.notification?.title || payload.data?.title || 'FoodBridge AI Alert';
+          const title = payload.notification?.title || payload.data?.title || 'SavorSurplus Alert';
           const body = payload.notification?.body || payload.data?.body || '';
           const link = payload.data?.link || '';
           const type = payload.data?.type || 'info';
